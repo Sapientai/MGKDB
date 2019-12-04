@@ -1,0 +1,139 @@
+&parallelization
+n_procs_s =   1
+n_procs_v =   1
+n_procs_w =   2
+n_procs_x =   1
+n_procs_y =   1
+n_procs_z = 128
+n_procs_sim =    256
+/
+
+&box
+n_spec =    1
+nx0    =    7
+nky0   =    1
+nz0    =  384
+nv0    =   36
+nw0    =    8
+
+kymin =    160.00000    
+lv    =   3.00000    
+lw    =   9.00000    
+nexc  = -1
+adapt_lx = T
+n0_global =  10421
+ky0_ind =   1
+kx_center =   -75.599286    
+/
+
+&in_out
+diagdir = '/global/cscratch1/sd/drhatch/ETG_archives/AUGB1_ETG2/scanfiles0002/'
+
+read_checkpoint  = F
+write_checkpoint = T
+
+istep_field  =     100
+istep_mom    =     600
+istep_nrg    =      20
+istep_omega  =      20
+istep_vsp    =    5000
+istep_schpt  =    5000
+istep_energy =     100
+
+write_std = T
+iterdb_file     = 'AUG_B1.iterdb'
+/
+
+&general
+nonlinear =   F
+comp_type = 'IV'
+perf_vec  =  1 1 1 2 1 1 1 1 1
+nblocks   =       4
+hypz_compensation =   F
+
+timescheme = 'RK4'
+dt_max     =   0.1690E-03
+dt_vlasov  =   0.1690E-03
+ev_coll    =    100.87    
+
+timelim    =      43000
+ntimesteps =     100000
+simtimelim =    1.500    
+underflow_limit =   0.1000E-19
+
+beta       =   0.26849102E-02
+debye2     =   0.18525456E-03
+bpar   =   T
+collision_op = 'landau'
+coll         =   0.15942470E-02
+coll_cons_model  = 'xu_rosenbluth'
+
+init_cond = 'alm'
+
+hyp_z_with_dz_prefactor = F
+hyp_z =   -2.000    
+hyp_v_with_dv_prefactor = F
+hyp_v =   0.2000    
+
+perf_tsteps =  -1
+
+/
+
+&geometry
+magn_geometry = 'gene'
+q0       =    3.3526266    
+shat     =  -0.30081195    
+geomfile = 'tracer_efit_1'
+minor_r  =    1.0000000    
+major_R  =    2.3700705    
+rhostar  =   0.44652473E-02
+dpdx_term= 'full_drift'
+dpdx_pm  =   0.31238783    
+norm_flux_projection  = F
+/
+
+&species
+name   = 'e'
+omn    =    15.391365    
+omt    =    42.783361    
+
+mass   =   0.27240000E-03
+temp   =    1.0000000    
+dens   =    1.0000000    
+charge = -1
+/
+
+&info
+step_time  =     0.0204
+number of computed time steps =    8876
+time for initial value solver =    181.287
+calc_dt = T
+nltdt_off = F
+ev_coll_est  =    124.10390    
+init_time =     0.2001
+n_fields = 3
+n_moms   =  9
+nrgcols  = 10
+lx =  0.207771E-01
+ly =  0.392699E-01
+PRECISION  = DOUBLE
+ENDIANNESS = LITTLE
+OMP_NUM_THREADS =   1
+GIT_BRANCH = 5a4f169a7b19f0de946632343b29d2b4dc51fae9                    
+GIT_MASTER = 5a4f169a7b19f0de946632343b29d2b4dc51fae9                    
+RELEASE = 1.9 - alpha 0
+nu_ei =   0.386378
+/
+
+&units
+Bref =   1.0073089503242025E+00
+Tref =   4.6630761743534815E-01
+nref =   1.4496982044498472E+00
+Lref =   6.9253238995542099E-01
+mref =   2.0000000000000000E+00
+/
+
+&bsgrid
+is_bsg = F
+/
+

@@ -1,0 +1,39 @@
+
+
+Using phi from GENE run
+kz =  0.469247309552
+kperp = 39.4163841684
+omd = 7.45504978301
+gamma/kperp**2 = 0.0254057644894
+kz**2 = 0.220193037522
+omd * abs(omega) = 370.028911467
+kz * (int phi)**2 / int(phi**2)/ sqrt(2pi) =  1.28849372089
+Input to SKiM
+kperp = 1.97081920842
+omd = 0.37275248915
+
+
+Using once smoothed phi from GENE run
+kz =  0.467574038352
+kperp = 39.4239721976
+omd = 7.45481686325
+gamma/kperp**2 = 0.0253959856103
+kz**2 = 0.21862548134
+omd * abs(omega) = 370.017350572
+kz * (int phi)**2 / int(phi**2)/ sqrt(2pi) =  1.28746057495
+Input to SKiM
+kperp = 1.97119860988
+omd = 0.372740843162
+
+
+Using twice smoothed phi from GENE run
+kz =  0.465932751971
+kperp = 39.4315510047
+omd = 7.45461633086
+gamma/kperp**2 = 0.0253862242504
+kz**2 = 0.217093329359
+omd * abs(omega) = 370.007397214
+kz * (int phi)**2 / int(phi**2)/ sqrt(2pi) =  1.28647979409
+Input to SKiM
+kperp = 1.97157755024
+omd = 0.372730816543

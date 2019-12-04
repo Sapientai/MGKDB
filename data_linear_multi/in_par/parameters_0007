@@ -1,0 +1,144 @@
+&parallelization
+n_parallel_sims = 1
+n_procs_s =   1
+n_procs_v = 1
+n_procs_w = 2
+n_procs_x =   1
+n_procs_y =   1
+n_procs_z = 128
+n_procs_sim = 256
+/
+
+&box
+n_spec =    1
+nx0 = 7
+nky0 = 1
+nz0    =  384
+nv0    =   36
+nw0    =    8
+
+kymin = 40 !scanlist: 10,20,40,50,60,80,120,160,240
+kx_center = 0 !scanlist: 0.0 , 1.57079632679*-0.3008*kymin(1), 3.14159265359*-0.3008*kymin(1)
+lv    =     3.00    
+lw    =     9.00    
+lx    =   4.32164    
+
+adapt_lx = T
+x0    =   0.9750    
+
+/
+
+&in_out
+diagdir = '/global/cscratch1/sd/drhatch/ETG_archives/AUGB1_ETG2/scanfiles0002' 
+
+read_checkpoint = .t.
+write_checkpoint = T
+
+istep_field  =     100
+istep_mom    =     600
+istep_nrg    =      20
+istep_vsp    =    5000
+istep_schpt  =    5000
+istep_energy =     100
+
+write_std = T
+iterdb_file     = 'AUG_B1.iterdb'
+/
+
+&general 
+calc_dt = T
+nonlinear = F
+comp_type = 'IV'
+perf_vec  =  1 1 1 2 1 1 1 1 1
+
+
+timescheme = 'RK4'
+dt_max     =   0.2870E-03
+dt_vlasov  =   0.2870E-03
+ev_coll    =    101.03    
+courant    =     1.25
+
+timelim    =      43000
+ntimesteps =     100000
+simtimelim = 1.5
+underflow_limit =   0.1000E-19
+
+beta       =   0.26849102E-02
+debye2     =   0.18525456E-03
+bpar   =   T
+collision_op = 'landau'
+coll         =   0.15942470E-02
+coll_cons_model  = 'xu_rosenbluth'
+
+init_cond = 'alm'
+
+hyp_z =   -2.000    
+hyp_v =   0.2000    
+
+/
+
+&external_contr
+!ExBrate    =    3.101    
+/
+
+&geometry
+magn_geometry = 'gene'
+q0       =    3.3526266    
+shat     =  -0.3008
+geomfile = 'tracer_efit_1'
+edge_opt =    2.0000000    
+minor_r  =    1.0000000    
+major_R  =    2.3700705    
+rhostar  =   0.44652473E-02
+dpdx_term= 'full_drift'
+dpdx_pm  =   0.31238783    
+norm_flux_projection  = F
+/
+
+&species
+name   = 'e'
+omn    =    15.391365    
+omt    =    42.783361    
+
+mass   =   0.27240000E-03
+temp   =    1.0000000    
+dens   =    1.0000000    
+charge = -1
+/
+
+&info
+chpt_in = '/scratch/scratchdirs/drhatch/IPNL/AUGB1_ETG2///checkpoint'
+number of computed time steps =       0
+time for initial value solver =    384.329
+calc_dt = T
+ev_coll_est  =    124.10717    
+init_time =     1.4881
+n_fields = 3
+n_moms   =  9
+nrgcols  = 10
+lx =   4.32164    
+ly =  0.628319    
+PRECISION  = DOUBLE
+ENDIANNESS = LITTLE
+OMP_NUM_THREADS =   1
+GIT_BRANCH = 784f8cf40311628f5647b6879d486c8c270f2d4f                    
+RELEASE = 1.8 - alpha 0
+nu_ei =   0.386378
+nustar_e =   0.144464
+/
+
+&units
+Bref =   1.0073089503242025E+00
+Tref =   4.6630761743534815E-01
+nref =   1.4496982044498472E+00
+Lref =   6.9253238995542099E-01
+mref =   2.0000000000000000E+00
+/
+
+
+&scan
+chpt_in = '/global/cscratch1/sd/drhatch/ETG_archives/AUGB1_ETG2/scanfiles0002/s_checkpoint_0007'
+n_parallel_sims = 1
+scan_dims = 9 3
+par_in_dir = '/global/cscratch1/sd/drhatch/ETG_archives/AUGB1_ETG2/scanfiles0002/in_par'
+/

@@ -1,0 +1,907 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+File handling script for formatting output files, getting file lists, and
+reading and writing to database containing:
+    get_file_list(out_dir,begin):       input GENE output directory and base filepath 
+                                           (nrg, energy, etc), return full list of files 
+                                           in directory
+    get_suffixes(out_dir):            input GENE output directory, return list of run 
+                                           suffixes in the directory
+    gridfs_put(filepath):               input filepath, upload  file to database, and 
+                                           return object_id of uploaded file
+    gridfs_read(db_file):               input database filename, return contents of file
+    upload_to_mongo   
+    isLinear
+@author: Austin Blackmon
+"""
+
+'''
+ToDO:
+    
+    1: files with extention
+    2: mom files with different type (linear run will only need the last frame)
+    
+'''
+
+from mgk_post_processing import *
+from ParIO import * 
+import numpy as np
+from pymongo import MongoClient
+from bson.objectid import ObjectId
+from bson import json_util
+import os
+import gridfs
+import re
+from sshtunnel import SSHTunnelForwarder
+#import json
+#=======================================================
+# database specification. 
+#=====================================================
+#mgkdb_server = 'mongodb03.nersc.gov/mgk_fusion'
+#mgkdb_port = '27017'
+#mgkdb_user = 'mgk_fusion_admin'
+#mgkdb_pass = 'ekekek19294jdwss2k'
+#
+#mgkdb_connect = MongoClient('mongodb03.nersc.gov')
+#mgkdb_client = mgkdb_connect.admin.authenticate(mgkdb_user, args.mgkdb_pass)
+
+mgkdb_server = 'localhost'
+mgkdb_port = '27017'
+mgkdb_dbname = 'mgk_fusion'
+mgkdb_user = 'dykuang'
+mgkdb_pass = '1234'
+
+mgkdb_connect = MongoClient(mgkdb_server)
+database = mgkdb_connect[mgkdb_dbname]
+mgkdb_client = database.authenticate(mgkdb_user, mgkdb_pass)	
+
+# Default_Keys for summary files, keys should not contain '.' #
+Default_Keys = ['scan_id',  'submit_id',  'eqdisk_id' ]
+
+#standard files#
+# Q: is geneerr with suffix?
+Docs = ['autopar', 'codemods', 'energy', 'tracer_efit', 'nrg', 
+              'parameters', 's_alpha', 'scan.log', 'scan_info.dat']
+Keys = ['autopar', 'codemods', 'energy', 'tracer_efit',  'nrg', 
+              'parameters', 's_alpha', 'scanlog', 'scaninfo']
+
+#Large files#
+Docs_L = ['field', 'mom', 'vsp']
+Keys_L = ['field', 'mom', 'vsp']
+
+
+
+#User specified files#
+Docs_ex = [] 
+Keys_ex = []
+
+    
+meta = ["user", "run_collection_name" ,"run_suffix" ,"keywords", "confidence"]
+    
+file_related_keys = Keys + Keys_L + Keys_ex
+file_related_docs = Docs + Docs_L + Docs_ex
+    
+#run_data_Nonlin = ["Qes", "kymin", "kx_center", "omt", "omn"]
+#run_data_Linear = ["gamma","omega_num","kymin", "kx_center", "omt", "omn"]
+
+
+def reset_docs_keys():
+    global Default_Keys, Docs, Keys, Docs_L, Keys_L, Docs_ex, Keys_ex, meta, file_related_keys,\
+           file_related_docs
+    
+    Default_Keys = ['scan_id',  'submit_id',  'eqdisk_id' ]
+
+    Docs = ['autopar', 'codemods', 'energy', 'tracer_efit', 'nrg',  
+                  'parameters', 's_alpha', 'scan.log', 'scan_info.dat']
+    Keys = ['autopar', 'codemods', 'energy', 'tracer_efit', 'nrg',  
+                  'parameters', 's_alpha', 'scanlog', 'scaninfo']
+    
+    #Large files#
+    Docs_L = ['field', 'mom', 'vsp']
+    Keys_L = ['field', 'mom', 'vsp']
+    
+    
+    #User specified files#
+    Docs_ex = [] 
+    Keys_ex = []
+    
+        
+    meta = ["user", "run_collection_name" ,"run_suffix" ,"keywords", "confidence"]
+        
+    file_related_keys = Keys + Keys_L + Keys_ex
+    file_related_docs = Docs + Docs_L + Docs_ex
+        
+    print("Default file names and their key names are reset!")
+
+def get_data(key, *args):
+    '''
+    Use to get data from default files with functions defined in func_dic
+    '''
+    return func_dic[key](*args)
+
+def get_data_by_func(user_func, *args):
+    '''
+    user_func takes args and should return a dictionary having at least two keys: '_header_' and '_data_'
+    an example is provided as below: get_data_from_energy()
+    '''
+    return user_func(*args)
+
+def get_data_from_energy(db, filepath):
+    '''
+    read GENE energy output, parsed into header and datapart
+    '''
+    fs = gridfs.GridFS(db)
+    if fs.exists({"filepath": filepath}):
+        file = fs.find_one({"filepath": filepath}) # assuming only one
+        contents = file.read().decode('utf8').split('\n')
+        header = []
+        data = []
+        for line in contents:
+            if '#' in line:
+                header.append(line)
+            else:
+                d_str = line.split()
+                if d_str:
+                    data.append([float(num) for num in d_str])
+        
+#        data = np.array(data)
+        return {'_header_': header[:-1], '_data_': np.array(data)}
+    
+    else:
+        print("No entry in current database matches the specified filepath.")
+        return None
+
+def get_data_from_nrg(db, filepath):
+    fs = gridfs.GridFS(db)
+    if fs.exists({"filepath": filepath}):
+        file = fs.find_one({"filepath": filepath}) # assuming only one
+        contents = file.read().decode('utf8').split('\n')
+        header = []
+        data = []
+        time = []
+        count = 0
+        for line in contents[:-1]: # last line is ''
+            if count % 2 == 0:
+#               print(count)
+               time.append(float(line))
+            else:
+                d_str = line.split()
+                if d_str:
+                    data.append([float(num) for num in d_str])
+            count += 1
+        
+#        data = np.array(data)
+        return {'_header_': header, '_time_': np.array(time), '_data_': np.array(data)}
+    
+    else:
+        print("No entry in current database matches the specified filepath.")
+        return None
+
+def isfloat(a):
+    try:
+        float(a)
+        return True
+    except ValueError:
+        return False
+
+def to_float(a):
+    try:
+        b = float(a)
+    except ValueError:
+        b = a
+    return b
+
+def get_data_from_parameters(db, filepath):
+    fs = gridfs.GridFS(db)
+    if fs.exists({"filepath": filepath}):
+        file = fs.find_one({"filepath": filepath}) # assuming only one
+        contents = file.read().decode('utf8').split('\n')
+        summary_dict=dict()
+        for line in contents:
+            if '&' in line:
+                category = line[1:]
+                sub_dict = {}
+            elif '=' in line:
+                pars = line.split('=')
+                sub_dict[pars[0].rstrip()] = to_float(pars[1]) 
+            elif '/' in line:
+                summary_dict[category] = sub_dict            
+            else:
+                continue
+            
+        return summary_dict
+    
+    else:
+        print("No entry in current database matches the specified filepath.")
+        return None
+    
+#def get_data_from_scaninfo(db, filepath):
+#    '''
+#    This may does NOT work for multiple suffixes.
+#    '''
+#    fs = gridfs.GridFS(db)
+#    if fs.exists({"filepath": filepath}):
+#        file = fs.find_one({"filepath": filepath}) # assuming only one
+#        contents = file.read().decode('utf8').split('\n')
+#
+#        keys = ['kymin', 'x0', 'kx_center', 'n0_global', 'gamma(cs/a)', 'omega(cs/a)',
+#                '<z>', 'lambda_z', 'parity(apar)', 'parity(phi)', 'QEM/QES', 'Epar cancelation',
+#                'gamma_HB_avg', 'gamma_HB_min']
+#
+#        info = dict().fromkeys(keys)
+#        for line in contents:
+#            if '#' in line:
+#                continue
+#            else:
+#                vals = line.split()
+#                if vals:
+#                    for ind, key in enumerate(keys):
+#                          info[key] = to_float(vals[ind])
+#
+#        return info
+#    
+#    else:
+#        print("No entry in current database matches the specified filepath.")
+#        return None    
+
+def get_data_from_tracer_efit(db, filepath):      
+    fs = gridfs.GridFS(db)
+    if fs.exists({"filepath": filepath}):
+        file = fs.find_one({"filepath": filepath}) # assuming only one
+        contents = file.read().decode('utf8').split('\n')
+        header_dict = {}
+        data = []
+        for line in contents:
+            if '=' in line:
+                item = line.split('=')
+#                if '_' in item[1] or ' \' ' in item[1]:
+                if isfloat(item[1]):
+                    header_dict[item[0]] = float(item[1])
+                else:
+                    header_dict[item[0]] = item[1]
+                    
+            elif '/' in line or '&' in line:
+                continue
+
+            else:
+                d_str = line.split()
+                if d_str:
+                    data.append([float(num) for num in d_str])
+        
+#        data = np.array(data)
+        return {'_header_': header_dict, '_data_': np.array(data)}
+    
+    else:
+        print("No entry in current database matches the specified filepath.")
+        return None
+    
+func_dic = {'energy': get_data_from_energy,
+            'nrg': get_data_from_nrg,
+            'parameters': get_data_from_parameters
+            }        
+
+def get_file_list(out_dir, begin):
+    '''
+    Get files from out_dir that begins with "begin"
+    '''
+    files_list = []
+    
+    #unwanted filetype suffixes for general list
+    bad_ext = ('.ps','.png')
+    
+    #scan files in GENE output directory, ignoring files in '/in_par', and return list
+    files = next(os.walk(out_dir))[2]
+    for count, name in enumerate(files, start=0):
+        if name.startswith(begin) and name.endswith(bad_ext) == False and not os.path.isdir('in_par'):
+            file = out_dir + '/' + name
+            files_list.append(file)
+    return files_list     
+
+
+def get_suffixes(out_dir):
+    suffixes = []
+    
+    #scan files in GENE output directory, find all run suffixes, return as list
+    files = next(os.walk(out_dir))[2]
+    for count, name in enumerate(files, start=0):
+        if name.startswith('parameters_'):
+            suffix = name.split('_',1)[1]
+            suffix = '_' + suffix
+            suffixes.append(suffix)
+        elif name.lower().startswith('parameters.dat'):
+            suffixes = ['.dat']                
+    return suffixes
+
+
+def gridfs_put(filepath):
+    #set directory and filepath
+    file = open(filepath, 'rb')
+
+    #connect to 'ETG' database
+#    db = mgkdb_client.mgk_fusion
+    db = database
+
+    #upload file to 'fs.files' collection
+    fs = gridfs.GridFS(db)
+    dbfile = fs.put(file, encoding='UTF-8', 
+                    filepath = filepath,
+                    filename = filepath.split('/')[-1],
+                    metadata = None)  # may also consider using upload_from_stream ?
+    file.close()
+    
+    #grab '_id' for uploaded file
+#    object_id = str(dbfile)  # why convert to string?
+#    return(object_id)
+    return dbfile
+    
+    
+def gridfs_read(filepath):
+    #connect to 'ETG' database
+#    db = mgkdb_client.mgk_fusion
+    db = database
+    #open 'filepath'
+    fs = gridfs.GridFS(db)
+    file = fs.find_one({"filepath": filepath})
+    contents = file.read()
+    return(contents)
+    
+    
+def isLinear(folder_name):
+    linear = None
+    #check parameters file for 'nonlinear' value
+    if os.path.isfile(folder_name + '/parameters'):
+        par = Parameters()
+        par.Read_Pars(folder_name + '/parameters')
+        pars = par.pardict
+        linear = not pars['nonlinear']
+        return(linear)
+    #check folder name for linear
+    elif folder_name.find('linear') != -1:
+        linear = True 
+        return(linear)
+    #check folder name for nonlin
+    elif folder_name.find('nonlin') != -1:
+        linear = False
+        return(linear)
+    else:
+        assert linear is None, "Can not decide, please include linear/nonlinear as the suffix of your data folder!"
+        
+        
+def isUploaded(out_dir,runs_coll):
+    '''
+    check if out_dir appears in the database collection.
+    Assuming out_dir will appear no more than once in the database
+    '''
+    inDb = runs_coll.find({ "Meta.run_collection_name": out_dir })
+#    print(inDb)
+#    for run in inDb:
+#        runIn = run["run_collection_name"]
+##        print(runIn)
+#        return(runIn == out_dir)
+    uploaded = False
+    for run in inDb:
+        if run["Meta"]["run_collection_name"] == out_dir: # seems redundent?
+            uploaded = True
+            break
+    
+    return uploaded
+
+
+def get_record(out_dir, runs_coll):
+    '''
+    Get a list of summary dictionary for 'out_dir' in the database
+    '''
+    inDb = runs_coll.find({ "Meta.run_collection_name": out_dir })
+    record = []
+    for run in inDb:
+#        dic = dict()
+#        for key, val in run.items():
+#            dic[key] = val
+#        record.append(dic)
+        record.append(run)
+    return record
+
+#def retrieve_files(source_dir, target_dir, runs_coll, key_list=file_related_keys):
+#    '''
+#    Retrieve files stored in database taged with source_dir to target_dir
+#    Current code is local -> local, will need remote -> local via sshtunnel as well
+#    '''
+#    
+#    fs = gridfs.GridFS(database)
+#
+#    # get the summary
+#    records = get_record(source_dir, runs_coll)
+#    
+#    # for each record in summary, save corresponding files to target_dir
+#    count = 1
+##    print(len(records))
+#    for record in records:
+#        for key in key_list:
+#            if record[key] != 'None':
+#                _id = ObjectId(record[key])
+#                file = fs.find_one({"_id": _id}) # only one file with _id, only available by fs.download_to_stream(id, destination)
+##                for file in files:
+#                contents = file.read()
+##                    file_name = file["filepath"].split('/')[-1] # this way is not supported
+#                file_name = file.filepath.split('/')[-1]
+#                with open(target_dir + '/' + file_name, 'wb') as f:
+#                    f.write(contents)
+#        # also save the record to json
+#        to_json = json_util.dumps(record)
+#        with open(target_dir + '/' + 'record_{}.json'.format(count), 'wb') as f:
+#            f.write(to_json)
+#            
+#        count +=1  
+#    
+#    print("Retrieval completed")
+    
+def download_file_by_name(db, filename, destination, revision=-1, session=None):
+    '''
+    db: database name
+    filename: filename stored in database, that is "db.fs.files['filename']"
+    destination: local path to put the file
+    
+    Attention: filename may correspond to multiple entries in the database
+    '''
+    fs = gridfs.GridFSBucket(db)
+    records = db.fs.files.find({"filename": filename})
+    count = 0
+    for record in records:
+        _id = record['_id']
+        parent = record['filepath'].split('/')[-2]
+        with open(os.path.join(destination, parent+'_'+filename ),'wb+') as f:
+            fs.download_to_stream(_id, f)
+            count +=1
+#            fs.download_to_stream_by_name(filename, f, revision, session)
+        
+    print("Download completed! Downloaded: {}".format(count))
+    
+def download_file_by_id(db, _id, destination, fname, session = None):
+    '''
+    db: database name
+    _id: object_id
+    destionation: local path to put the file
+    fname: name you want to call for the downloaded file
+    '''
+
+    fs = gridfs.GridFSBucket(db)
+    with open(os.path.join(destination, fname),'wb+') as f:   
+        fs.download_to_stream(_id, f)
+    print("Download completed!")
+    
+def download_dir_by_name(db, runs_coll, dir_name, destination):  
+    '''
+    db: database name
+    dir_name: as appear in db.Meta['run_collection_name']
+    destination: destination to place files
+    '''
+    
+    try:
+        path = os.path.join(destination, dir_name.split('/')[-1])
+        os.mkdir(path)
+    except OSError:
+        print ("Creation of the directory %s failed" % path)
+    else:
+        fs = gridfs.GridFSBucket(db)
+        inDb = runs_coll.find({ "Meta.run_collection_name": dir_name })
+        for record in inDb:
+            for key, val in record['Files'].items():
+                if val != 'None' and key not in ['scanlog', 'scaninfo']:
+                    filename = db.fs.files.find_one(val)['filename']
+                    with open(os.path.join(path, filename),'wb+') as f:
+#                        fs.download_to_stream_by_name(filename, f, revision=-1, session=None)
+                        fs.download_to_stream(val, f, session=None)
+        
+        with open(os.path.join(path, 'scan.log'),'wb+') as f:
+            fs.download_to_stream(record['Files']['scanlog'], f, session=None)
+        with open(os.path.join(path, 'scan_info.dat'),'wb+') as f:
+            fs.download_to_stream(record['Files']['scaninfo'], f, session=None)    
+            
+        print ("Successfully created the directory %s " % path)
+
+
+def download_collections_by_id(db, runs_coll, _id, destination):
+    '''
+    Download all files in collections by the id of the summary dictionary.
+    '''
+    
+    fs = gridfs.GridFSBucket(db)
+    record = runs_coll.find_one({ "_id": _id })
+    dir_name = record['Meta']['run_collection_name']
+    try:
+        path = os.path.join(destination, dir_name.split('/')[-1])
+        os.mkdir(path)
+    except OSError:
+        print ("Creation of the directory %s failed" % path)
+    else:
+
+        for key, val in record['Files'].items():
+            if val != 'None':
+                filename = db.fs.files.find_one(val)['filename']
+                with open(os.path.join(path, filename),'wb+') as f:
+#                        fs.download_to_stream_by_name(filename, f, revision=-1, session=None)
+                    fs.download_to_stream(val, f, session=None)
+        print ("Successfully download files in the collection to directory %s " % path)    
+    
+def update_mongo(out_dir, db, runs_coll):
+    # only update file related entries, no comparison made before update
+#    inDb = runs_coll.find({ "run_collection_name": out_dir })
+#    inDb = get_record(out_dir, runs_coll)
+    fs = gridfs.GridFS(db)
+    suffixes = get_suffixes(out_dir)        
+    update_option = input('Enter options for update:\n 0: Files relating to all runs. \n 1: Specify the keywords and suffixes. \n ')
+    if update_option == '0':
+        files_to_update = input('Please type FULL file names to update, separated by comma.\n').split(',')
+        keys_to_update = input('Please type key names for each file you typed, separated by comma.\n').split(',')
+        updated = []
+        print('Uploading files .......')
+        # update the storage chunk
+        for doc, field in zip(files_to_update, keys_to_update):
+            files = get_file_list(out_dir, doc) # get file with path
+            assert len(files), "Files specied not found!"
+            # delete ALL history
+            for file in files:
+                grid_out = fs.find({'filepath': file})
+                for grid in grid_out:
+                    fs.delete(grid['_id'])
+                    
+            with open(file, 'rb') as f:
+                _id = fs.put(f, encoding='UTF-8', filepath=file)
+            _id = str(_id)
+            updated.append([field, _id])
+        
+        # update the summary dictionary  
+        print('Updating summary dictionary .....')              
+        for entry in updated:
+            for suffix in suffixes:
+                runs_coll.update({ "Meta.run_collection_name": out_dir, "run_suffix": suffix}, 
+                                 {"$set":{entry[0]: entry[1]}})
+        
+        print("Update complete")
+                
+    elif update_option == '1':
+        files_to_update = input('Please type filenames (without suffixes) for files to update, separated by comma.\n').split(',')
+        print("suffixes availables are {}".format(suffixes))
+        runs_to_update = input('Please type runs subject to which suffixes to update, separated by comma. If you need to update all runs, just hit ENTER. \n').split(',')      
+        updated = []
+        # update the storage chunk
+        print('Uploading files .......')
+        if len(runs_to_update[0]) != 0:
+            run_suffixes = runs_to_update
+        else:
+            run_suffixes = suffixes
+        
+        for doc in files_to_update:
+            for suffix in run_suffixes:
+                file = out_dir + '/' + doc  + suffix
+                grid_out = fs.find({'filepath': file})
+                for grid in grid_out:
+                    fs.delete(grid['_id'])
+                
+                with open(file, 'rb') as f:
+                    _id = fs.put(f, encoding='UTF-8', filepath=file)
+                _id = str(_id)
+                runs_coll.update({ "Meta.run_collection_name": out_dir, "run_suffix": suffix }, 
+                                 {"$set":{doc: _id}})
+        print("Update complete")
+    
+    else:
+        print('Invalid input. Update aborted.')
+        pass
+    
+def remove_from_mongo(out_dir, db, runs_coll):
+    #find all documents containing collection name
+#    if linear:
+#        runs_coll = db.LinearRuns
+#    else:
+#        runs_coll = db.NonlinRuns
+        
+    inDb = runs_coll.find({ "Meta.run_collection_name": out_dir })        
+    fs = gridfs.GridFS(db)
+    for run in inDb:
+        # delete the gridfs storage:
+        for key, val in run['Files'].items():
+#            print(val)
+#            if (key in file_related_keys) and val != 'None':
+##                print((key, val))
+#                target_id = ObjectId(val)
+#                print((key, target_id))
+#                fs.delete(target_id)
+#                print('deleted!')
+            if val != 'None':
+                print((key, val))
+                fs.delete(val)
+                print('deleted!')
+#                if fs.exists(target_id):
+#                    print("Deleting storage for entry \'{}\' deleted with id: {}").format(key, val)
+#                    fs.delete(target_id)
+#                    print("Deleted!")
+                    
+                
+#        delete the header file
+        runs_coll.delete_one(run)
+        
+
+def upload_file_chunks(out_dir, large_files=False, extra_files=False):
+    '''
+    This function does the actual uploading of grifs chunks and
+    returns object_ids for the chunk.
+    '''
+    
+    if os.path.isfile(out_dir + '/parameters'):
+        par = Parameters()
+        par.Read_Pars(out_dir + '/parameters')
+        pars = par.pardict
+        if 'magn_geometry' in pars:
+            Docs.append(pars['magn_geometry'][1:-1])
+            Keys.append('magn_geometry')
+        if large_files:
+            if 'name1' in pars and 'mom' in Docs_L:
+                Docs_L.pop(Docs_L.index('mom'))
+                Keys_L.pop(Keys_L.index('mom'))
+                Docs_L.append('mom_'+pars['name1'][1:-1])
+                Keys_L.append('mom_'+pars['name1'][1:-1])
+    
+    output_files = [get_file_list(out_dir, Qname) for Qname in Docs if Qname]
+    
+        
+    if large_files:
+        output_files += [get_file_list(out_dir, Qname) for Qname in Docs_L if Qname]
+    if extra_files:
+        output_files += [get_file_list(out_dir, Qname) for Qname in Docs_ex if Qname]
+        
+    
+    
+    output_files = [item for sublist in output_files for item in sublist] # flat the list
+    
+#    print(output_files)
+    #upload all GENE output files to database
+#    object_ids = [] 
+#    for files in output_files:
+#        object_ids.append(gridfs_put(files)) 
+#            
+#    #map from_output files to object ids
+#    for i in range(len(output_files)):
+#        object_ids[i] = object_ids[i] + '    ' +  output_files[i]
+       
+    object_ids = {}
+    for file in output_files:
+        _id = gridfs_put(file)
+        object_ids[_id] = file
+
+#    print(object_ids)
+    return object_ids
+
+def upload_linear(out_dir, user, linear, confidence, input_heat, keywords, 
+                  large_files=False, extra=False, verbose=True):
+    #connect to linear collection
+#    runs_coll = mgkdb_client.mgk_fusion.LinearRuns
+    runs_coll = database.LinearRuns
+    
+    #generate scan_info.dat
+#    suffixes = scan_info(out_dir)
+    
+    #update files dictionary
+    object_ids = upload_file_chunks(out_dir, large_files, extra)  # it changes Docs and Keys globally 
+#    print(object_ids)         
+#    suffixes = get_suffixes(out_dir)
+#    print(suffixes)
+    _docs = Docs.copy()
+    _keys = Keys.copy()
+    
+    if large_files:
+        _docs = _docs + Docs_L
+        _keys = _keys + Keys_L
+    if extra:
+        _docs = _docs + Docs_ex
+        _keys = _keys + Keys_ex
+        
+    files_dict = dict.fromkeys(Default_Keys+_keys, 'None')
+    
+    for suffix in suffixes:
+        for _id, line in object_ids.items():
+            for Q_name, Key in zip(_docs, _keys):
+                if line.find(out_dir+'/'+Q_name + suffix) != -1:
+#                if (Q_name + suffix) == line.split('/')[-1]:    
+#                    files_dict[Key] = line.split()[0]
+                    files_dict[Key] = _id
+#                elif line.find(out_dir+'/'+Q_name) != -1 and files_dict[Key] is 'None':
+#                    files_dict[Key] = line.split()[0]
+#                    
+#                elif line.find(out_dir+'/'+Q_name + suffix + '.log') != -1 and files_dict[Key] is 'None':
+#                    files_dict[Key] = line.split()[0]
+#                    
+#                elif line.find(out_dir+'/'+Q_name + suffix + '.dat') != -1 and iles_dict[Key] is 'None':
+#                    files_dict[Key] = line.split()[0]
+                    
+#            if line.find('geneerr.log') != -1:
+#                files_dict['geneerrlog'] = line.split()[0]
+            if line.find(out_dir+'/'+'scan.log') != -1:
+#                files_dict['scanlog'] = line.split()[0]
+                files_dict['scanlog'] = _id
+            if line.find(out_dir+'/'+'scan_info.dat') != -1:
+#                files_dict['scaninfo'] = line.split()[0]
+                files_dict['scaninfo'] = _id
+        
+        #metadata dictonary
+        meta_dict = {"user": user,
+                     "run_collection_name": out_dir,
+                     "run_suffix": '' + suffix,
+                     "keywords": keywords,
+                     "confidence": confidence
+                    }  
+        
+        #find relevant quantities from in/output
+#        gamma = find_omega(out_dir + '/omega' + suffix)[0]
+#        omega_num = find_omega(out_dir + '/omega' + suffix)[1]
+##        params = find_params(out_dir + '/parameters' + suffix)
+##        kx = params[0]
+##        ky = params[1]
+##        omn = params[2]
+##        omt = params[3]
+#        
+#        #data dictionary format for linear runs  
+##        run_data_dict = {"gamma": gamma,
+##                         "omega_num": omega_num,
+##                         "kymin": ky,
+##                         "kx_center": kx,
+##                         "omt": omt,
+##                         "omn": omn
+##                        }
+#            
+#        QoI_dict = {"gamma": gamma,
+#                    "omega_num": omega_num
+#                    }
+        
+        QoI_dict = get_QoI_from_run(out_dir, suffix)
+        param_dict = get_parsed_params(out_dir + '/parameters' + suffix)
+        #combine dictionaries and upload
+        run_data =  {'Meta': meta_dict, 'Files': files_dict, 'QoI': QoI_dict, 'Parameters': param_dict}
+        runs_coll.insert_one(run_data).inserted_id  
+        print('Files with suffix: {} in folder {} uploaded successfully'.format(suffix, out_dir))
+        if verbose:
+            print('A summary is generated as below:\n')
+            print(run_data)
+        
+    reset_docs_keys()
+#    print('Run collection \'' + out_dir + '\' uploaded succesfully.')
+        
+        
+def upload_nonlin(out_dir, user, linear, confidence, input_heat, keywords, 
+                  large_files=False, extra=False, verbose=True):
+    #connect to nonlinear collection
+    runs_coll = database.NonlinRuns
+    
+    #generate scan_info.dat
+#    suffixes = scan_info(out_dir)  ### add check for file existence
+    
+    #update files dictionary
+    object_ids = upload_file_chunks(out_dir, large_files, extra)   
+#    suffixes = get_suffixes(out_dir)
+#    print(suffixes)
+#    print(object_ids)
+    _docs = Docs.copy()
+    _keys = Keys.copy()
+    
+    if large_files:
+        _docs = _docs + Docs_L
+        _keys = _keys + Keys_L
+    if extra:
+        _docs = _docs + Docs_ex
+        _keys = _keys + Keys_ex
+        
+    files_dict = dict.fromkeys(Default_Keys+_keys, 'None')
+        
+    for suffix in suffixes:
+#        print(suffix)
+        for _id, line in object_ids.items():  
+            for Q_name, Key in zip(_docs, _keys):
+                if line.find(out_dir+'/'+Q_name + suffix) != -1:
+#                if (Q_name + suffix) == line.split('/')[-1]:    
+#                    files_dict[Key] = line.split()[0]
+                    files_dict[Key] = _id
+                    
+#                elif line.find(out_dir+'/'+Q_name) != -1 and Key not in files_dict:
+#                    files_dict[Key] = line.split()[0]
+#                    
+#                elif line.find(out_dir+'/'+Q_name + suffix + '.log') != -1 and Key not in files_dict:
+#                    files_dict[Key] = line.split()[0]
+#                    
+#                elif line.find(out_dir+'/'+Q_name + suffix + '.dat') != -1 and Key not in files_dict:
+#                    files_dict[Key] = line.split()[0]
+
+            if line.find(out_dir+'/'+'scan.log') != -1:
+#                files_dict['scanlog'] = line.split()[0]
+                files_dict['scanlog'] = _id
+            if line.find(out_dir+'/'+'scan_info.dat') != -1:
+#                files_dict['scaninfo'] = line.split()[0]
+                files_dict['scaninfo'] = _id
+#            if line.find('geneerr.log') != -1:
+#                files_dict['geneerrlog'] = line.split()[0]
+
+            
+
+                
+        #find relevant quantities from in/output
+#        print(suffix)
+        
+        param_dict = get_parsed_params(out_dir + '/parameters' + suffix)
+
+#        params = find_params(out_dir + '/parameters' + suffix)
+#        kx = params[0]
+#        ky = params[1]
+#        omn = params[2]  #### add check n_spec for suffix
+#        omt = params[3]
+#        print(omn)
+        #metadata dictonary
+        meta_dict = {"user": user,
+                     "run_collection_name": out_dir,
+                     "run_suffix": '' + suffix,
+                     "keywords": keywords,
+                     "confidence": confidence
+                    }
+        #data dictionary format for nonlinear runs
+        QoI = get_QoI_from_run(out_dir, suffix)
+        Qes = get_Qes(out_dir, suffix)
+        QoI_dict = {"Qes" : Qes, **QoI                        
+                    }
+             
+        #combine dictionaries and upload
+#        
+#        run_data =  {''meta_dict, **files_dict, **run_data_dict} 
+        run_data =  {'Meta': meta_dict, 'Files': files_dict, 'QoI': QoI_dict, 'Parameters': param_dict}
+        runs_coll.insert_one(run_data).inserted_id  
+
+#        print('Run collection \'' + suffix + 'in ' + out_dir +'\' uploaded succesfully.')        
+        print('Files with suffix: {} in folder {} uploaded successfully.'.format(suffix, out_dir))
+
+        if verbose:
+            print('A summary is generated as below:')
+            print(run_data)
+        
+    reset_docs_keys()
+            
+def upload_to_mongo(out_dir, user, linear, confidence, input_heat, keywords, 
+                    large_files = False, extra=False, verbose=True):
+    #for linear runs
+    if linear:
+        #connect to linear collection
+        runs_coll = database.LinearRuns
+        #check if folder is already uploaded, prompt update?
+        if isUploaded(out_dir, runs_coll):
+            update = input('Folder exists in database.  You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to abort.\n')
+            if update == '0':
+                #for now, delete and reupload instead of update - function under construction
+                remove_from_mongo(out_dir, database, runs_coll)   
+                upload_linear(out_dir, user, linear, confidence, input_heat, keywords,
+                              large_files, extra, verbose)
+            elif update == '1':
+                update_mongo(out_dir, database, runs_coll)
+            else:
+                print('Run collection \'' + out_dir + '\' skipped.')
+        else:
+            upload_linear(out_dir, user, linear, confidence, input_heat, keywords, 
+                          large_files, extra, verbose)
+                
+    #for nonlinear runs
+    if not linear:
+        #connect to nonlinear collection
+        runs_coll = database.NonlinRuns
+        #check if folder is already uploaded, prompt update?
+        if isUploaded(out_dir, runs_coll):
+            update = input('Folder exists in database.  You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to abort.')
+            if update == '0':
+                #for now, delete and reupload instead of update - function under construction
+                remove_from_mongo(out_dir, database, runs_coll)   
+                upload_nonlin(out_dir, user, linear, confidence, input_heat, keywords, 
+                              large_files, extra, verbose)
+            elif update == '1':
+                update_mongo(out_dir, database, runs_coll)
+
+            else:
+                print('Run collection \'' + out_dir + '\' skipped.')
+        else:
+            upload_nonlin(out_dir, user, linear, confidence, input_heat, keywords, 
+                          large_files, extra, verbose)

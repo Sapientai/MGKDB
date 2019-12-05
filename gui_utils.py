@@ -1,3 +1,10 @@
+
+'''
+A Sign-in credential window
+
+Author: Gerardo Salazar
+'''
+
 from tkinter import *
 
 class Window(Frame):

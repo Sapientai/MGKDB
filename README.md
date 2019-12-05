@@ -4,12 +4,12 @@
 
 2. If successfully installed, you are probably now in mongo shell environment. You can now create a local database (For test) by   
 ```
-   use mydb  ----- % create an empty database with name 'mydb'   
+   use mgk_fusion  ----- % create an empty database with name 'mydb'   
 
    db.createUser(   
     {   
-     user: "myuser",  % create user name  
-     pwd: "mypassword", % create user pass  
+     user: "username",  % create user name  
+     pwd: "password", % create user pass  
      roles: [ "dbOwner" ] % assign role  
     }   
    

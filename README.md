@@ -1,45 +1,46 @@
-**Edit a file, create a new file, and clone from Bitbucket in under 2 minutes**
+## To start up
 
-When you're done, you can delete the content in this README and update the file with details for others getting started with your repository.
+1. Download [MongoDB](https://www.mongodb.com/what-is-mongodb) and install it according to the [documentation](https://docs.mongodb.com/manual/administration/install-community/). If you would also like a gui, you can also download [MongoDB Compass](https://www.mongodb.com/products/compass)
 
-*We recommend that you open this README in another tab as you perform the tasks below. You can [watch our video](https://youtu.be/0ocf7u76WSo) for a full demo of all the steps in this tutorial. Open the video in a new tab to avoid leaving Bitbucket.*
+2. If successfully installed, you are probably now in mongo shell environment. You can now create a local database (For test) by   
+```
+   use mydb  ----- % create an empty database with name 'mydb'   
 
----
+   db.createUser(   
+    {   
+     user: "myuser",  % create user name  
+     pwd: "mypassword", % create user pass  
+     roles: [ "dbOwner" ] % assign role  
+    }   
+   
+   db.auth(username, pass)   % authenticate a user    
+```  
 
-## Edit a file
+3. [Cheat sheet](https://blog.codecentric.de/files/2012/12/MongoDB-CheatSheet-v1_0.pdf) and [a sql-comparison](https://docs.mongodb.com/manual/reference/sql-comparison/ )  
 
-You’ll start by editing this README file to learn how to edit a file in Bitbucket.
+4. Update your created name and pass in the script `mgk_uploader.py` and run it to upload information from the test data into the database.  
+   * You can check current uploaded collections by typing `show collections` in the mongo shell.   
+   * You can check the summary dictionary by typing `db.LinearRuns.find().pretty()`.
 
-1. Click **Source** on the left side.
-2. Click the README.md link from the list of files.
-3. Click the **Edit** button.
-4. Delete the following text: *Delete this line to make a change to the README from Bitbucket.*
-5. After making your change, click **Commit** and then **Commit** again in the dialog. The commit page will open and you’ll see the change you just made.
-6. Go back to the **Source** page.
+5. The physical storage of large files are by [GRIDFS](https://docs.mongodb.com/manual/core/gridfs/). Since it is handled by Python in the backend in our case, [here](https://api.mongodb.com/python/current/api/gridfs/index.html) is the documentation for using it in pymongo
 
----
+6. You can interacte with the database via at least 3 methods:  
+   * [Mongo Shell](https://docs.mongodb.com/manual/mongo/)  
+   * [Pymongo](https://api.mongodb.com/python/current/api/index.html)  
+   * The GUI, such as MongoDB Compass.  
+   
 
-## Create a file
+7. Some example queries:  
+   * `db.LinearRuns.find({"Parameters_dict.kymin": {$lt: 20}}).count()`   
+   * `db.LinearRuns.find({"Parameters_dict.kymin": 160},{"Parameters_dict.kymin":1})`    
+   * `db.fs.files.find({$text:{$search : "\"autopar_0013\""}}).pretty()`   
+   (text index needs to be created first. In mongo shell, type `db.collection.createIndex( { "$**": "text" } )` check [here](https://docs.mongodb.com/v3.2/core/index-text/) for details) 
+  
+8. Many parts are still under construction.   
+   * Default QoIs to get from each run.  Need update in `get_QoI_from_run` in `mgk_post_processing.py` for adding these quantities.    
+   * Integrity check.  
+   * Put the database in a remote server and authentication management for different users.    
+   * Other user interfaces such as a web based frontend.    
+   * Visualizations after the scan and visualization option after querying the database.  
+   * Compatibilities with other tools.
 
-Next, you’ll add a new file to this repository.
-
-1. Click the **New file** button at the top of the **Source** page.
-2. Give the file a filename of **contributors.txt**.
-3. Enter your name in the empty file space.
-4. Click **Commit** and then **Commit** again in the dialog.
-5. Go back to the **Source** page.
-
-Before you move on, go ahead and explore the repository. You've already seen the **Source** page, but check out the **Commits**, **Branches**, and **Settings** pages.
-
----
-
-## Clone a repository
-
-Use these steps to clone from SourceTree, our client for using the repository command-line free. Cloning allows you to work on your files locally. If you don't yet have SourceTree, [download and install first](https://www.sourcetreeapp.com/). If you prefer to clone from the command line, see [Clone a repository](https://confluence.atlassian.com/x/4whODQ).
-
-1. You’ll see the clone button under the **Source** heading. Click that button.
-2. Now click **Check out in SourceTree**. You may need to create a SourceTree account or log in.
-3. When you see the **Clone New** dialog in SourceTree, update the destination path and name if you’d like to and then click **Clone**.
-4. Open the directory you just created to see your repository’s files.
-
-Now that you're more familiar with your Bitbucket repository, go ahead and add a new file locally. You can [push your change back to Bitbucket with SourceTree](https://confluence.atlassian.com/x/iqyBMg), or you can [add, commit,](https://confluence.atlassian.com/x/8QhODQ) and [push from the command line](https://confluence.atlassian.com/x/NQ0zDQ).

@@ -14,7 +14,7 @@ reading and writing to database containing:
     gridfs_read(db_file):               input database filename, return contents of file
     upload_to_mongo   
     isLinear
-@author: Austin Blackmon
+@author: Austin Blackmon, Dongyang Kuang
 """
 
 '''
@@ -686,7 +686,7 @@ def upload_linear(out_dir, user, linear, confidence, input_heat, keywords,
     #update files dictionary
     object_ids = upload_file_chunks(out_dir, large_files, extra)  # it changes Docs and Keys globally 
 #    print(object_ids)         
-#    suffixes = get_suffixes(out_dir)
+    suffixes = get_suffixes(out_dir)
 #    print(suffixes)
     _docs = Docs.copy()
     _keys = Keys.copy()
@@ -779,7 +779,7 @@ def upload_nonlin(out_dir, user, linear, confidence, input_heat, keywords,
     
     #update files dictionary
     object_ids = upload_file_chunks(out_dir, large_files, extra)   
-#    suffixes = get_suffixes(out_dir)
+    suffixes = get_suffixes(out_dir)
 #    print(suffixes)
 #    print(object_ids)
     _docs = Docs.copy()

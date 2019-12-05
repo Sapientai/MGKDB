@@ -19,7 +19,7 @@ Post processing script containing:
                                                frequency, saves plot
                                                possible scan_param: 'kx', 'ky', 'TiTe', 'omn', 'omt'
                                                possible freq: 'gamma', 'omega'
-@author: Austin Blackmon
+@author: Austin Blackmon, Dongyang Kuang
 """
 
 from mgk_file_handling import *

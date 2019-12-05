@@ -9,7 +9,7 @@ Optional fields:    confidence
                     input_heat
                     keywords
                     
-@author: Austin Blackmon
+@author: Austin Blackmon, Dongyang Kuang
 """
 
 from mgk_file_handling import *
@@ -26,8 +26,8 @@ from gui_utils import *
 user = 'dykuang'
 
 #output_folder = 'D:/test_data/data_nonlin_1'
-output_folder = 'D:/test_data/data_linear_multi'     ### Set as '.' for current directory ###
-#multiple_runs = False  ### Automate scanning through a directory of numerous runs ###
+output_folder = 'data_linear_multi'     ### Set as '.' for current directory ###
+multiple_runs = False  ### Automate scanning through a directory of numerous runs ###
 
 
 large_files = True # whether or not to include large_files: field, mom, vsp, ...

@@ -525,16 +525,48 @@ def download_collections_by_id(db, runs_coll, _id, destination):
                     fs.download_to_stream(val, f, session=None)
         print ("Successfully download files in the collection to directory %s " % path)    
     
+
+
+def update_Meta(out_dir, runs_coll, suffix):
+
+    meta_list = ['user', 'run_collection_name', 'run_suffix', 'keywords', 'confidence']
+    print("Keys available for update are {}".format(meta_list))
+    
+    keys = input('What entries do you like to update? separate your input by comma.\n').split(',')
+    vals = input('type your values corresponding to those keys you typed. Separate each category by ; .\n').split(';')
+    assert len(keys)==len(vals), 'Input number of keys and values does not match. Abort!'
+    for key, val in zip(keys, vals):
+    
+        runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix}, 
+                         {"$set":{'Meta.'+key: val} }
+                         )    
+    print("Meta{} in {} updated correctly".format(suffix, out_dir))
+
+    
+def update_Parameter(out_dir, runs_coll, suffix):
+    
+    param_dict = get_parsed_params(out_dir + '/parameters' + suffix)
+    runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix}, 
+                     {"$set":{'Parameters': param_dict}}
+                     )
+    
+    print("Parameters{} in {} updated correctly".format(suffix, out_dir))
+    
+
+
 def update_mongo(out_dir, db, runs_coll):
-    # only update file related entries, no comparison made before update
-#    inDb = runs_coll.find({ "run_collection_name": out_dir })
-#    inDb = get_record(out_dir, runs_coll)
+    '''
+    only update file related entries, no comparison made before update
+
+    '''
+
     fs = gridfs.GridFS(db)
     suffixes = get_suffixes(out_dir)        
     update_option = input('Enter options for update:\n 0: Files relating to all runs. \n 1: Specify the keywords and suffixes. \n ')
     if update_option == '0':
         files_to_update = input('Please type FULL file names to update, separated by comma.\n').split(',')
         keys_to_update = input('Please type key names for each file you typed, separated by comma.\n').split(',')
+        affect_QoI = input('Will the file change QoIs? (Y/N)')
         updated = []
         print('Uploading files .......')
         # update the storage chunk
@@ -545,19 +577,26 @@ def update_mongo(out_dir, db, runs_coll):
             for file in files:
                 grid_out = fs.find({'filepath': file})
                 for grid in grid_out:
-                    fs.delete(grid['_id'])
+                    fs.delete(grid._id)
                     
             with open(file, 'rb') as f:
                 _id = fs.put(f, encoding='UTF-8', filepath=file)
-            _id = str(_id)
+#            _id = str(_id)
             updated.append([field, _id])
         
         # update the summary dictionary  
         print('Updating summary dictionary .....')              
         for entry in updated:
             for suffix in suffixes:
-                runs_coll.update({ "Meta.run_collection_name": out_dir, "run_suffix": suffix}, 
-                                 {"$set":{entry[0]: entry[1]}})
+                if affect_QoI in ['Y', 'y']:
+                    QoI_dir = get_QoI_from_run(out_dir, suffix)
+                    runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, 
+                                 { "$set": {'QoI': QoI_dir}} 
+                                 )
+                    
+                runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix}, 
+                                 {"$set":{'Files.'+entry[0]: entry[1]}}
+                                 )
         
         print("Update complete")
                 
@@ -565,6 +604,7 @@ def update_mongo(out_dir, db, runs_coll):
         files_to_update = input('Please type filenames (without suffixes) for files to update, separated by comma.\n').split(',')
         print("suffixes availables are {}".format(suffixes))
         runs_to_update = input('Please type runs subject to which suffixes to update, separated by comma. If you need to update all runs, just hit ENTER. \n').split(',')      
+        affect_QoI = input('Will the file change QoIs? (Y/N)')
         updated = []
         # update the storage chunk
         print('Uploading files .......')
@@ -575,16 +615,23 @@ def update_mongo(out_dir, db, runs_coll):
         
         for doc in files_to_update:
             for suffix in run_suffixes:
+                if affect_QoI in ['Y', 'y']:
+                    QoI_dir = get_QoI_from_run(out_dir, suffix)
+                    runs_coll.update_one({ "Meta.run_collection_name": out_dir, "run_suffix": suffix }, 
+                                 { "$set": {'QoI': QoI_dir}} 
+                                 )
                 file = out_dir + '/' + doc  + suffix
                 grid_out = fs.find({'filepath': file})
                 for grid in grid_out:
-                    fs.delete(grid['_id'])
+#                    print(grid)
+                    fs.delete(grid._id)
                 
                 with open(file, 'rb') as f:
                     _id = fs.put(f, encoding='UTF-8', filepath=file)
-                _id = str(_id)
-                runs_coll.update({ "Meta.run_collection_name": out_dir, "run_suffix": suffix }, 
-                                 {"$set":{doc: _id}})
+#                _id = str(_id)
+                runs_coll.update_one({ "Meta.run_collection_name": out_dir, "run_suffix": suffix }, 
+                                 { "$set": {'Files.'+ doc: _id} }
+                                 )
         print("Update complete")
     
     else:
@@ -844,9 +891,9 @@ def upload_nonlin(out_dir, user, linear, confidence, input_heat, keywords,
                     }
         #data dictionary format for nonlinear runs
         QoI = get_QoI_from_run(out_dir, suffix)
-        Qes = get_Qes(out_dir, suffix)
-        QoI_dict = {"Qes" : Qes, **QoI                        
-                    }
+#        Qes = get_Qes(out_dir, suffix)
+#        QoI_dict = {"Qes" : Qes, **QoI                        
+#                    }
              
         #combine dictionaries and upload
 #        

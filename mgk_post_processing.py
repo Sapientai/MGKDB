@@ -649,6 +649,7 @@ def get_QoI_from_run(out_dir, suffix):
 #            print(calc_gamma(out_dir, suffix))
         QoI_dict['gamma(cs/a)'] = calc_gamma(out_dir, suffix)[0]
         QoI_dict['omega(cs/a)'] = 0.0
+        QoI_dict['Qes'] = get_Qes(out_dir, suffix)
 
     else:
         QoI_dict['gamma(cs/a)']=np.nan

@@ -46,20 +46,24 @@ from sshtunnel import SSHTunnelForwarder
 #
 #mgkdb_connect = MongoClient('mongodb03.nersc.gov')
 #mgkdb_client = mgkdb_connect.admin.authenticate(mgkdb_user, args.mgkdb_pass)
+#mgkdb_client = mgkdb_connect.mgk_fusion.authenticate(mgkdb_user, args.mgkdb_pass)
 
-mgkdb_server = 'localhost'
-mgkdb_port = '27017'
-mgkdb_dbname = 'mgk_fusion'
-mgkdb_user = 'dykuang'
-mgkdb_pass = '1234'
-
-mgkdb_connect = MongoClient(mgkdb_server)
-database = mgkdb_connect[mgkdb_dbname]
-mgkdb_client = database.authenticate(mgkdb_user, mgkdb_pass)	
+# =============================================================================
+# mgkdb_server = 'localhost'
+# mgkdb_port = '27017'
+# mgkdb_dbname = 'mgk_fusion'
+# mgkdb_user = 'dykuang'
+# mgkdb_pass = '1234'
+# 
+# mgkdb_connect = MongoClient(mgkdb_server)
+# database = mgkdb_connect[mgkdb_dbname]
+# mgkdb_client = database.authenticate(mgkdb_user, mgkdb_pass)	
+# =============================================================================
 
 # Default_Keys for summary files, keys should not contain '.' #
 Default_Keys = ['scan_id',  'submit_id',  'eqdisk_id' ]
 
+#==============================================================================
 #standard files#
 # Q: is geneerr with suffix?
 Docs = ['autopar', 'codemods', 'energy', 'tracer_efit', 'nrg', 
@@ -315,13 +319,13 @@ def get_suffixes(out_dir):
     return suffixes
 
 
-def gridfs_put(filepath):
+def gridfs_put(db, filepath):
     #set directory and filepath
     file = open(filepath, 'rb')
 
     #connect to 'ETG' database
 #    db = mgkdb_client.mgk_fusion
-    db = database
+#    db = database
 
     #upload file to 'fs.files' collection
     fs = gridfs.GridFS(db)
@@ -337,10 +341,10 @@ def gridfs_put(filepath):
     return dbfile
     
     
-def gridfs_read(filepath):
+def gridfs_read(db, filepath):
     #connect to 'ETG' database
 #    db = mgkdb_client.mgk_fusion
-    db = database
+#    db = database
     #open 'filepath'
     fs = gridfs.GridFS(db)
     file = fs.find_one({"filepath": filepath})
@@ -671,7 +675,7 @@ def remove_from_mongo(out_dir, db, runs_coll):
         runs_coll.delete_one(run)
         
 
-def upload_file_chunks(out_dir, large_files=False, extra_files=False):
+def upload_file_chunks(db, out_dir, large_files=False, extra_files=False):
     '''
     This function does the actual uploading of grifs chunks and
     returns object_ids for the chunk.
@@ -715,23 +719,23 @@ def upload_file_chunks(out_dir, large_files=False, extra_files=False):
        
     object_ids = {}
     for file in output_files:
-        _id = gridfs_put(file)
+        _id = gridfs_put(db, file)
         object_ids[_id] = file
 
 #    print(object_ids)
     return object_ids
 
-def upload_linear(out_dir, user, linear, confidence, input_heat, keywords, 
+def upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords, 
                   large_files=False, extra=False, verbose=True):
     #connect to linear collection
 #    runs_coll = mgkdb_client.mgk_fusion.LinearRuns
-    runs_coll = database.LinearRuns
+    runs_coll = db.LinearRuns
     
     #generate scan_info.dat
 #    suffixes = scan_info(out_dir)
     
     #update files dictionary
-    object_ids = upload_file_chunks(out_dir, large_files, extra)  # it changes Docs and Keys globally 
+    object_ids = upload_file_chunks(db, out_dir, large_files, extra)  # it changes Docs and Keys globally 
 #    print(object_ids)         
     suffixes = get_suffixes(out_dir)
 #    print(suffixes)
@@ -816,16 +820,16 @@ def upload_linear(out_dir, user, linear, confidence, input_heat, keywords,
 #    print('Run collection \'' + out_dir + '\' uploaded succesfully.')
         
         
-def upload_nonlin(out_dir, user, linear, confidence, input_heat, keywords, 
+def upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords, 
                   large_files=False, extra=False, verbose=True):
     #connect to nonlinear collection
-    runs_coll = database.NonlinRuns
+    runs_coll = db.NonlinRuns
     
     #generate scan_info.dat
 #    suffixes = scan_info(out_dir)  ### add check for file existence
     
     #update files dictionary
-    object_ids = upload_file_chunks(out_dir, large_files, extra)   
+    object_ids = upload_file_chunks(db, out_dir, large_files, extra)   
     suffixes = get_suffixes(out_dir)
 #    print(suffixes)
 #    print(object_ids)
@@ -910,45 +914,45 @@ def upload_nonlin(out_dir, user, linear, confidence, input_heat, keywords,
         
     reset_docs_keys()
             
-def upload_to_mongo(out_dir, user, linear, confidence, input_heat, keywords, 
+def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords, 
                     large_files = False, extra=False, verbose=True):
     #for linear runs
     if linear:
         #connect to linear collection
-        runs_coll = database.LinearRuns
+        runs_coll = db.LinearRuns
         #check if folder is already uploaded, prompt update?
         if isUploaded(out_dir, runs_coll):
             update = input('Folder exists in database.  You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to abort.\n')
             if update == '0':
                 #for now, delete and reupload instead of update - function under construction
-                remove_from_mongo(out_dir, database, runs_coll)   
-                upload_linear(out_dir, user, linear, confidence, input_heat, keywords,
+                remove_from_mongo(out_dir, db, runs_coll)   
+                upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords,
                               large_files, extra, verbose)
             elif update == '1':
-                update_mongo(out_dir, database, runs_coll)
+                update_mongo(out_dir, db, runs_coll)
             else:
                 print('Run collection \'' + out_dir + '\' skipped.')
         else:
-            upload_linear(out_dir, user, linear, confidence, input_heat, keywords, 
+            upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords, 
                           large_files, extra, verbose)
                 
     #for nonlinear runs
     if not linear:
         #connect to nonlinear collection
-        runs_coll = database.NonlinRuns
+        runs_coll = db.NonlinRuns
         #check if folder is already uploaded, prompt update?
         if isUploaded(out_dir, runs_coll):
             update = input('Folder exists in database.  You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to abort.')
             if update == '0':
                 #for now, delete and reupload instead of update - function under construction
-                remove_from_mongo(out_dir, database, runs_coll)   
-                upload_nonlin(out_dir, user, linear, confidence, input_heat, keywords, 
+                remove_from_mongo(out_dir, db, runs_coll)   
+                upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords, 
                               large_files, extra, verbose)
             elif update == '1':
-                update_mongo(out_dir, database, runs_coll)
+                update_mongo(out_dir, db, runs_coll)
 
             else:
                 print('Run collection \'' + out_dir + '\' skipped.')
         else:
-            upload_nonlin(out_dir, user, linear, confidence, input_heat, keywords, 
+            upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords, 
                           large_files, extra, verbose)

@@ -617,7 +617,7 @@ def update_mongo(out_dir, db, runs_coll):
             for suffix in run_suffixes:
                 if affect_QoI in ['Y', 'y']:
                     QoI_dir = get_QoI_from_run(out_dir, suffix)
-                    runs_coll.update_one({ "Meta.run_collection_name": out_dir, "run_suffix": suffix }, 
+                    runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, 
                                  { "$set": {'QoI': QoI_dir}} 
                                  )
                 file = out_dir + '/' + doc  + suffix
@@ -629,7 +629,7 @@ def update_mongo(out_dir, db, runs_coll):
                 with open(file, 'rb') as f:
                     _id = fs.put(f, encoding='UTF-8', filepath=file)
 #                _id = str(_id)
-                runs_coll.update_one({ "Meta.run_collection_name": out_dir, "run_suffix": suffix }, 
+                runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, 
                                  { "$set": {'Files.'+ doc: _id} }
                                  )
         print("Update complete")

@@ -74,7 +74,7 @@ large_files = args.large_files
 extra = args.extra
 verbose = args.verbose
 confidence = args.confidence
-info = os.path.abspath(args.authenticate)
+info = args.authenticate
 
 
 if info is None:

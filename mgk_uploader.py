@@ -66,7 +66,7 @@ parser.add_argument('-A', '--authenticate', default = None, help='locally saved 
 
 args = parser.parse_args()
 
-output_folder = args.target
+output_folder = os.path.abspath(args.target)
 multiple_runs = args.multiple_runs
 keywords = args.keywords
 input_heat = args.input_heat
@@ -74,7 +74,7 @@ large_files = args.large_files
 extra = args.extra
 verbose = args.verbose
 confidence = args.confidence
-info = args.authenticate
+info = os.path.abspath(args.authenticate)
 
 
 if info is None:
@@ -84,14 +84,14 @@ if info is None:
         login = mgk_login(server= O2[0], port= O2[1], dbname=O2[2], user=O2[3], pwd = O2[4])
         O2_1 = input("You can save it by entering a target path, press ENTER if you choose not to save it\n")
         if len(O2_1)>1:
-            login.save(O2_1)
+            login.save(os.path.abspath(O2_1) )
         else:
             print('Info not saved!')
             pass
     elif O1 == '1':
         O2= input("Please enter the target path\n")
         login = mgk_login()
-        login.from_saved(O2)
+        login.from_saved(os.path.abspath(O2))
     
     else:
         exit("Invalid input. Abort")
@@ -100,7 +100,7 @@ if info is None:
 else:
     login = mgk_login()
     try:
-        login.from_saved(info)
+        login.from_saved(os.path.abspath(info))
     except OSError:
         exit("The specified file is not found")
         

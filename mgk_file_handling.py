@@ -685,6 +685,8 @@ def upload_file_chunks(db, out_dir, large_files=False, extra_files=False):
         par = Parameters()
         par.Read_Pars(out_dir + '/parameters')
         pars = par.pardict
+        n_spec = pars['n_spec']
+        
         if 'magn_geometry' in pars:
             Docs.append(pars['magn_geometry'][1:-1])
             Keys.append('magn_geometry')
@@ -692,8 +694,9 @@ def upload_file_chunks(db, out_dir, large_files=False, extra_files=False):
             if 'name1' in pars and 'mom' in Docs_L:
                 Docs_L.pop(Docs_L.index('mom'))
                 Keys_L.pop(Keys_L.index('mom'))
-                Docs_L.append('mom_'+pars['name1'][1:-1])
-                Keys_L.append('mom_'+pars['name1'][1:-1])
+                for i in range(n_spec): # adding all particle species
+                    Docs_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
+                    Keys_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
     
     output_files = [get_file_list(out_dir, Qname) for Qname in Docs if Qname]
     

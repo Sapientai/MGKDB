@@ -46,22 +46,26 @@ def get_nspec(out_dir,suffix):
     
 def get_nrg(out_dir, suffix):
     #modified from IFSedge/get_nrg.py
+    par = Parameters()
+    par.Read_Pars(os.path.join(out_dir, 'parameters' + suffix))
+    pars = par.pardict 
     
     #initializations
-    ncols=10
-    time=np.empty(0,dtype='float')
+    ncols=pars['nrgcols']
+    time=np.empty(0,dtype='float')  # confused about the use of 0
     nrg0=np.empty((1,ncols))
     nrg1=np.empty((0,ncols),dtype='float')
     
     #grab 'n_spec' from 'parameters'
-    nspec = get_nspec(out_dir,suffix)
+#    nspec = get_nspec(out_dir,suffix)
+    nspec = pars['n_spec']
     
     #separate initializations for different 'n_spec' values
     if nspec<=2:
-        nrg2=np.empty((0,10),dtype='float')
+        nrg2=np.empty((0,ncols),dtype='float')
     if nspec<=3:
-        nrg2=np.empty((0,10),dtype='float')
-        nrg3=np.empty((0,10),dtype='float')
+        nrg2=np.empty((0,ncols),dtype='float')
+        nrg3=np.empty((0,ncols),dtype='float')
     
     
     #open 'nrg' file
@@ -334,7 +338,12 @@ def plot_linear(out_dir,scan_param,freq):
 
 def calc_gamma(out_dir,suffix):
     """dens,upar,tpar,tperp,Ges,Gem,Qes,Qem,Pes,Pem"""
-    ncols=10
+    
+    par = Parameters()
+    par.Read_Pars(out_dir+'/parameters'+suffix)
+    pars = par.pardict    
+    
+    ncols=pars['nrgcols']
     #grab 'n_spec' from 'parameters'
     nspec = get_nspec(out_dir,suffix)
 
@@ -536,7 +545,7 @@ def scan_info(out_dir):
         
             zavg=np.sum(np.abs(phi)*np.abs(zgrid))/np.sum(np.abs(phi))
             scan_info[i,6] = zavg
-            cfunc,zed,corr_len=my_corr_func_complex(phi,phi,zgrid,show_plot=False)
+            cfunc,zed,corr_len=my_corr_func_complex(phi,phi,zgrid,show_plot=False) # why v1 = v2 = phi ?
             scan_info[i,7] = corr_len
             parity_factor_apar = np.abs(np.sum(apar))/np.sum(np.abs(apar))
             scan_info[i,8] = parity_factor_apar
@@ -601,7 +610,7 @@ def scan_info(out_dir):
                 tn,nrg1,nrg2,nrg3=get_nrg(out_dir, suffix)
                 scan_info[i,10]=nrg3[-1,7]/(abs(nrg3[-1,6])+abs(nrg1[-1,6]))
             else:
-                exit("Not ready for nspec>2")
+                exit("Not ready for nspec>3")
         else:
             scan_info[i,10] = np.nan
         
@@ -748,7 +757,7 @@ def get_QoI_from_run(out_dir, suffix):
             tn,nrg1,nrg2,nrg3=get_nrg(out_dir, suffix)
             QoI_dict['QEM/QES']=nrg3[-1,7]/(abs(nrg3[-1,6])+abs(nrg1[-1,6]))
         else:
-            exit("Not ready for nspec>2")
+            exit("Not ready for nspec>3")
     else:
         QoI_dict['QEM/QES'] = np.nan
         

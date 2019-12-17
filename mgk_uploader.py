@@ -61,7 +61,7 @@ parser.add_argument('-Ex','--extra', default = False, help='whether or not to in
 parser.add_argument('-V', '--verbose', default = False, help='output verbose')
 parser.add_argument('-M', '--multiple_runs', default = False, help='output verbose')
 parser.add_argument('-C', '--confidence', default = '5', help='confidence of simulation')
-parser.add_argument('-K', '--keywords', default = 'GENE', help='relevant keywords for future references')
+parser.add_argument('-K', '--keywords', default = 'GENE', help='relevant keywords for future references, separated by comma')
 parser.add_argument('-A', '--authenticate', default = None, help='locally saved login info, a .pkl file')
 
 args = parser.parse_args()
@@ -130,11 +130,11 @@ if multiple_runs:
         print(folder)
         linear = isLinear(name)
         if linear:
-            lin = 'linear'
+            lin = ['linear']
         else:
-            lin = 'nonlin'
+            lin = ['nonlin']
         #add linear/nonlin to keywords
-        keywords_lin = keywords + lin
+        keywords_lin = keywords.split(',') + lin
         
         #send run list to upload_to_mongo to be uploaded
         upload_to_mongo(database, folder, user, linear, confidence, input_heat, keywords_lin, 
@@ -149,11 +149,11 @@ else:
             #check if run is linear or nonlinear
             linear = isLinear(output_folder)
             if linear:
-                lin = 'linear'
+                lin = ['linear']
             else:
-                lin = 'nonlin'
+                lin = ['nonlin']
             #add linear/nonlin to keywords
-            keywords_lin = keywords + lin
+            keywords_lin = keywords.split(',') + lin
 #            print(keywords_lin)
             #send run to upload_to_mongo to be uploaded
             upload_to_mongo(database, output_folder, user, linear, confidence, input_heat, 

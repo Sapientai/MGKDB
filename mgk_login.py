@@ -37,7 +37,8 @@ class mgk_login(object):
     def update(self, dict_to_update):
         for key, val in dict_to_update.items():
             if key in self.login:
-                self.login[key] = val      
+                self.login[key] = val 
+    #   self.login.update(dict_to_update)
                 
     def connect(self):
         

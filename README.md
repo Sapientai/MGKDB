@@ -1,4 +1,4 @@
-## To start up
+## Play it locally
 
 1. Download [MongoDB](https://www.mongodb.com/what-is-mongodb) and install it according to the [documentation](https://docs.mongodb.com/manual/administration/install-community/). If you would also like a gui, you can also download [MongoDB Compass](https://www.mongodb.com/products/compass)
 
@@ -43,4 +43,20 @@
    * Other user interfaces such as a web based frontend.    
    * Visualizations after the scan and visualization option after querying the database.  
    * Compatibilities with other tools.
+
+## on Cori
+
+1. Cloning the repo via git.  
+2. Load python3 via `module load python3`     
+3. Run the uploader by `python3 mgk-dev/mgk_uploader.py -T /global/homes/d/dykuang/mgk-dev/data_linear_multi`.  Option -T is for specifying your target folder. Use option --help for display other options information.  
+4. If you encounter "module not found" error. You can use `conda install`. For example, `conda install pymongo`.  
+5. If this is the first time you upload files, it will ask you to type login credentials. You need to get a username and pass for the database. (Just email me with your preferred name and pass, I will then create read/write access for you).  
+The default value for server, port, database name are:  **mongodb03.nersc.gov, 27017, mgk_fusion**. You will have the option to save the credential after you finished manually entering these info.
+After you choose to save it. You can use `-A` option to locate your saved `.pkl` file to make uploads next time. For example `python3 mgk-dev/mgk_uploader.py -T /global/homes/d/dykuang/mgk-dev/data_linear_multi -A DK_mgk_login_admin.pkl`
+6. If everything went smoothly, you will see informations like "... successfully" printed on terminal. If not, please shoot me an email with the error message, so that I can try to locate the error.  
+7. You can also entering the mongo shell to check what is in the database now. Modify the following shell script and save it for your convenience.  
+```
+module load mongodb
+mongo -u username -p pass mongodb03.nersc.gov/mgk_fusion
+```  
 

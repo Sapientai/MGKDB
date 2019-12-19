@@ -576,7 +576,7 @@ def update_mongo(out_dir, db, runs_coll):
         # update the storage chunk
         for doc, field in zip(files_to_update, keys_to_update):
             files = get_file_list(out_dir, doc) # get file with path
-            assert len(files), "Files specied not found!"
+            assert len(files), "Files specified not found!"
             # delete ALL history
             for file in files:
                 grid_out = fs.find({'filepath': file})
@@ -609,7 +609,7 @@ def update_mongo(out_dir, db, runs_coll):
         print("suffixes availables are {}".format(suffixes))
         runs_to_update = input('Please type runs subject to which suffixes to update, separated by comma. If you need to update all runs, just hit ENTER. \n').split(',')      
         affect_QoI = input('Will the file change QoIs? (Y/N)')
-        updated = []
+#        updated = []
         # update the storage chunk
         print('Uploading files .......')
         if len(runs_to_update[0]) != 0:

@@ -111,7 +111,7 @@ class Window(Frame):
         passwordLabel.pack(side=LEFT, padx = 5, pady=5)
         
         self.password = StringVar()
-        passwordEntry = Entry(passwordFrame, textvariable=self.password)
+        passwordEntry = Entry(passwordFrame, show="*", textvariable=self.password)
         passwordEntry.pack(fill=X, padx=5, expand=True)
         passwordEntry.focus_set()
         
@@ -121,12 +121,12 @@ class Window(Frame):
         dirFrame = Frame(self)
         dirFrame.pack(fill=X)
 
-        dirLabel = Label(dirFrame, text="Target Directory: ", width=20)
+        dirLabel = Label(dirFrame, text="Target Directory: ", width=15)
         dirLabel.pack(side=LEFT, padx = 5, pady=5)
         
         self.out_dir = StringVar()
         dirEntry = Entry(dirFrame, textvariable=self.out_dir)
-        dirEntry.pack(fill=X, padx=5, expand=True)
+        dirEntry.pack(side=LEFT, fill=X, padx=5, expand=True)
         dirEntry.focus_set()
         
         def browse():

@@ -10,7 +10,23 @@ from tkinter import filedialog
 from pymongo import MongoClient
 from mgk_file_handling import *
 import os
+import sys
+from tkinter.scrolledtext import ScrolledText
 
+class StdRedirector(object):
+    '''
+    redirecting standard output to gui
+    '''
+    def __init__(self, text_widget):
+        self.text_space = text_widget
+
+    def write(self, string):
+        self.text_space.config(state=NORMAL)
+        self.text_space.insert("end", string)
+        self.text_space.see("end")
+        self.text_space.config(state=DISABLED)
+        
+        
 class Window(Frame):
     def __init__(self, *args, **kwargs):
         Frame.__init__(self, *args, **kwargs)
@@ -19,6 +35,7 @@ class Window(Frame):
 #        self.master = master
         self.state = {}
         self.init_window()
+
 
         
     
@@ -32,6 +49,7 @@ class Window(Frame):
         topText = Text(topTextFrame, height=2, width=90)
         topText.pack(side=TOP, padx=5, pady=5)
         topText.insert(END, "Welcome to MGK-GUI. Please fill in the info below to proceed.")
+        
         
         '''
         Use saved files to login
@@ -285,6 +303,8 @@ class Window(Frame):
         Linear_Button.pack(side='left')
         NonLinear_Button.pack(side='left')
         
+
+        
         '''
         utils
         '''
@@ -300,6 +320,22 @@ class Window(Frame):
         
         updateButton = Button(utilsFrame, text="Update", command=self.create_update_window)
         updateButton.pack(side=RIGHT, padx=5, pady=5)
+        
+        
+        '''
+        Window for console output
+        '''
+        outFrame = Frame(self)
+        outFrame.pack(fill=X)
+        
+        outLabel = Label(outFrame, text="Console", width=10)
+        outLabel.pack(side=TOP, padx = 5, pady=5)
+        
+        text_box = ScrolledText(outFrame, state='disabled')
+        text_box.configure(font='TkFixedFont')
+        text_box.pack(side=BOTTOM, fill=X, padx = 10, expand=True)
+        
+        sys.stdout = StdRedirector(text_box)
         
 
     def quit(self):

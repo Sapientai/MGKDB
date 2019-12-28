@@ -897,7 +897,7 @@ def upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords,
                      "confidence": confidence
                     }
         #data dictionary format for nonlinear runs
-        QoI = get_QoI_from_run(out_dir, suffix)
+        QoI_dict = get_QoI_from_run(out_dir, suffix)
 #        Qes = get_Qes(out_dir, suffix)
 #        QoI_dict = {"Qes" : Qes, **QoI                        
 #                    }

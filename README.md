@@ -64,7 +64,7 @@ mongo -u username -p pass mongodb03.nersc.gov/mgk_fusion
    * Forward the ssh tunnel port to a local port : `ssh -i .ssh/nersc -f YOURACCOUNT@cori.nersc.gov -L 2222:mongodb03.nersc.gov:27017 -N`. I used 2222 here, but you can use other port specifications.
     You will be asked to provide login credentials on cori for this.
    
-   * At the start page, fill in fields as below:  
+   * At the start page, fill in fields as below:(Replace the username and password with yours.)  
 ![picture](mongocompasslogin.png) 
     
    * Click "connect".

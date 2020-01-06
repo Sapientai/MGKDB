@@ -44,7 +44,7 @@
    * Visualizations after the scan and visualization option after querying the database.  
    * Compatibilities with other tools.
 
-## on Cori
+## Test it on Cori
 
 1. Cloning the repo via git.  
 2. Load python3 via `module load python3`     
@@ -65,7 +65,7 @@ mongo -u username -p pass mongodb03.nersc.gov/mgk_fusion
     You will be asked to provide login credentials on cori for this.
    
    * At the start page, fill in fields as below:  
-    <img src="mongocompasslogin.png">  
+![picture](mongocompasslogin.png) 
     
    * Click "connect".
      

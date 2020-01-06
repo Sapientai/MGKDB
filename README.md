@@ -61,9 +61,12 @@ mongo -u username -p pass mongodb03.nersc.gov/mgk_fusion
 ```  
    
 8. If you had MongoCompass installed locally, you are also able to view the database locally following the instructions below.  
-   * Forward the ssh tunnel port to a local port : `ssh -i .ssh/nersc -f YOURACCOUNT@cori.nersc.gov -L 2222:mongodb03.nersc.gov:27017 -N`. I used 2222 here, but you can use other port specifications.  
+   * Forward the ssh tunnel port to a local port : `ssh -i .ssh/nersc -f YOURACCOUNT@cori.nersc.gov -L 2222:mongodb03.nersc.gov:27017 -N`. I used 2222 here, but you can use other port specifications.
+    You will be asked to provide login credentials on cori for this.
+   
    * At the start page, fill in fields as below:  
-    <img src="mongocompasslogin">  
+    <img src="mongocompasslogin.png">  
+    
    * Click "connect".
      
 

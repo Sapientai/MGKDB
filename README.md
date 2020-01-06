@@ -47,20 +47,27 @@
 ## Test it on Cori
 
 1. Cloning the repo via git.  
-2. Load python3 via `module load python3`     
-3. Run the uploader by `python3 mgk-dev/mgk_uploader.py -T /global/homes/d/dykuang/mgk-dev/data_linear_multi`.  Option -T is for specifying your target folder. Use option --help for display other options information.  
-4. If you encounter "module not found" error. You can use `conda install`. For example, `conda install pymongo`.  
-5. If this is the first time you upload files, it will ask you to type login credentials. You need to get a username and pass for the database. (Just email me with your preferred name and pass, I will then create read/write access for you).  
+2. Load python3 via `module load python3` 
+
+#### Use Command Line
+1. Run the uploader by `python3 mgk-dev/mgk_uploader.py -T /global/homes/d/dykuang/mgk-dev/data_linear_multi`.  Option -T is for specifying your target folder. Use option --help for display other options information.  
+2. If you encounter "module not found" error. You can use `conda install`. For example, `conda install pymongo`.  
+3. If this is the first time you upload files, it will ask you to type login credentials. You need to get a username and pass for the database. (Just email me with your preferred name and pass, I will then create read/write access for you).  
 The default value for server, port, database name are:  **mongodb03.nersc.gov, 27017, mgk_fusion**. You will have the option to save the credential after you finished manually entering these info.
 After you choose to save it. You can use `-A` option to locate your saved `.pkl` file to make uploads next time. For example `python3 mgk-dev/mgk_uploader.py -T /global/homes/d/dykuang/mgk-dev/data_linear_multi -A DK_mgk_login_admin.pkl`
-6. If everything went smoothly, you will see informations like "... successfully" printed on terminal. If not, please shoot me an email with the error message, so that I can try to locate the error.  
-7. You can also entering the mongo shell to check what is in the database now. Modify the following shell script and save it for your convenience.  
+
+#### Use Gui
+1. In order for the GUI to work, you must login to cori via -Y option `ssh -l username -Y cori.nersc.gov`.    
+2. Load python3 and then run "python3 /path_to/gui_utils.py".  
+
+3. If everything went smoothly, you will see informations like "... successfully" printed on terminal. If not, please shoot me an email with the error message, so that I can try to locate the error.  
+4. You can also entering the mongo shell to check what is in the database now. Modify the following shell script and save it for your convenience.  
 ```
 module load mongodb
 mongo -u username -p pass mongodb03.nersc.gov/mgk_fusion
 ```  
    
-8. If you had MongoCompass installed locally, you are also able to view the database locally following the instructions below.  
+5. If you had MongoCompass installed locally, you are also able to view the database locally following the instructions below.  
    * Forward the ssh tunnel port to a local port : `ssh -i .ssh/nersc -f YOURACCOUNT@cori.nersc.gov -L 2222:mongodb03.nersc.gov:27017 -N`. I used 2222 here, but you can use other port specifications.
     You will be asked to provide login credentials on cori for this.
    

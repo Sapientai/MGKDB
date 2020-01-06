@@ -69,7 +69,7 @@ class Window(Frame):
         hostEntry.pack(fill=X, padx=5, expand=True)
         hostEntry.focus_set()
         
-        hostEntry.insert(0, 'localhost') # set default value
+        hostEntry.insert(0, 'mongodb03.nersc.gov') # set default value
         
         '''
         port
@@ -741,7 +741,7 @@ def get_specs():
 #    upt_window.mainloop()
 #    return app.state    
 
-#if __name__ == '__main__':
-##    specs = get_specs()
+if __name__ == '__main__':
+    specs = get_specs()
 #    upt = get_update() 
     

@@ -77,3 +77,8 @@ mongo -u username -p pass mongodb03.nersc.gov/mgk_fusion
    * Click "connect".
      
 
+## Some concerns during test.
+* Download stream are only possible in python environment using functions from `mgk_file_handling.py`  
+* Parameters should be named like "parameters.dat" or "parameters_suffix"(suffix can be something like 0001, 01, ...) for the script to scan correctly.  
+* If using GUI, you may expect quite a response latency while using the "Browse" button for selecting target folder to upload if it is relatively "far away" from currently location. You can just type it the path in the entry to reduce this latency.  
+* If you had Read/Write access to the database, be careful while using mongodb compass, you may accidently modify the database.  

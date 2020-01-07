@@ -441,28 +441,28 @@ def get_record(out_dir, runs_coll):
 #    
 #    print("Retrieval completed")
     
-def download_file_by_name(db, filename, destination, revision=-1, session=None):
+def download_file_by_path(db, filepath, destination, revision=-1, session=None):
     '''
     db: database name
-    filename: filename stored in database, that is "db.fs.files['filename']"
+    filepath: filepath stored in database, that is "db.fs.files['filepath']"
     destination: local path to put the file
     
     Attention: filename may correspond to multiple entries in the database
     '''
     fs = gridfs.GridFSBucket(db)
-    records = db.fs.files.find({"filename": filename})
+    records = db.fs.files.find({"filepath": filepath})
     count = 0
     for record in records:
         _id = record['_id']
-        parent = record['filepath'].split('/')[-2]
-        with open(os.path.join(destination, parent+'_'+filename ),'wb+') as f:
+        filename = record['filepath'].split('/')[-1]
+        with open(os.path.join(destination, filename+'{}'.format(count) ),'wb+') as f:
             fs.download_to_stream(_id, f)
             count +=1
 #            fs.download_to_stream_by_name(filename, f, revision, session)
         
     print("Download completed! Downloaded: {}".format(count))
     
-def download_file_by_id(db, _id, destination, fname, session = None):
+def download_file_by_id(db, _id, destination, fname=None, session = None):
     '''
     db: database name
     _id: object_id
@@ -471,6 +471,8 @@ def download_file_by_id(db, _id, destination, fname, session = None):
     '''
 
     fs = gridfs.GridFSBucket(db)
+    if not fname:
+        fname = db.fs.files.find_one(_id)['filename']
     with open(os.path.join(destination, fname),'wb+') as f:   
         fs.download_to_stream(_id, f)
     print("Download completed!")
@@ -506,7 +508,7 @@ def download_dir_by_name(db, runs_coll, dir_name, destination):
         print ("Successfully created the directory %s " % path)
 
 
-def download_collections_by_id(db, runs_coll, _id, destination):
+def download_runs_by_id(db, runs_coll, _id, destination):
     '''
     Download all files in collections by the id of the summary dictionary.
     '''

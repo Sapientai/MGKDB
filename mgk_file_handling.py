@@ -566,7 +566,7 @@ def update_mongo(out_dir, db, runs_coll):
 
     fs = gridfs.GridFS(db)
     suffixes = get_suffixes(out_dir)        
-    update_option = input('Enter options for update:\n 0: Files relating to all runs. \n 1: Specify the keywords and suffixes. \n ')
+    update_option = input('Enter options for update:\n 0: Files shared by all runs, usually do not have a suffix. \n 1: Unique files used per run. Specify the keywords and suffixes. \n ')
     if update_option == '0':
         files_to_update = input('Please type FULL file names to update, separated by comma.\n').split(',')
         keys_to_update = input('Please type key names for each file you typed, separated by comma.\n').split(',')

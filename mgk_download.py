@@ -7,7 +7,7 @@ Created on Tue Jan  7 14:39:26 2020
 For downloading files from mgk_fusion in shell
 """
 
-from mgk_file_handling import download_dir_by_name, download_file_by_name, download_file_by_id, download_runs_by_id
+from mgk_file_handling import download_dir_by_name, download_file_by_path, download_file_by_id, download_runs_by_id
 import gridfs
 from mgk_login import mgk_login
 import argparse
@@ -72,7 +72,7 @@ else:
 database = login.connect()
 
 if file:
-    download_file_by_name(database, file, destination, revision=-1, session=None)   
+    download_file_by_path(database, file, destination, revision=-1, session=None)   
     
 elif OID:
     if collection == 'linear':

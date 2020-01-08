@@ -565,7 +565,7 @@ def update_Meta(out_dir, runs_coll, suffix):
     
 def update_Parameter(out_dir, runs_coll, suffix):
     
-    param_dict = get_parsed_params(out_dir + '/parameters' + suffix)
+    param_dict = get_parsed_params(os.path.join(out_dir, 'parameters' + suffix) )
     runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix}, 
                      {"$set":{'Parameters': param_dict}}
                      )
@@ -640,7 +640,7 @@ def update_mongo(out_dir, db, runs_coll):
                     runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, 
                                  { "$set": {'QoI': QoI_dir}} 
                                  )
-                file = out_dir + '/' + doc  + suffix
+                file = os.path.join(out_dir, doc  + suffix)
                 grid_out = fs.find({'filepath': file})
                 for grid in grid_out:
 #                    print(grid)
@@ -697,9 +697,9 @@ def upload_file_chunks(db, out_dir, large_files=False, extra_files=False):
     returns object_ids for the chunk.
     '''
     
-    if os.path.isfile(out_dir + '/parameters'):
+    if os.path.isfile(os.path.join(out_dir, 'parameters')):
         par = Parameters()
-        par.Read_Pars(out_dir + '/parameters')
+        par.Read_Pars(os.path.join(out_dir, 'parameters'))
         pars = par.pardict
         n_spec = pars['n_spec']
         
@@ -773,7 +773,7 @@ def upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords,
     for suffix in suffixes:
         for _id, line in object_ids.items():
             for Q_name, Key in zip(_docs, _keys):
-                if line.find(out_dir+'/'+Q_name + suffix) != -1:
+                if line.find(os.path.join(out_dir,Q_name + suffix) ) != -1:
 #                if (Q_name + suffix) == line.split('/')[-1]:    
 #                    files_dict[Key] = line.split()[0]
                     files_dict[Key] = _id
@@ -788,13 +788,13 @@ def upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords,
                     
 #            if line.find('geneerr.log') != -1:
 #                files_dict['geneerrlog'] = line.split()[0]
-            if line.find(out_dir+'/'+'scan.log') != -1:
+            if line.find(os.path.join(out_dir,'scan.log') ) != -1:
 #                files_dict['scanlog'] = line.split()[0]
                 files_dict['scanlog'] = _id
-            if line.find(out_dir+'/'+'scan_info.dat') != -1:
+            if line.find(os.path.join(out_dir,'scan_info.dat') ) != -1:
 #                files_dict['scaninfo'] = line.split()[0]
                 files_dict['scaninfo'] = _id
-            if line.find(out_dir+'/'+'geneerr.log') != -1:
+            if line.find(os.path.join(out_dir,'geneerr.log') ) != -1:
                 files_dict['geneerr'] = _id
         
         #metadata dictonary
@@ -828,7 +828,7 @@ def upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords,
 #                    }
         
         QoI_dict = get_QoI_from_run(out_dir, suffix)
-        param_dict = get_parsed_params(out_dir + '/parameters' + suffix)
+        param_dict = get_parsed_params(os.path.join(out_dir, 'parameters' + suffix) )
         #combine dictionaries and upload
         run_data =  {'Meta': meta_dict, 'Files': files_dict, 'QoI': QoI_dict, 'Parameters': param_dict}
         runs_coll.insert_one(run_data).inserted_id  
@@ -870,7 +870,7 @@ def upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords,
 #        print(suffix)
         for _id, line in object_ids.items():  
             for Q_name, Key in zip(_docs, _keys):
-                if line.find(out_dir+'/'+Q_name + suffix) != -1:
+                if line.find(os.path.join(out_dir, Q_name + suffix)) != -1:
 #                if (Q_name + suffix) == line.split('/')[-1]:    
 #                    files_dict[Key] = line.split()[0]
                     files_dict[Key] = _id
@@ -884,13 +884,13 @@ def upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords,
 #                elif line.find(out_dir+'/'+Q_name + suffix + '.dat') != -1 and Key not in files_dict:
 #                    files_dict[Key] = line.split()[0]
 
-            if line.find(out_dir+'/'+'scan.log') != -1:
+            if line.find(os.path.join(out_dir,'scan.log')) != -1:
 #                files_dict['scanlog'] = line.split()[0]
                 files_dict['scanlog'] = _id
-            if line.find(out_dir+'/'+'scan_info.dat') != -1:
+            if line.find(os.path.join(out_dir, 'scan_info.dat')) != -1:
 #                files_dict['scaninfo'] = line.split()[0]
                 files_dict['scaninfo'] = _id
-            if line.find(out_dir+'/'+'geneerr.log') != -1:
+            if line.find(os.path.join(out_dir , 'geneerr.log') ) != -1:
                 files_dict['geneerr'] = _id
 
             
@@ -899,7 +899,7 @@ def upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords,
         #find relevant quantities from in/output
 #        print(suffix)
         
-        param_dict = get_parsed_params(out_dir + '/parameters' + suffix)
+        param_dict = get_parsed_params( os.path.join(out_dir, 'parameters' + suffix) )
 
 #        params = find_params(out_dir + '/parameters' + suffix)
 #        kx = params[0]

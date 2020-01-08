@@ -38,16 +38,8 @@ import re
 from sshtunnel import SSHTunnelForwarder
 import json
 #=======================================================
-# database specification. 
+# database specification. Local test
 #=====================================================
-#mgkdb_server = 'mongodb03.nersc.gov/mgk_fusion'
-#mgkdb_port = '27017'
-#mgkdb_user = 'mgk_fusion_admin'
-#mgkdb_pass = 'ekekek19294jdwss2k'
-#
-#mgkdb_connect = MongoClient('mongodb03.nersc.gov')
-#mgkdb_client = mgkdb_connect.admin.authenticate(mgkdb_user, args.mgkdb_pass)
-#mgkdb_client = mgkdb_connect.mgk_fusion.authenticate(mgkdb_user, args.mgkdb_pass)
 
 # =============================================================================
 # mgkdb_server = 'localhost'
@@ -66,11 +58,11 @@ Default_Keys = ['scan_id',  'submit_id',  'eqdisk_id' ]
 
 #==============================================================================
 #standard files#
-# Q: is geneerr with suffix?
+# Q: is geneerr with suffix? 
 Docs = ['autopar', 'codemods', 'energy', 'tracer_efit', 'nrg', 
-              'parameters', 's_alpha', 'scan.log', 'scan_info.dat']
+              'parameters', 's_alpha', 'scan.log', 'scan_info.dat', 'geneerr.log']
 Keys = ['autopar', 'codemods', 'energy', 'tracer_efit',  'nrg', 
-              'parameters', 's_alpha', 'scanlog', 'scaninfo']
+              'parameters', 's_alpha', 'scanlog', 'scaninfo', 'geneerr']
 
 #Large files#
 Docs_L = ['field', 'mom', 'vsp']
@@ -99,9 +91,9 @@ def reset_docs_keys():
     Default_Keys = ['scan_id',  'submit_id',  'eqdisk_id' ]
 
     Docs = ['autopar', 'codemods', 'energy', 'tracer_efit', 'nrg',  
-                  'parameters', 's_alpha', 'scan.log', 'scan_info.dat']
+                  'parameters', 's_alpha', 'scan.log', 'scan_info.dat', 'geneerr.log']
     Keys = ['autopar', 'codemods', 'energy', 'tracer_efit', 'nrg',  
-                  'parameters', 's_alpha', 'scanlog', 'scaninfo']
+                  'parameters', 's_alpha', 'scanlog', 'scaninfo', 'geneerr']
     
     #Large files#
     Docs_L = ['field', 'mom', 'vsp']
@@ -500,10 +492,12 @@ def download_dir_by_name(db, runs_coll, dir_name, destination):
         fs.download_to_stream(inDb[0]['Files']['scanlog'], f, session=None)
     with open(os.path.join(path, 'scan_info.dat'),'wb+') as f:
         fs.download_to_stream(inDb[1]['Files']['scaninfo'], f, session=None)
+    with open(os.path.join(path, 'geneerr.log'),'wb+') as f:
+        fs.download_to_stream(inDb[1]['Files']['geneerr'], f, session=None)
 
     for record in inDb:
         for key, val in record['Files'].items():
-            if val != 'None' and key not in ['scanlog', 'scaninfo']:
+            if val != 'None' and key not in ['scanlog', 'scaninfo', 'geneerr']:
                 filename = db.fs.files.find_one(val)['filename']
                 with open(os.path.join(path, filename),'wb+') as f:
 #                    fs.download_to_stream_by_name(filename, f, revision=-1, session=None)
@@ -511,6 +505,7 @@ def download_dir_by_name(db, runs_coll, dir_name, destination):
                 record['Files'][key] = str(val)
         record['Files']['scanlog'] = str(record['Files']['scanlog'])
         record['Files']['scaninfo'] = str(record['Files']['scaninfo'])
+        record['Files']['geneerr'] = str(record['Files']['geneerr'])
         record['_id'] = str(record['_id'])
         with open(os.path.join(path, 'mgkdb_summary_for'+record['Meta']['run_suffix']+'.json'), 'w') as f:
             json.dump(record, f)
@@ -719,7 +714,7 @@ def upload_file_chunks(db, out_dir, large_files=False, extra_files=False):
                     Docs_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
                     Keys_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
     
-    output_files = [get_file_list(out_dir, Qname) for Qname in Docs if Qname]
+    output_files = [get_file_list(out_dir, Qname) for Qname in Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
     
         
     if large_files:
@@ -799,6 +794,8 @@ def upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords,
             if line.find(out_dir+'/'+'scan_info.dat') != -1:
 #                files_dict['scaninfo'] = line.split()[0]
                 files_dict['scaninfo'] = _id
+            if line.find(out_dir+'/'+'geneerr.log') != -1:
+                files_dict['geneerr'] = _id
         
         #metadata dictonary
         meta_dict = {"user": user,
@@ -893,8 +890,8 @@ def upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords,
             if line.find(out_dir+'/'+'scan_info.dat') != -1:
 #                files_dict['scaninfo'] = line.split()[0]
                 files_dict['scaninfo'] = _id
-#            if line.find('geneerr.log') != -1:
-#                files_dict['geneerrlog'] = line.split()[0]
+            if line.find(out_dir+'/'+'geneerr.log') != -1:
+                files_dict['geneerr'] = _id
 
             
 

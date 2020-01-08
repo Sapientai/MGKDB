@@ -20,18 +20,18 @@ from bson.objectid import ObjectId
 #==========================================================
 parser = argparse.ArgumentParser(description='Process input for downloading files')
 
-parser.add_argument('-T', '--target', help='run collection_name, i.e. gene output folder path')
-parser.add_argument('-F', '--file', defulat = None, help='filename to be downloaded if any')
-parser.add_argument('-C', '--collection', defulat = None, help='collection name in the database')
+parser.add_argument('-T', '--target', default= None,help='run collection_name, i.e. gene output folder path')
+parser.add_argument('-F', '--file', default = None, help='filename to be downloaded if any')
+parser.add_argument('-C', '--collection', default = None, help='collection name in the database')
 parser.add_argument('-OID', '--objectID', default = None, help = 'Object ID in the database')
 parser.add_argument('-A', '--authenticate', default = None, help='locally saved login info, a .pkl file')
-parser.add_argument('-D', '--destination', default = './', help = 'directory where files are downloaded to.')
+parser.add_argument('-D', '--destination', default = '', help = 'directory where files are downloaded to.')
 parser.add_argument('-S', '--saveas', default = None, help = 'Name to save the file as')
 
 args = parser.parse_args()
 
-tar_dir = os.path.abspath(args.target)
-file = os.path.join(tar_dir, args.file)
+tar_dir = args.target
+filepath = args.file
 info = args.authenticate
 OID = args.objectID
 destination = args.destination
@@ -71,8 +71,8 @@ else:
 
 database = login.connect()
 
-if file:
-    download_file_by_path(database, file, destination, revision=-1, session=None)   
+if filepath:
+    download_file_by_path(database, filepath, destination, revision=-1, session=None)   
     
 elif OID:
     if collection == 'linear':
@@ -82,7 +82,7 @@ elif OID:
     elif fname:
         download_file_by_id(database, ObjectId(OID), destination, fname, session = None)
 
-else:
+elif tar_dir:
     if collection == 'linear':
         download_dir_by_name(database, database.LinearRuns, tar_dir, destination)
     elif collection == 'nonlinear':

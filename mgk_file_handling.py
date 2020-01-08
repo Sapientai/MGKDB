@@ -32,10 +32,11 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 from bson import json_util
 import os
+from pathlib import Path
 import gridfs
 import re
 from sshtunnel import SSHTunnelForwarder
-#import json
+import json
 #=======================================================
 # database specification. 
 #=====================================================
@@ -483,29 +484,38 @@ def download_dir_by_name(db, runs_coll, dir_name, destination):
     dir_name: as appear in db.Meta['run_collection_name']
     destination: destination to place files
     '''
-    
-    try:
-        path = os.path.join(destination, dir_name.split('/')[-1])
-        os.mkdir(path)
-    except OSError:
-        print ("Creation of the directory %s failed" % path)
-    else:
-        fs = gridfs.GridFSBucket(db)
-        inDb = runs_coll.find({ "Meta.run_collection_name": dir_name })
-        for record in inDb:
-            for key, val in record['Files'].items():
-                if val != 'None' and key not in ['scanlog', 'scaninfo']:
-                    filename = db.fs.files.find_one(val)['filename']
-                    with open(os.path.join(path, filename),'wb+') as f:
-#                        fs.download_to_stream_by_name(filename, f, revision=-1, session=None)
-                        fs.download_to_stream(val, f, session=None)
-        
-        with open(os.path.join(path, 'scan.log'),'wb+') as f:
-            fs.download_to_stream(record['Files']['scanlog'], f, session=None)
-        with open(os.path.join(path, 'scan_info.dat'),'wb+') as f:
-            fs.download_to_stream(record['Files']['scaninfo'], f, session=None)    
-            
-        print ("Successfully created the directory %s " % path)
+    path = os.path.join(destination, dir_name.split('/')[-1])
+    if not os.path.exists(path):    
+        try:
+
+            #os.mkdir(path)
+            Path(path).mkdir(parents=True) 
+        except OSError:
+            print ("Creation of the directory %s failed" % path)
+    #else:
+    fs = gridfs.GridFSBucket(db)
+    inDb = runs_coll.find({ "Meta.run_collection_name": dir_name })
+
+    with open(os.path.join(path, 'scan.log'),'wb+') as f:
+        fs.download_to_stream(inDb[0]['Files']['scanlog'], f, session=None)
+    with open(os.path.join(path, 'scan_info.dat'),'wb+') as f:
+        fs.download_to_stream(inDb[1]['Files']['scaninfo'], f, session=None)
+
+    for record in inDb:
+        for key, val in record['Files'].items():
+            if val != 'None' and key not in ['scanlog', 'scaninfo']:
+                filename = db.fs.files.find_one(val)['filename']
+                with open(os.path.join(path, filename),'wb+') as f:
+#                    fs.download_to_stream_by_name(filename, f, revision=-1, session=None)
+                    fs.download_to_stream(val, f, session=None)
+                record['Files'][key] = str(val)
+        record['Files']['scanlog'] = str(record['Files']['scanlog'])
+        record['Files']['scaninfo'] = str(record['Files']['scaninfo'])
+        record['_id'] = str(record['_id'])
+        with open(os.path.join(path, 'mgkdb_summary_for'+record['Meta']['run_suffix']+'.json'), 'w') as f:
+            json.dump(record, f)
+           
+    print ("Successfully downloaded to the directory %s " % path)
 
 
 def download_runs_by_id(db, runs_coll, _id, destination):
@@ -515,21 +525,30 @@ def download_runs_by_id(db, runs_coll, _id, destination):
     
     fs = gridfs.GridFSBucket(db)
     record = runs_coll.find_one({ "_id": _id })
+    record['_id'] = str(_id)
     dir_name = record['Meta']['run_collection_name']
-    try:
-        path = os.path.join(destination, dir_name.split('/')[-1])
-        os.mkdir(path)
-    except OSError:
-        print ("Creation of the directory %s failed" % path)
-    else:
+    path = os.path.join(destination, dir_name.split('/')[-1])
+    if not os.path.exists(path):
+        try:
+            path = os.path.join(destination, dir_name.split('/')[-1])
+            #os.mkdir(path)
+            Path(path).mkdir(parents=True)
+        except OSError:
+            print ("Creation of the directory %s failed" % path)
+    #else:
 
-        for key, val in record['Files'].items():
-            if val != 'None':
-                filename = db.fs.files.find_one(val)['filename']
-                with open(os.path.join(path, filename),'wb+') as f:
-#                        fs.download_to_stream_by_name(filename, f, revision=-1, session=None)
-                    fs.download_to_stream(val, f, session=None)
-        print ("Successfully download files in the collection to directory %s " % path)    
+    for key, val in record['Files'].items():
+        if val != 'None':
+            filename = db.fs.files.find_one(val)['filename']
+            #print(db.fs.files.find_one(val)).keys()
+            with open(os.path.join(path, filename),'wb+') as f:
+#                    fs.download_to_stream_by_name(filename, f, revision=-1, session=None)
+                fs.download_to_stream(val, f, session=None)
+            record['Files'][key] = str(val)
+    #print(record)
+    with open(os.path.join(path, 'mgkdb_summary_for'+record['Meta']['run_suffix']+'.json'), 'w') as f:
+        json.dump(record, f)
+    print("Successfully downloaded files in the collection to directory %s " % path)    
     
 
 
@@ -586,7 +605,7 @@ def update_mongo(out_dir, db, runs_coll):
                     fs.delete(grid._id)
                     
             with open(file, 'rb') as f:
-                _id = fs.put(f, encoding='UTF-8', filepath=file)
+                _id = fs.put(f, encoding='UTF-8', filepath=file, filename=file.split('/')[-1])
 #            _id = str(_id)
             updated.append([field, _id])
         
@@ -633,7 +652,7 @@ def update_mongo(out_dir, db, runs_coll):
                     fs.delete(grid._id)
                 
                 with open(file, 'rb') as f:
-                    _id = fs.put(f, encoding='UTF-8', filepath=file)
+                    _id = fs.put(f, encoding='UTF-8', filepath=file, filename=file.split('/')[-1])
 #                _id = str(_id)
                 runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, 
                                  { "$set": {'Files.'+ doc: _id} }

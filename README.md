@@ -55,28 +55,23 @@
 3. If this is the first time you upload files, it will ask you to type login credentials. You need to get a username and pass for the database. (Just email me with your preferred name and pass, I will then create read/write access for you).  
 The default value for server, port, database name are:  **mongodb03.nersc.gov, 27017, mgk_fusion**. You will have the option to save the credential after you finished manually entering these info.
 After you choose to save it. You can use `-A` option to locate your saved `.pkl` file to make uploads next time. For example `python3 mgk-dev/mgk_uploader.py -T /global/homes/d/dykuang/mgk-dev/data_linear_multi -A DK_mgk_login_admin.pkl`
-
 #### Use Gui
-1. In order for the GUI to work, you must login to cori via -Y option `ssh -l username -Y cori.nersc.gov`.    
-2. Load python3 and then run "python3 /path_to/gui_utils.py".  
-
+1. In order for the GUI to work, you must login to cori via -Y option `ssh -l username -Y cori.nersc.gov`.      
+2. Load python3 and then run "python3 /path_to/gui_utils.py".    
 3. If everything went smoothly, you will see informations like "... successfully" printed on terminal. If not, please shoot me an email with the error message, so that I can try to locate the error.  
-4. You can also entering the mongo shell to check what is in the database now. Modify the following shell script and save it for your convenience.  
+4. You can also entering the mongo shell to check what is in the database now. Modify the following shell script and save it for your convenience.    
 ```
 module load mongodb
 mongo -u username -p pass mongodb03.nersc.gov/mgk_fusion
-```  
-   
+```       
 5. If you had MongoCompass installed locally, you are also able to view the database locally following the instructions below.  
    * Forward the ssh tunnel port to a local port : `ssh -i .ssh/nersc -f YOURACCOUNT@cori.nersc.gov -L 2222:mongodb03.nersc.gov:27017 -N`. I used 2222 here, but you can use other port specifications.
-    You will be asked to provide login credentials on cori for this.
-   
+    You will be asked to provide login credentials on cori for this.    
    * At the start page, fill in fields as below:(Replace the username and password with yours.)  
-![picture](mongocompasslogin.png) 
-    
-   * Click "connect".
-     
-
+![picture](mongocompasslogin.png)     
+   * Click "connect".      
+6. You can also connect by pasting the connection string:  
+`mongodb://USER:PASS@localhost:2222/?authSource=mgk_fusion&readPreference=primary&appname=MongoDB%20Compass&ssl=false`
 ## Some concerns during test.
 * Download stream are only possible in python environment using functions from `mgk_file_handling.py`  
 * Parameters should be named like "parameters.dat" or "parameters_suffix"(suffix can be something like 0001, 01, ...) for the script to scan correctly.  

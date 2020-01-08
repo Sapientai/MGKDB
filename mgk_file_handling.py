@@ -292,7 +292,7 @@ def get_file_list(out_dir, begin):
     files = next(os.walk(out_dir))[2]
     for count, name in enumerate(files, start=0):
         if name.startswith(begin) and name.endswith(bad_ext) == False and not os.path.isdir('in_par'):
-            file = out_dir + '/' + name
+            file = os.path.join(out_dir, name)
             files_list.append(file)
     return files_list     
 
@@ -724,7 +724,7 @@ def upload_file_chunks(db, out_dir, large_files=False, extra_files=False):
         
     
     
-    output_files = [item for sublist in output_files for item in sublist] # flat the list
+    output_files = set([item for sublist in output_files for item in sublist]) # flat the list and remove possible duplicates
     
 #    print(output_files)
     #upload all GENE output files to database

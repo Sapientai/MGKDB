@@ -69,7 +69,7 @@ def get_nrg(out_dir, suffix):
     
     
     #open 'nrg' file
-    f=open(out_dir + '/nrg' + suffix,'r')
+    f=open(os.path.join(out_dir , 'nrg' + suffix),'r')
     nrg_in=f.read()
 
     #format 'nrg' file for reading
@@ -203,7 +203,7 @@ def get_quasilinear(filepath):
 def get_omega_from_field(out_dir, suffix):
     calc_from_apar=0
     par = Parameters()
-    par.Read_Pars(out_dir+'/parameters'+suffix)
+    par.Read_Pars(os.path.join(out_dir,'parameters'+suffix) )
     pars = par.pardict
     
     #find 'n_spec' value in parameters dictionary
@@ -267,7 +267,7 @@ def get_omega_from_field(out_dir, suffix):
     
     
     if output_zeros:
-        f=open(out_dir+'/omega'+suffix,'w')
+        f=open(os.path.join(out_dir, 'omega'+suffix),'w')
         f.write(str(pars['kymin'])+'    '+str(0.0)+'    '+str(0.0)+'\n')
         f.close()
     else:
@@ -278,7 +278,7 @@ def get_omega_from_field(out_dir, suffix):
         plt.legend(loc='upper left')
         plt.show()
     
-        f=open(out_dir+'/omega'+suffix,'w')
+        f=open(os.path.join(out_dir, 'omega'+suffix),'w')
         f.write(str(pars['kymin'])+'    '+str(gam_avg)+'    '+str(om_avg)+'\n')
         f.close()
 
@@ -313,8 +313,8 @@ def plot_linear(out_dir,scan_param,freq):
     plt.figure(figsize=(10,10))
     
     #grab scan_param column and freq column from 'scan.log'
-    x0 = np.genfromtxt(out_dir +'/scan.log', usecols=(2), skip_header=1)
-    y0 = np.genfromtxt(out_dir +'/scan.log', usecols=column, skip_header=1) 
+    x0 = np.genfromtxt(os.path.join(out_dir , 'scan.log'), usecols=(2), skip_header=1)
+    y0 = np.genfromtxt(os.path.join(out_dir , 'scan.log'), usecols=column, skip_header=1) 
     
     #plot
     plt.plot(x0,y0,color='#990099',label=out_dir,marker='*',ms='14',ls='-')
@@ -330,8 +330,8 @@ def plot_linear(out_dir,scan_param,freq):
     plt.legend(loc='best',numpoints=1,fontsize=14)
     
     #save and close figure
-    plt.savefig(out_dir + '/' + scan_param + '_vs_' + freq +'.png')
-    plt.savefig(out_dir + '/' + scan_param + '_vs_' + freq +'.svg')
+    plt.savefig(os.path.join(out_dir ,  scan_param + '_vs_' + freq +'.png'))
+    plt.savefig(os.path.join(out_dir , scan_param + '_vs_' + freq +'.svg') )
     plt.close()
     
     ### ADD PLOT MULTIPLE RUNS - AUTOMATE LABELING, COLORING, ETC ###
@@ -340,7 +340,7 @@ def calc_gamma(out_dir,suffix):
     """dens,upar,tpar,tperp,Ges,Gem,Qes,Qem,Pes,Pem"""
     
     par = Parameters()
-    par.Read_Pars(out_dir+'/parameters'+suffix)
+    par.Read_Pars(os.path.join(out_dir,'parameters'+suffix) )
     pars = par.pardict    
     
     ncols=pars['nrgcols']
@@ -449,18 +449,18 @@ def scan_info(out_dir):
     suffixes.sort()
     scan_info = np.zeros((numscan,14),dtype='float64')
 
-    assert os.path.isfile(out_dir + '/parameters'), "Parameter file not found!"  
+    assert os.path.isfile( os.path.join(out_dir , 'parameters')), "Parameter file not found!"  
     par = Parameters()
-    par.Read_Pars(out_dir + '/parameters')
+    par.Read_Pars(os.path.join(out_dir , 'parameters'))
     pars = par.pardict
     
 #    print(suffixes)
     for i in range(numscan):
         suffix = suffixes[i]
         par0 = Parameters()
-        if os.path.isfile(out_dir + '/parameters' + suffix):
+        if os.path.isfile(os.path.join(out_dir , 'parameters'+suffix)):
 #            par0 = Parameters()
-            par0.Read_Pars(out_dir + '/parameters' + suffix)
+            par0.Read_Pars(os.path.join(out_dir , 'parameters'+suffix))
             pars0 = par0.pardict
             nspec = pars0['n_spec']
             scan_info[i,0] = pars0['kymin']
@@ -481,7 +481,7 @@ def scan_info(out_dir):
                 scan_info[i,3] = np.nan
 
         else:
-            par0.Read_Pars(out_dir + '/parameters' + suffix)
+            par0.Read_Pars(os.path.join(out_dir , 'parameters'+suffix))
 #            print(out_dir + '/parameters' + suffix)
             pars0 = par0.pardict
             nspec = pars0['n_spec']
@@ -496,30 +496,30 @@ def scan_info(out_dir):
             else:
                 scan_info[i,3] = 0.0
                 
-        if os.path.isfile(out_dir + '/omega' + suffix):
-            omega0 = np.genfromtxt(out_dir + '/omega' + suffix)
+        if os.path.isfile(os.path.join(out_dir,'omega' + suffix)):
+            omega0 = np.genfromtxt(os.path.join(out_dir,'omega' + suffix))
             if omega0.any() and omega0[1] != 0.0:
                 scan_info[i,4]=omega0[1]
                 scan_info[i,5]=omega0[2]
             elif True:
                 scan_info[i,4]=calc_gamma(out_dir, suffix)[0]
                 scan_info[i,5]= 0.0
-                np.savetxt(out_dir + '/omega' + suffix, [scan_info[i,0],scan_info[i,4],np.nan])
+                np.savetxt(os.path.join(out_dir,'omega' + suffix), [scan_info[i,0],scan_info[i,4],np.nan])
             else:
                 scan_info[i,4]=np.nan
                 scan_info[i,5]=np.nan
 #        elif calc_grs and os.path.isfile(out_dir + '/nrg' + suffix):
-        elif os.path.isfile(out_dir + '/nrg' + suffix): 
+        elif os.path.isfile(os.path.join(out_dir,'nrg' + suffix)): 
 #            print(calc_gamma(out_dir, suffix))
             scan_info[i,4] = calc_gamma(out_dir, suffix)[0]
             scan_info[i,5] = 0.0
-            np.savetxt(out_dir + '/omega' + suffix,[scan_info[i,0],scan_info[i,4],np.nan])
+            np.savetxt(os.path.join(out_dir,'omega' + suffix),[scan_info[i,0],scan_info[i,4],np.nan])
         else:
             scan_info[i,4]=np.nan
             scan_info[i,5]=np.nan
         
-        if os.path.isfile(out_dir + '/field' + suffix):
-            field = fieldfile(out_dir + '/field' + suffix, pars0)
+        if os.path.isfile(os.path.join(out_dir,'field' + suffix)):
+            field = fieldfile(os.path.join(out_dir,'field' + suffix), pars0)
             field.set_time(field.tfld[-1])
             fntot = field.nz*field.nx
     
@@ -599,7 +599,7 @@ def scan_info(out_dir):
             scan_info[i,12] = np.nan
             scan_info[i,13] = np.nan
     
-        if os.path.isfile(out_dir + '/nrg' + suffix):
+        if os.path.isfile(os.path.join(out_dir,'nrg' + suffix)):
             if nspec==1:
                 tn,nrg1=get_nrg(out_dir, suffix)
                 scan_info[i,10]=nrg1[-1,7]/abs(nrg1[-1,6])
@@ -617,7 +617,7 @@ def scan_info(out_dir):
         
         
 #    print(scan_info)   
-    f = out_dir + '/scan_info.dat'
+    f = os.path.join(out_dir, 'scan_info.dat')
     head = '# 1.kymin\n 2.x0\n 3.kx_center\n 4.n0_global\n 5.gamma(cs/a)\n 6.omega(cs/a)\n 7.<z>\n 8.lambda_z\n 9.parity(apar)\n 10.parity(phi)\n 11.QEM/QES\n 12.Epar cancelation\n 13.gamma_HB_avg\n 14.gamma_HB_min\n'
     np.savetxt(f, scan_info, header = head)
     
@@ -638,11 +638,11 @@ def get_QoI_from_dir(out_dir):
 def get_QoI_from_run(out_dir, suffix):
     QoI_dict = {}
     par0 = Parameters()
-    par0.Read_Pars(out_dir + '/parameters' + suffix)
+    par0.Read_Pars(os.path.join(out_dir , 'parameters' + suffix))
     pars0 = par0.pardict 
     nspec = pars0['n_spec']
-    if os.path.isfile(out_dir + '/omega' + suffix):
-        omega0 = np.genfromtxt(out_dir + '/omega' + suffix)
+    if os.path.isfile(os.path.join(out_dir , 'omega' + suffix)):
+        omega0 = np.genfromtxt(os.path.join(out_dir , 'omega' + suffix))
         if omega0.any() and omega0[1] != 0.0:
             QoI_dict['gamma(cs/a)'] = omega0[1]
             QoI_dict['omega(cs/a)'] = omega0[2]
@@ -654,7 +654,7 @@ def get_QoI_from_run(out_dir, suffix):
             QoI_dict['gamma(cs/a)']=np.nan
             QoI_dict['omega(cs/a)']=np.nan
 #        elif calc_grs and os.path.isfile(out_dir + '/nrg' + suffix):
-    elif os.path.isfile(out_dir + '/nrg' + suffix): 
+    elif os.path.isfile(os.path.join(out_dir , 'nrg' + suffix)): 
 #            print(calc_gamma(out_dir, suffix))
         QoI_dict['gamma(cs/a)'] = calc_gamma(out_dir, suffix)[0]
         QoI_dict['omega(cs/a)'] = 0.0
@@ -664,8 +664,8 @@ def get_QoI_from_run(out_dir, suffix):
         QoI_dict['gamma(cs/a)']=np.nan
         QoI_dict['omega(cs/a)']=np.nan
     
-    if os.path.isfile(out_dir + '/field' + suffix):
-        field = fieldfile(out_dir + '/field' + suffix, pars0)
+    if os.path.isfile(os.path.join(out_dir , 'field' + suffix)):
+        field = fieldfile(os.path.join(out_dir , 'field' + suffix), pars0)
         field.set_time(field.tfld[-1])
         fntot = field.nz*field.nx
 
@@ -746,7 +746,7 @@ def get_QoI_from_run(out_dir, suffix):
         QoI_dict['gamma_HB_avg'] = np.nan
         QoI_dict['gamma_HB_min'] = np.nan
 
-    if os.path.isfile(out_dir + '/nrg' + suffix):
+    if os.path.isfile(os.path.join(out_dir , 'nrg' + suffix)):
         if nspec==1:
             tn,nrg1=get_nrg(out_dir, suffix)
             QoI_dict['QEM/QES']=nrg1[-1,7]/abs(nrg1[-1,6])

@@ -145,7 +145,7 @@ if multiple_runs:
         folder = os.path.join(output_folder, name)
 #        if not os.path.isdir('in_par'):
         #check if run is linear or nonlinear
-        print(folder)
+        #print(folder)
         linear = isLinear(name)
         if linear:
             lin = ['linear']
@@ -163,7 +163,7 @@ if multiple_runs:
 else: 
     for dirpath, dirnames, files in os.walk(output_folder):
         if str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1:    
-            print(str(files))
+            #print(str(dirpath))
             #check if run is linear or nonlinear
             linear = isLinear(output_folder)
             if linear:
@@ -174,6 +174,6 @@ else:
             keywords_lin = keywords.split(',') + lin
 #            print(keywords_lin)
             #send run to upload_to_mongo to be uploaded
-            upload_to_mongo(database, output_folder, user, linear, confidence, input_heat, 
+            upload_to_mongo(database, dirpath, user, linear, confidence, input_heat, 
                             keywords_lin, large_files, extra, verbose)
 #            print("The file {} Uploaded Successfully.".format(files))

@@ -779,6 +779,7 @@ def upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords,
 #                if (Q_name + suffix) == line.split('/')[-1]:    
 #                    files_dict[Key] = line.split()[0]
                     files_dict[Key] = _id
+                    object_ids.pop(_id)
 #                elif line.find(out_dir+'/'+Q_name) != -1 and files_dict[Key] is 'None':
 #                    files_dict[Key] = line.split()[0]
 #                    
@@ -793,11 +794,15 @@ def upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords,
             if line.find(os.path.join(out_dir,'scan.log') ) != -1:
 #                files_dict['scanlog'] = line.split()[0]
                 files_dict['scanlog'] = _id
+                object_ids.pop(_id)
             if line.find(os.path.join(out_dir,'scan_info.dat') ) != -1:
 #                files_dict['scaninfo'] = line.split()[0]
                 files_dict['scaninfo'] = _id
+                object_ids.pop(_id)
             if line.find(os.path.join(out_dir,'geneerr.log') ) != -1:
                 files_dict['geneerr'] = _id
+                object_ids.pop(_id)
+      
         
         #metadata dictonary
         meta_dict = {"user": user,
@@ -838,7 +843,17 @@ def upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords,
         if verbose:
             print('A summary is generated as below:\n')
             print(run_data)
-        
+    
+    
+    
+    '''
+    Get a dictionary of what's left in object_ids
+    '''
+    ex_dict = dict()
+    for _id, line in object_ids.items():
+        ex_dict[line] = _id
+    
+    db.ex.Lin.insert_one(ex_dict)        
     reset_docs_keys()
 #    print('Run collection \'' + out_dir + '\' uploaded succesfully.')
         
@@ -876,6 +891,7 @@ def upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords,
 #                if (Q_name + suffix) == line.split('/')[-1]:    
 #                    files_dict[Key] = line.split()[0]
                     files_dict[Key] = _id
+                    object_ids.pop(_id)
                     
 #                elif line.find(out_dir+'/'+Q_name) != -1 and Key not in files_dict:
 #                    files_dict[Key] = line.split()[0]
@@ -889,15 +905,14 @@ def upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords,
             if line.find(os.path.join(out_dir,'scan.log')) != -1:
 #                files_dict['scanlog'] = line.split()[0]
                 files_dict['scanlog'] = _id
+                object_ids.pop(_id)
             if line.find(os.path.join(out_dir, 'scan_info.dat')) != -1:
 #                files_dict['scaninfo'] = line.split()[0]
                 files_dict['scaninfo'] = _id
+                object_ids.pop(_id)
             if line.find(os.path.join(out_dir , 'geneerr.log') ) != -1:
                 files_dict['geneerr'] = _id
-
-            
-
-                
+                object_ids.pop(_id)
         #find relevant quantities from in/output
 #        print(suffix)
         
@@ -934,7 +949,16 @@ def upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords,
         if verbose:
             print('A summary is generated as below:')
             print(run_data)
-        
+    
+
+    '''
+    Get a dictionary of what's left in object_ids
+    '''
+    ex_dict = dict()
+    for _id, line in object_ids.items():
+        ex_dict[line] = _id
+    
+    db.ex.Nonlin.insert_one(ex_dict)    
     reset_docs_keys()
             
 def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords, 

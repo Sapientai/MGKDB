@@ -71,9 +71,23 @@ mongo -u username -p pass mongodb03.nersc.gov/mgk_fusion
 ![picture](mongocompasslogin.png)     
    * Click "connect".      
 6. You can also connect by pasting the connection string:  
-`mongodb://USER:PASS@localhost:2222/?authSource=mgk_fusion&readPreference=primary&appname=MongoDB%20Compass&ssl=false`
+`mongodb://USER:PASS@localhost:2222/?authSource=mgk_fusion&readPreference=primary&appname=MongoDB%20Compass&ssl=false`  
+### Retrieving files from database    
+* Save the file with ObjectId(5e150c312038695f1da2e956) to *directory/newname*  
+`python3 mgk-dev/mgk_download.py -A My_mgk_login.pkl -OID 5e150c312038695f1da2e956 -D directory -S newname`  
+* Save the file with *filepath* to *directory*:  
+`python3 mgk-dev/mgk_download.py -A My_mgk_login.pkl -F filepath -D directory`    
+* Save all files in the *collection* with the same *run_collection_name* to *directory* :  
+`python3 mgk-dev/mgk_download.py -A My_mgk_login.pkl  -C collection -T run_collection_name -D directory`    
+* Save files with the particular run of ObjectId(5e150c312038695f1da2ea10) in *collection* to *directory*:  
+`python3 mgk-dev/mgk_download.py -A My_mgk_login.pkl  -C collection -OID 5e150c312038695f1da2ea10 -D directory`  
+
+New directory will be created if it does not exist.
+
 ## Some concerns during test.
-* Download stream are only possible in python environment using functions from `mgk_file_handling.py`  
+* User must have an account on the server. Upload/Download is indirect : local--server--database.  
 * Parameters should be named like "parameters.dat" or "parameters_suffix"(suffix can be something like 0001, 01, ...) for the script to scan correctly.  
+* If two files sharing the same prefix as in the DOC list, for example "parameters" and "parameters_0001", both files will be uploaded, but the objectId of "parameters" will not be recorded in the summary dictionary.
+You may change the filename of the file you do not want to upload to avoid this.  For example, 'parameters' -> '_parameters'.  
 * If using GUI, you may expect quite a response latency while using the "Browse" button for selecting target folder to upload if it is relatively "far away" from currently location. You can just type it the path in the entry to reduce this latency.  
 * If you had Read/Write access to the database, be careful while using mongodb compass, you may accidently modify the database.  

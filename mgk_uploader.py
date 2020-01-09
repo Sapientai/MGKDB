@@ -67,12 +67,30 @@ parser.add_argument('-A', '--authenticate', default = None, help='locally saved 
 args = parser.parse_args()
 
 output_folder = os.path.abspath(args.target)
-multiple_runs = args.multiple_runs
+if args.multiple_runs in ['T', 'True', '1', 't', 'true']:
+    multiple_runs = True
+else:
+    multiple_runs = False
+
 keywords = args.keywords
 input_heat = args.input_heat
-large_files = args.large_files
-extra = args.extra
-verbose = args.verbose
+
+if args.large_files in ['T', 'True', '1', 't', 'true']:
+    large_files = True
+else:
+    large_files = False
+
+if args.extra in ['T', 'True', '1', 't', 'true']:
+    extra = True
+else:
+    extra = False
+
+if args.verbose in ['T', 'True', '1', 't', 'true']:
+    verbose = True
+else:
+    verbose = False
+
+
 confidence = args.confidence
 info = args.authenticate
 
@@ -144,8 +162,8 @@ if multiple_runs:
 #submit a single run
 else: 
     for dirpath, dirnames, files in os.walk(output_folder):
-        if str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1:
-#            print(files)
+        if str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1:    
+            print(str(files))
             #check if run is linear or nonlinear
             linear = isLinear(output_folder)
             if linear:

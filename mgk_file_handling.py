@@ -305,8 +305,9 @@ def get_suffixes(out_dir):
     for count, name in enumerate(files, start=0):
         if name.startswith('parameters_'):
             suffix = name.split('_',1)[1]
-            suffix = '_' + suffix
-            suffixes.append(suffix)
+            if '_' not in suffix: # suffixes like "1_linear" will not be considered.
+                suffix = '_' + suffix
+                suffixes.append(suffix)
         elif name.lower().startswith('parameters.dat'):
             suffixes = ['.dat']                
     return suffixes
@@ -773,7 +774,7 @@ def upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords,
     files_dict = dict.fromkeys(Default_Keys+_keys, 'None')
     
     for suffix in suffixes:
-        for _id, line in object_ids.items():
+        for _id, line in list(object_ids.items()):
             for Q_name, Key in zip(_docs, _keys):
                 if line.find(os.path.join(out_dir,Q_name + suffix) ) != -1:
 #                if (Q_name + suffix) == line.split('/')[-1]:    
@@ -852,8 +853,8 @@ def upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords,
     ex_dict = dict()
     for _id, line in object_ids.items():
         ex_dict[line] = _id
-    
-    db.ex.Lin.insert_one(ex_dict)        
+    if ex_dict: 
+        db.ex.Lin.insert_one(ex_dict)        
     reset_docs_keys()
 #    print('Run collection \'' + out_dir + '\' uploaded succesfully.')
         
@@ -885,7 +886,7 @@ def upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords,
         
     for suffix in suffixes:
 #        print(suffix)
-        for _id, line in object_ids.items():  
+        for _id, line in list(object_ids.items()):  
             for Q_name, Key in zip(_docs, _keys):
                 if line.find(os.path.join(out_dir, Q_name + suffix)) != -1:
 #                if (Q_name + suffix) == line.split('/')[-1]:    
@@ -957,8 +958,8 @@ def upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords,
     ex_dict = dict()
     for _id, line in object_ids.items():
         ex_dict[line] = _id
-    
-    db.ex.Nonlin.insert_one(ex_dict)    
+    if ex_dict:
+        db.ex.Nonlin.insert_one(ex_dict)    
     reset_docs_keys()
             
 def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords, 

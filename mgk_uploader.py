@@ -163,7 +163,7 @@ if multiple_runs:
 else: 
     for dirpath, dirnames, files in os.walk(output_folder):
         if str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1:    
-            #print(str(dirpath))
+            print(str(dirpath))
             #check if run is linear or nonlinear
             linear = isLinear(output_folder)
             if linear:

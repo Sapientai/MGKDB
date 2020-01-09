@@ -955,6 +955,7 @@ def upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords,
     '''
     Get a dictionary of what's left in object_ids
     '''
+    print(object_ids.values())
     ex_dict = dict()
     for _id, line in object_ids.items():
         ex_dict[line] = _id
@@ -970,7 +971,7 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
         runs_coll = db.LinearRuns
         #check if folder is already uploaded, prompt update?
         if isUploaded(out_dir, runs_coll):
-            update = input('Folder exists in database.  You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to abort.\n')
+            update = input('Folder tag:\n {} \n exists in database.  You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to abort.\n'.format(out_dir))
             if update == '0':
                 #for now, delete and reupload instead of update - function under construction
                 remove_from_mongo(out_dir, db, runs_coll)   
@@ -990,7 +991,7 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
         runs_coll = db.NonlinRuns
         #check if folder is already uploaded, prompt update?
         if isUploaded(out_dir, runs_coll):
-            update = input('Folder exists in database.  You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to abort.')
+            update = input('Folder tag:\n {} \n exists in database.  You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to abort.'.format(out_dir))
             if update == '0':
                 #for now, delete and reupload instead of update - function under construction
                 remove_from_mongo(out_dir, db, runs_coll)   

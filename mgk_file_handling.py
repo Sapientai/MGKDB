@@ -959,11 +959,12 @@ def upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords,
     '''
     Get a dictionary of what's left in object_ids
     '''
-    print(object_ids.values())
+    
     ex_dict = dict()
     for _id, line in object_ids.items():
         ex_dict[line] = _id
     if ex_dict:
+#        print(ex_dict.values())
         db.ex.Nonlin.insert_one(ex_dict)    
     reset_docs_keys()
             

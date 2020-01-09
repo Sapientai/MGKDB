@@ -143,6 +143,7 @@ if multiple_runs:
 #    print(dirnames)
     for count, name in enumerate(dirnames, start=0):
         folder = os.path.join(output_folder, name)
+        print('Scanning in {} *******************\n'.format(folder) )
 #        if not os.path.isdir('in_par'):
         #check if run is linear or nonlinear
         #print(folder)
@@ -163,7 +164,7 @@ if multiple_runs:
 else: 
     for dirpath, dirnames, files in os.walk(output_folder):
         if str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1:    
-            print(str(dirpath))
+            print('Scanning in {} *******************\n'.format(str(dirpath)) )
             #check if run is linear or nonlinear
             linear = isLinear(output_folder)
             if linear:

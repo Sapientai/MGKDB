@@ -725,7 +725,7 @@ def upload_file_chunks(db, out_dir, large_files=False, extra_files=False):
         choice = input('Which one do you want to scan for information.\n')
         choice = int(choice)
         par_file = os.path.join(out_dir, par_list[choice])
-        print('File {} selected for scan.'.format(par_list[choice]))
+        print('File {} selected for scanning [magn_geometry] and [mom] information.'.format(par_list[choice]))
     
     par = Parameters()
     par.Read_Pars(par_file)
@@ -995,7 +995,7 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
         runs_coll = db.NonlinRuns
         #check if folder is already uploaded, prompt update?
         if isUploaded(out_dir, runs_coll):
-            update = input('Folder tag:\n {} \n exists in database.  You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to abort.'.format(out_dir))
+            update = input('Folder tag:\n {} \n exists in database.  You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to abort.\n'.format(out_dir))
             if update == '0':
                 #for now, delete and reupload instead of update - function under construction
                 remove_from_mongo(out_dir, db, runs_coll)   

@@ -59,9 +59,9 @@ Default_Keys = ['scan_id',  'submit_id',  'eqdisk_id' ]
 #==============================================================================
 #standard files#
 # Q: is geneerr with suffix? 
-Docs = ['autopar', 'codemods', 'energy', 'tracer_efit', 'nrg', 
+Docs = ['autopar', 'codemods', 'energy',  'nrg', 
               'parameters', 's_alpha', 'scan.log', 'scan_info.dat', 'geneerr.log']
-Keys = ['autopar', 'codemods', 'energy', 'tracer_efit',  'nrg', 
+Keys = ['autopar', 'codemods', 'energy',  'nrg', 
               'parameters', 's_alpha', 'scanlog', 'scaninfo', 'geneerr']
 
 #Large files#
@@ -90,9 +90,9 @@ def reset_docs_keys():
     
     Default_Keys = ['scan_id',  'submit_id',  'eqdisk_id' ]
 
-    Docs = ['autopar', 'codemods', 'energy', 'tracer_efit', 'nrg',  
+    Docs = ['autopar', 'codemods', 'energy', 'nrg',  
                   'parameters', 's_alpha', 'scan.log', 'scan_info.dat', 'geneerr.log']
-    Keys = ['autopar', 'codemods', 'energy', 'tracer_efit', 'nrg',  
+    Keys = ['autopar', 'codemods', 'energy', 'nrg',  
                   'parameters', 's_alpha', 'scanlog', 'scaninfo', 'geneerr']
     
     #Large files#
@@ -699,23 +699,49 @@ def upload_file_chunks(db, out_dir, large_files=False, extra_files=False):
     This function does the actual uploading of grifs chunks and
     returns object_ids for the chunk.
     '''
+#    suffixes = get_suffixes(out_dir)
+#    
+#    '''
+#    If there is a shared parameter file or these is only one parameter file
+#    '''
+#    if os.path.isfile(os.path.join(out_dir, 'parameters')):
+#        par_file = os.path.join(out_dir, 'parameters')
+#    elif len(suffixes)==1 and os.path.isfile(os.path.join(out_dir, 'parameters'+suffixes[0])):
+#        par_file = os.path.join(out_dir, 'parameters'+suffixes[0])
+#    else:
+#        os.exit('Cannot locate or decide the parameter file!')
     
-    if os.path.isfile(os.path.join(out_dir, 'parameters')):
-        par = Parameters()
-        par.Read_Pars(os.path.join(out_dir, 'parameters'))
-        pars = par.pardict
-        n_spec = pars['n_spec']
-        
-        if 'magn_geometry' in pars:
-            Docs.append(pars['magn_geometry'][1:-1])
-            Keys.append('magn_geometry')
-        if large_files:
-            if 'name1' in pars and 'mom' in Docs_L:
-                Docs_L.pop(Docs_L.index('mom'))
-                Keys_L.pop(Keys_L.index('mom'))
-                for i in range(n_spec): # adding all particle species
-                    Docs_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
-                    Keys_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
+    par_list = get_file_list(out_dir, 'parameters') # assuming parameter files start with 'parameters' 
+    if len(par_list) == 0:
+        os.exit('Cannot locate parameter files in folder')
+    elif len(par_list) == 1:
+        par_file = os.path.join(out_dir, par_list[0])
+    else: # assuming all these files share the same 'magn_geometry' and 'mom' info.
+        print('There seems to be multiple parameter files detected:\n')
+        count=0
+        for par in par_list:
+            print('{} : {}\n'.format(count, par.split('/')[-1]))
+            count+=1
+        choice = input('Which one do you want to scan for information.\n')
+        choice = int(choice)
+        par_file = os.path.join(out_dir, par_list[choice])
+        print('File {} selected for scan.'.format(par_list[choice]))
+    
+    par = Parameters()
+    par.Read_Pars(par_file)
+    pars = par.pardict
+    n_spec = pars['n_spec']
+    
+    if 'magn_geometry' in pars:
+        Docs.append(pars['magn_geometry'][1:-1])
+        Keys.append('magn_geometry')
+    if large_files:
+        if 'name1' in pars and 'mom' in Docs_L:
+            Docs_L.pop(Docs_L.index('mom'))
+            Keys_L.pop(Keys_L.index('mom'))
+            for i in range(n_spec): # adding all particle species
+                Docs_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
+                Keys_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
     
     output_files = [get_file_list(out_dir, Qname) for Qname in Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
     
@@ -776,31 +802,27 @@ def upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords,
     for suffix in suffixes:
         for _id, line in list(object_ids.items()):
             for Q_name, Key in zip(_docs, _keys):
-                if line.find(os.path.join(out_dir,Q_name + suffix) ) != -1:
-#                if (Q_name + suffix) == line.split('/')[-1]:    
+#                if line.find(os.path.join(out_dir,Q_name + suffix) ) != -1:
+#                if (Q_name + suffix) == line.split('/')[-1]:
+                if os.path.join(out_dir,Q_name + suffix) == line:
 #                    files_dict[Key] = line.split()[0]
                     files_dict[Key] = _id
                     object_ids.pop(_id)
-#                elif line.find(out_dir+'/'+Q_name) != -1 and files_dict[Key] is 'None':
-#                    files_dict[Key] = line.split()[0]
-#                    
-#                elif line.find(out_dir+'/'+Q_name + suffix + '.log') != -1 and files_dict[Key] is 'None':
-#                    files_dict[Key] = line.split()[0]
-#                    
-#                elif line.find(out_dir+'/'+Q_name + suffix + '.dat') != -1 and iles_dict[Key] is 'None':
-#                    files_dict[Key] = line.split()[0]
                     
 #            if line.find('geneerr.log') != -1:
 #                files_dict['geneerrlog'] = line.split()[0]
-            if line.find(os.path.join(out_dir,'scan.log') ) != -1:
+#            if line.find(os.path.join(out_dir,'scan.log') ) != -1:
+            if os.path.join(out_dir,'scan.log') == line:
 #                files_dict['scanlog'] = line.split()[0]
                 files_dict['scanlog'] = _id
                 object_ids.pop(_id)
-            if line.find(os.path.join(out_dir,'scan_info.dat') ) != -1:
+#            if line.find(os.path.join(out_dir,'scan_info.dat') ) != -1:
 #                files_dict['scaninfo'] = line.split()[0]
+            if os.path.join(out_dir,'scan_info.dat') == line:
                 files_dict['scaninfo'] = _id
                 object_ids.pop(_id)
-            if line.find(os.path.join(out_dir,'geneerr.log') ) != -1:
+#            if line.find(os.path.join(out_dir,'geneerr.log') ) != -1:
+            if os.path.join(out_dir,'geneerr.log') == line:
                 files_dict['geneerr'] = _id
                 object_ids.pop(_id)
       
@@ -812,29 +834,7 @@ def upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords,
                      "keywords": keywords,
                      "confidence": confidence
                     }  
-        
-        #find relevant quantities from in/output
-#        gamma = find_omega(out_dir + '/omega' + suffix)[0]
-#        omega_num = find_omega(out_dir + '/omega' + suffix)[1]
-##        params = find_params(out_dir + '/parameters' + suffix)
-##        kx = params[0]
-##        ky = params[1]
-##        omn = params[2]
-##        omt = params[3]
-#        
-#        #data dictionary format for linear runs  
-##        run_data_dict = {"gamma": gamma,
-##                         "omega_num": omega_num,
-##                         "kymin": ky,
-##                         "kx_center": kx,
-##                         "omt": omt,
-##                         "omn": omn
-##                        }
-#            
-#        QoI_dict = {"gamma": gamma,
-#                    "omega_num": omega_num
-#                    }
-        
+               
         QoI_dict = get_QoI_from_run(out_dir, suffix)
         param_dict = get_parsed_params(os.path.join(out_dir, 'parameters' + suffix) )
         #combine dictionaries and upload
@@ -888,7 +888,8 @@ def upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords,
 #        print(suffix)
         for _id, line in list(object_ids.items()):  
             for Q_name, Key in zip(_docs, _keys):
-                if line.find(os.path.join(out_dir, Q_name + suffix)) != -1:
+#                if line.find(os.path.join(out_dir, Q_name + suffix)) != -1:
+                if os.path.join(out_dir,Q_name + suffix) == line:
 #                if (Q_name + suffix) == line.split('/')[-1]:    
 #                    files_dict[Key] = line.split()[0]
                     files_dict[Key] = _id
@@ -903,15 +904,18 @@ def upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords,
 #                elif line.find(out_dir+'/'+Q_name + suffix + '.dat') != -1 and Key not in files_dict:
 #                    files_dict[Key] = line.split()[0]
 
-            if line.find(os.path.join(out_dir,'scan.log')) != -1:
+#            if line.find(os.path.join(out_dir,'scan.log')) != -1:
+            if os.path.join(out_dir,'scan.log') == line:
 #                files_dict['scanlog'] = line.split()[0]
                 files_dict['scanlog'] = _id
                 object_ids.pop(_id)
-            if line.find(os.path.join(out_dir, 'scan_info.dat')) != -1:
+#            if line.find(os.path.join(out_dir, 'scan_info.dat')) != -1:
+            if os.path.join(out_dir,'scan_info.dat') == line:
 #                files_dict['scaninfo'] = line.split()[0]
                 files_dict['scaninfo'] = _id
                 object_ids.pop(_id)
-            if line.find(os.path.join(out_dir , 'geneerr.log') ) != -1:
+#            if line.find(os.path.join(out_dir , 'geneerr.log') ) != -1:
+            if os.path.join(out_dir,'geneerr.log') == line:
                 files_dict['geneerr'] = _id
                 object_ids.pop(_id)
         #find relevant quantities from in/output

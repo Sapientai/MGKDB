@@ -87,7 +87,8 @@ New directory will be created if it does not exist.
 ## Some concerns during test.
 * User must have an account on the server. Upload/Download is indirect : local--server--database.  
 * Parameters should be named like "parameters.dat" or "parameters_suffix"(suffix can be something like 0001, 01, ...) for the script to scan correctly.  
-* If two files sharing the same prefix as in the DOC list, for example "parameters" and "parameters_0001", both files will be uploaded, but the objectId of "parameters" will not be recorded in the summary dictionary.
-You may change the filename of the file you do not want to upload to avoid this.  For example, 'parameters' -> '_parameters'.  
+* If two files sharing the same prefix as in the DOC list, for example "parameters" and "parameters_0001", both files will be uploaded, but the objectId of "parameters" will not be recorded in the summary dictionary. Instead, its objectId will be
+collected into an *ex* collection. You may choose to add it back to some collections. If not, the database admin will drop this collection and the physical storage for them on a regular basis. You may change the filename of the file you do not want to upload to avoid this.  For example, 'parameters' -> '_parameters'. 
+* The option multipleruns is not tested. "permission error".
 * If using GUI, you may expect quite a response latency while using the "Browse" button for selecting target folder to upload if it is relatively "far away" from currently location. You can just type it the path in the entry to reduce this latency.  
 * If you had Read/Write access to the database, be careful while using mongodb compass, you may accidently modify the database.  

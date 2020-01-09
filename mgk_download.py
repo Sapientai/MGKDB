@@ -66,7 +66,7 @@ else:
     try:
         login.from_saved(os.path.abspath(info))
     except OSError:
-        exit("The specified file is not found")
+        exit("The specified file for authentication is not found")
         
 
 database = login.connect()
@@ -75,9 +75,9 @@ if filepath:
     download_file_by_path(database, filepath, destination, revision=-1, session=None)   
     
 elif OID:
-    if collection == 'linear':
+    if collection in ['linear', 'Linear', 'LinearRuns']:
         download_runs_by_id(database, database.LinearRuns, ObjectId(OID), destination)
-    elif collection == 'nonlinear':
+    elif collection in ['nonlinear','Nonlinear', 'NonlinRuns']:
         download_runs_by_id(database, database.NonelinRuns, ObjectId(OID), destination)
     elif fname:
         download_file_by_id(database, ObjectId(OID), destination, fname, session = None)

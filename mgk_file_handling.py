@@ -466,6 +466,8 @@ def download_file_by_id(db, _id, destination, fname=None, session = None):
     fs = gridfs.GridFSBucket(db)
     if not fname:
         fname = db.fs.files.find_one(_id)['filename']
+    if not os.path.exists(destination):
+        Path(destination).mkdir(parents=True) 
     with open(os.path.join(destination, fname),'wb+') as f:   
         fs.download_to_stream(_id, f)
     print("Download completed!")

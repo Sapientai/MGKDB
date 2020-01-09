@@ -553,7 +553,7 @@ def download_runs_by_id(db, runs_coll, _id, destination):
 def update_Meta(out_dir, runs_coll, suffix):
 
     meta_list = ['user', 'run_collection_name', 'run_suffix', 'keywords', 'confidence']
-    print("Keys available for update are {}".format(meta_list))
+    print("Keys available for update are {}".format(meta_list.sort()))
     
     keys = input('What entries do you like to update? separate your input by comma.\n').split(',')
     vals = input('type your values corresponding to those keys you typed. Separate each category by ; .\n').split(';')
@@ -625,7 +625,7 @@ def update_mongo(out_dir, db, runs_coll):
                 
     elif update_option == '1':
         files_to_update = input('Please type filenames (without suffixes) for files to update, separated by comma.\n').split(',')
-        print("suffixes availables are {}".format(suffixes))
+        print("suffixes availables are {}".format(suffixes.sort()))
         runs_to_update = input('Please type runs subject to which suffixes to update, separated by comma. If you need to update all runs, just hit ENTER. \n').split(',')      
         affect_QoI = input('Will the file change QoIs? (Y/N)')
 #        updated = []
@@ -715,7 +715,9 @@ def upload_file_chunks(db, out_dir, large_files=False, extra_files=False):
     if len(par_list) == 0:
         os.exit('Cannot locate parameter files in folder')
     elif len(par_list) == 1:
-        par_file = os.path.join(out_dir, par_list[0])
+        par_file = par_list[0]
+    elif os.path.join(out_dir, 'parameters') in par_list:
+        par_file = os.path.join(out_dir, 'parameters')
     else: # assuming all these files share the same 'magn_geometry' and 'mom' info.
         print('There seems to be multiple parameter files detected:\n')
         count=0

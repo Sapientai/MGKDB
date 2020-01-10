@@ -120,7 +120,7 @@ else:
     try:
         login.from_saved(os.path.abspath(info))
     except OSError:
-        exit("The specified file is not found")
+        exit("The specified credential file is not found!")
         
 if extra:
     exfiles = input('Please type FULL file names to update, separated by comma.\n').split(',')
@@ -166,12 +166,15 @@ else:
         if str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1:    
             print('Scanning in {} *******************\n'.format(str(dirpath)) )
             #check if run is linear or nonlinear
-            linear = isLinear(output_folder)
+            #print(str(dirpath))
+            linear = isLinear(dirpath)
+            #print(linear)
             if linear:
                 lin = ['linear']
             else:
                 lin = ['nonlin']
             #add linear/nonlin to keywords
+                        
             keywords_lin = keywords.split(',') + lin
 #            print(keywords_lin)
             #send run to upload_to_mongo to be uploaded

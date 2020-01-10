@@ -600,8 +600,10 @@ def update_mongo(out_dir, db, runs_coll):
             for file in files:
                 grid_out = fs.find({'filepath': file})
                 for grid in grid_out:
+                    print('File with path tag:\n{}\n'.format(grid['filepath']) )
                     fs.delete(grid._id)
-                    
+                    print('deleted!')
+
             with open(file, 'rb') as f:
                 _id = fs.put(f, encoding='UTF-8', filepath=file, filename=file.split('/')[-1])
 #            _id = str(_id)
@@ -646,8 +648,9 @@ def update_mongo(out_dir, db, runs_coll):
                 file = os.path.join(out_dir, doc  + suffix)
                 grid_out = fs.find({'filepath': file})
                 for grid in grid_out:
-#                    print(grid)
+                    print('File with path tag:\n{}\n'.format(grid['filepath']) )
                     fs.delete(grid._id)
+                    print('deleted!')
                 
                 with open(file, 'rb') as f:
                     _id = fs.put(f, encoding='UTF-8', filepath=file, filename=file.split('/')[-1])
@@ -711,7 +714,9 @@ def upload_file_chunks(db, out_dir, large_files=False, extra_files=False):
 #    else:
 #        os.exit('Cannot locate or decide the parameter file!')
     
+    #print(out_dir) 
     par_list = get_file_list(out_dir, 'parameters') # assuming parameter files start with 'parameters' 
+    print(par_list)
     if len(par_list) == 0:
         os.exit('Cannot locate parameter files in folder')
     elif len(par_list) == 1:

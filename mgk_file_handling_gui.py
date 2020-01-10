@@ -755,7 +755,7 @@ def upload_linear(db, out_dir, par_file, user, linear, confidence, input_heat, k
 #    suffixes = scan_info(out_dir)
     
     #update files dictionary
-    object_ids = upload_file_chunks(db, out_dir, large_files, extra)  # it changes Docs and Keys globally 
+    object_ids = upload_file_chunks(db, out_dir, par_file, large_files, extra)  # it changes Docs and Keys globally 
 #    print(object_ids)         
     suffixes = get_suffixes(out_dir)
 #    print(suffixes)
@@ -840,7 +840,7 @@ def upload_nonlin(db, out_dir, par_file, user, linear, confidence, input_heat, k
 #    suffixes = scan_info(out_dir)  ### add check for file existence
     
     #update files dictionary
-    object_ids = upload_file_chunks(db, out_dir, large_files, extra)   
+    object_ids = upload_file_chunks(db, out_dir, par_file, large_files, extra)   
     suffixes = get_suffixes(out_dir)
 #    print(suffixes)
 #    print(object_ids)

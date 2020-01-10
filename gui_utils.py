@@ -8,7 +8,7 @@ Author: Gerardo Salazar, Dongyang Kuang
 from tkinter import *
 from tkinter import filedialog
 from pymongo import MongoClient
-from mgk_file_handling import *
+from mgk_file_handling_gui import *
 import os
 import sys
 from tkinter.scrolledtext import ScrolledText
@@ -34,10 +34,7 @@ class Window(Frame):
 #        self.master.geometry('960x720')
 #        self.master = master
         self.state = {}
-        self.init_window()
-
-
-        
+        self.init_window()    
     
     def init_window(self):
         self.master.title("MGKDB--main")
@@ -153,8 +150,7 @@ class Window(Frame):
         
         BrButton = Button(dirFrame, text="BROWSE", command = browse)
         BrButton.pack(side=RIGHT, padx=5, pady=5)
-#        self.master.bind("<Return>", self.upload)       
-
+#        self.master.bind("<Return>", self.upload) 
         
         
         '''
@@ -172,6 +168,25 @@ class Window(Frame):
         keywordsEntry.focus_set()
 
         keywordsEntry.insert(0, 'GENE')
+        
+        '''
+        A sample parameter file, assuming the rest shares some same settings as "magn_geometry" and 'mom'
+        '''
+        parFrame = Frame(self)
+        parFrame.pack(fill=X) 
+        
+        parLabel = Label(parFrame, text="Sample parameter file: ", width=20)
+        parLabel.pack(side=LEFT, padx = 5, pady=5)
+        
+        self.par_file = StringVar()
+        parEntry = Entry(parFrame, textvariable=self.par_file)
+        parEntry.pack(side=LEFT, fill=X, padx=5, expand=True)
+        parEntry.focus_set()
+        
+        parButton = Button(parFrame, text="BROWSE", command = browse)
+        parButton.pack(side=RIGHT, padx=5, pady=5)        
+        
+        
         '''
         confidence
         '''
@@ -221,8 +236,7 @@ class Window(Frame):
         largeFileCheckbox = Checkbutton(largeFileFrame, text="Large Files", 
                                         variable=self.largeFile, onvalue=True, offvalue=False)
         largeFileCheckbox.pack()
-        
-        
+               
         
         '''
         extra file option
@@ -339,11 +353,9 @@ class Window(Frame):
         
 
     def quit(self):
-       self.master.destroy()  
+        self.master.destroy()  
 
-
-        
-        
+    
     def create_update_window(self):
         t = Toplevel(self)
         t.wm_title("MGKDB -- update")
@@ -514,6 +526,7 @@ class Window(Frame):
         input_heat = self.input_heat.get()
         extra = self.extra.get()
         user = self.username.get()
+        par_file = self.par_file.get()
                 
         # Global vars
         global Docs_ex, Keys_ex
@@ -539,7 +552,8 @@ class Window(Frame):
                       "isLinear": linear,
                       "exFiles": Docs_ex,
                       "exKeys": Keys_ex,
-                      "database": database
+                      "database": database,
+                      "parfile": par_file
                       }
             
         
@@ -560,7 +574,7 @@ class Window(Frame):
                     if isUploaded(out_dir, runs_coll):
                         self.create_update_window()
                     else:
-                        upload_linear(database, folder, user, linear, confidence, 
+                        upload_linear(database, folder, par_file, user, linear, confidence, 
                                       input_heat, keywords_lin, 
                                       large_files, extra, verbose)
                         messagebox.showinfo("MGKDB", "Upload complete!")
@@ -572,7 +586,7 @@ class Window(Frame):
                     if isUploaded(output_folder, runs_coll):
                         self.create_update_window()
                     else:
-                        upload_nonlin(database, folder, user, linear, confidence, 
+                        upload_nonlin(database, folder, par_file, user, linear, confidence, 
                                       input_heat, keywords_lin, 
                                       large_files, extra, verbose)
                         messagebox.showinfo("MGKDB", "Upload complete!")
@@ -589,10 +603,10 @@ class Window(Frame):
                         lin = ['linear']
                         keywords_lin = keywords + lin
                         runs_coll = database.LinearRuns
-                        if isUploaded(output_folder, runs_coll):
+                        if isUploaded(dirpath, runs_coll):
                             self.create_update_window()
                         else:
-                            upload_linear(database, output_folder, user, linear, confidence, 
+                            upload_linear(database, dirpath, par_file, user, linear, confidence, 
                                           input_heat, keywords_lin, 
                                           large_files, extra, verbose)
                             messagebox.showinfo("MGKDB", "Upload complete!")
@@ -601,15 +615,15 @@ class Window(Frame):
                         lin = ['nonlin']                    
                         keywords_lin = keywords + lin
                         runs_coll = database.NonlinRuns
-                        if isUploaded(output_folder, runs_coll):
+                        if isUploaded(dirpath, runs_coll):
                             self.create_update_window()
                         else:
-                            upload_nonlin(database, output_folder, user, linear, confidence, 
+                            upload_nonlin(database, dirpath, par_file, user, linear, confidence, 
                                           input_heat, keywords_lin, 
                                           large_files, extra, verbose)
                             messagebox.showinfo("MGKDB", "Upload complete!")
 
-        reset_docs_keys()
+#        reset_docs_keys()
 #        self.master.quit()
         
     def update(self, event=None):

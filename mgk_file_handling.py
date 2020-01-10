@@ -714,26 +714,27 @@ def upload_file_chunks(db, out_dir, large_files=False, extra_files=False):
 #    else:
 #        os.exit('Cannot locate or decide the parameter file!')
     
-    #print(out_dir) 
-    par_list = get_file_list(out_dir, 'parameters') # assuming parameter files start with 'parameters' 
-    print(par_list)
-    if len(par_list) == 0:
-        os.exit('Cannot locate parameter files in folder')
-    elif len(par_list) == 1:
-        par_file = par_list[0]
-    elif os.path.join(out_dir, 'parameters') in par_list:
-        par_file = os.path.join(out_dir, 'parameters')
-    else: # assuming all these files share the same 'magn_geometry' and 'mom' info.
-        print('There seems to be multiple parameter files detected:\n')
-        count=0
-        for par in par_list:
-            print('{} : {}\n'.format(count, par.split('/')[-1]))
-            count+=1
-        choice = input('Which one do you want to scan for information.\n')
-        choice = int(choice)
-        par_file = os.path.join(out_dir, par_list[choice])
-        print('File {} selected for scanning [magn_geometry] and [mom] information.'.format(par_list[choice]))
-    
+#    print(out_dir) 
+#    par_list = get_file_list(out_dir, 'parameters') # assuming parameter files start with 'parameters' 
+#    print(par_list)
+#    if len(par_list) == 0:
+#        os.exit('Cannot locate parameter files in folder')
+#    elif len(par_list) == 1:
+#        par_file = par_list[0]
+#    elif os.path.join(out_dir, 'parameters') in par_list:
+#        par_file = os.path.join(out_dir, 'parameters')
+#    else: # assuming all these files share the same 'magn_geometry' and 'mom' info.
+#        print('There seems to be multiple parameter files detected:\n')
+#        count=0
+#        for par in par_list:
+#            print('{} : {}\n'.format(count, par.split('/')[-1]))
+#            count+=1
+#        choice = input('Which one do you want to scan for information.\n')
+#        choice = int(choice)
+#        par_file = os.path.join(out_dir, par_list[choice])
+#        print('File {} selected for scanning [magn_geometry] and [mom] information.'.format(par_list[choice]))
+    par_file = os.path.join(out_dir, 'parameters')
+    print(par_file)
     par = Parameters()
     par.Read_Pars(par_file)
     pars = par.pardict
@@ -790,6 +791,7 @@ def upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords,
 #    suffixes = scan_info(out_dir)
     
     #update files dictionary
+    print(out_dir)
     object_ids = upload_file_chunks(db, out_dir, large_files, extra)  # it changes Docs and Keys globally 
 #    print(object_ids)         
     suffixes = get_suffixes(out_dir)
@@ -982,6 +984,7 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
         #connect to linear collection
         runs_coll = db.LinearRuns
         #check if folder is already uploaded, prompt update?
+        print('upload linear runs ******')
         if isUploaded(out_dir, runs_coll):
             update = input('Folder tag:\n {} \n exists in database.  You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to abort.\n'.format(out_dir))
             if update == '0':
@@ -994,11 +997,12 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
             else:
                 print('Run collection \'' + out_dir + '\' skipped.')
         else:
+            print('Folder tag:\n{}\n not detected, creating new.\n')
             upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords, 
                           large_files, extra, verbose)
                 
     #for nonlinear runs
-    if not linear:
+    elif not linear:
         #connect to nonlinear collection
         runs_coll = db.NonlinRuns
         #check if folder is already uploaded, prompt update?
@@ -1015,5 +1019,8 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
             else:
                 print('Run collection \'' + out_dir + '\' skipped.')
         else:
+            print('Folder tag:\n{}\n not detected, creating new.\n')
             upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords, 
                           large_files, extra, verbose)
+    else:
+        os.exit('Cannot decide if the folder is subject to linear or nonlinear runs.')

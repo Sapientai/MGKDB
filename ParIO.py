@@ -65,7 +65,7 @@ class Parameters(object):
                             self.pardict[m.group(1).strip()] = m.group(2)
                             self.nmldict[m.group(1).strip()] = nml
         except IOError:
-            sys.exit("ParIO: ReadPars: could not read parameters file")
+            sys.exit("ParIO: ReadPars: could not read parameters file in {}".format(path))
         # clear the comments from all variables, cast some strings to integers and floats
         for item in self.pardict:
             self.pardict[item] = self.clearcomments(self.pardict[item])

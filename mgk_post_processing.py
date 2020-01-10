@@ -22,7 +22,7 @@ Post processing script containing:
 @author: Austin Blackmon, Dongyang Kuang
 """
 
-from mgk_file_handling import *
+#from mgk_file_handling import *
 import numpy as np
 import optparse as op
 import matplotlib.pyplot as plt

@@ -176,7 +176,8 @@ else:
             #add linear/nonlin to keywords
                         
             keywords_lin = keywords.split(',') + lin
-#            print(keywords_lin)
+            #print(keywords_lin)
+            #print(linear)
             #send run to upload_to_mongo to be uploaded
             upload_to_mongo(database, dirpath, user, linear, confidence, input_heat, 
                             keywords_lin, large_files, extra, verbose)

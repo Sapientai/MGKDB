@@ -638,7 +638,7 @@ class Window(Frame):
         input_heat = self.input_heat.get()
         extra = self.extra.get()
         user = self.username.get()
-        
+        par_file = self.par_file.get()
         suffixes = get_suffixes(out_dir)
         fs = gridfs.GridFS(database)
         
@@ -648,14 +648,14 @@ class Window(Frame):
                 keywords_lin = keywords + lin
                 runs_coll = database.LinearRuns
                 remove_from_mongo(out_dir, database, runs_coll)   
-                upload_linear(database, out_dir, user, linear, confidence, input_heat, keywords,
+                upload_linear(database, out_dir, par_file, user, linear, confidence, input_heat, keywords,
                                   large_files, extra, verbose)
             else:
                 lin = ['nonlin']                    
                 keywords_lin = keywords + lin
                 runs_coll = database.NonlinRuns
                 remove_from_mongo(out_dir, database, runs_coll) 
-                upload_nonlin(database, out_dir, user, linear, confidence, 
+                upload_nonlin(database, out_dir, par_file, user, linear, confidence, 
                                           input_heat, keywords_lin, 
                                           large_files, extra, verbose)
                 
@@ -674,7 +674,9 @@ class Window(Frame):
                 for file in files:
                     grid_out = fs.find({'filepath': file})
                     for grid in grid_out:
+                        print('File with path tag:\n{}\n'.format(grid['filepath']) )
                         fs.delete(grid._id)
+                        print('deleted!')
                         
                 with open(file, 'rb') as f:
                     _id = fs.put(f, encoding='UTF-8', filepath=file)
@@ -720,8 +722,9 @@ class Window(Frame):
                     file = out_dir + '/' + doc  + suffix
                     grid_out = fs.find({'filepath': file})
                     for grid in grid_out:
-    #                    print(grid)
+                        print('File with path tag:\n{}\n'.format(grid['filepath']) )
                         fs.delete(grid._id)
+                        print('deleted!')
                     
                     with open(file, 'rb') as f:
                         _id = fs.put(f, encoding='UTF-8', filepath=file)

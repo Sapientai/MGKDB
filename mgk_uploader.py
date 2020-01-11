@@ -15,7 +15,6 @@ Optional fields:    confidence
 from mgk_file_handling import *
 from ParIO import *
 import os
-from gui_utils import *
 from mgk_login import mgk_login
 import argparse
 from sys import exit

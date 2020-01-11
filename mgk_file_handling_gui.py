@@ -858,7 +858,7 @@ def upload_nonlin(db, out_dir, par_file, user, linear, confidence, input_heat, k
         
     for suffix in suffixes:
 #        print(suffix)
-        print(object_ids)
+#        print(object_ids)
         proc_list = list(object_ids.items()) 
         for _id, line in proc_list:  
             for Q_name, Key in zip(_docs, _keys):
@@ -869,10 +869,11 @@ def upload_nonlin(db, out_dir, par_file, user, linear, confidence, input_heat, k
                     files_dict[Key] = _id
                     try:
                         object_ids.pop(_id)
-                        print('{} removed fro dic.'.format(object_ids[_id]))
+                        #print('{} removed fro dic.'.format(object_ids[_id]))
                     except KeyError:
-                        print(_id)
-                        print(object_ids)
+                       # print(_id)
+                       # print(object_ids)
+                        continue
                     
 #                elif line.find(out_dir+'/'+Q_name) != -1 and Key not in files_dict:
 #                    files_dict[Key] = line.split()[0]

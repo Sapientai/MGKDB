@@ -859,7 +859,8 @@ def upload_nonlin(db, out_dir, par_file, user, linear, confidence, input_heat, k
     for suffix in suffixes:
 #        print(suffix)
         print(object_ids)
-        for _id, line in list(object_ids.items()):  
+        proc_list = list(object_ids.items()) 
+        for _id, line in proc_list:  
             for Q_name, Key in zip(_docs, _keys):
 #                if line.find(os.path.join(out_dir, Q_name + suffix)) != -1:
                 if os.path.join(out_dir,Q_name + suffix) == line:

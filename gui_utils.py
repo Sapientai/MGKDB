@@ -679,7 +679,7 @@ class Window(Frame):
                         print('deleted!')
                         
                 with open(file, 'rb') as f:
-                    _id = fs.put(f, encoding='UTF-8', filepath=file)
+                    _id = fs.put(f, encoding='UTF-8', filepath=file, filename = filepath.split('/')[-1])
     #            _id = str(_id)
                 updated.append([field, _id])
         
@@ -727,7 +727,7 @@ class Window(Frame):
                         print('deleted!')
                     
                     with open(file, 'rb') as f:
-                        _id = fs.put(f, encoding='UTF-8', filepath=file)
+                        _id = fs.put(f, encoding='UTF-8', filepath=file, filename = filepath.split('/')[-1])
     #                _id = str(_id)
                     runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, 
                                      { "$set": {'Files.'+ doc: _id} }

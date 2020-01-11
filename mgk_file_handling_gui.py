@@ -28,13 +28,13 @@ ToDO:
 from mgk_post_processing import *
 from ParIO import * 
 import numpy as np
-from pymongo import MongoClient
-from bson.objectid import ObjectId
-from bson import json_util
+#from pymongo import MongoClient
+#from bson.objectid import ObjectId
+#from bson import json_util
 import os
 from pathlib import Path
 import gridfs
-import re
+#import re
 from sshtunnel import SSHTunnelForwarder
 import json
 #=======================================================
@@ -110,7 +110,7 @@ def reset_docs_keys():
     file_related_keys = Keys + Keys_L + Keys_ex
     file_related_docs = Docs + Docs_L + Docs_ex
         
-    print("Default file names and their key names are reset!")
+    print("File names and their keys are reset to default!")
 
 def get_data(key, *args):
     '''
@@ -858,6 +858,7 @@ def upload_nonlin(db, out_dir, par_file, user, linear, confidence, input_heat, k
         
     for suffix in suffixes:
 #        print(suffix)
+        print(object_ids)
         for _id, line in list(object_ids.items()):  
             for Q_name, Key in zip(_docs, _keys):
 #                if line.find(os.path.join(out_dir, Q_name + suffix)) != -1:
@@ -865,7 +866,12 @@ def upload_nonlin(db, out_dir, par_file, user, linear, confidence, input_heat, k
 #                if (Q_name + suffix) == line.split('/')[-1]:    
 #                    files_dict[Key] = line.split()[0]
                     files_dict[Key] = _id
-                    object_ids.pop(_id)
+                    try:
+                        object_ids.pop(_id)
+                        print('{} removed fro dic.'.format(object_ids[_id]))
+                    except KeyError:
+                        print(_id)
+                        print(object_ids)
                     
 #                elif line.find(out_dir+'/'+Q_name) != -1 and Key not in files_dict:
 #                    files_dict[Key] = line.split()[0]
@@ -895,12 +901,6 @@ def upload_nonlin(db, out_dir, par_file, user, linear, confidence, input_heat, k
         
         param_dict = get_parsed_params( os.path.join(out_dir, 'parameters' + suffix) )
 
-#        params = find_params(out_dir + '/parameters' + suffix)
-#        kx = params[0]
-#        ky = params[1]
-#        omn = params[2]  #### add check n_spec for suffix
-#        omt = params[3]
-#        print(omn)
         #metadata dictonary
         meta_dict = {"user": user,
                      "run_collection_name": out_dir,

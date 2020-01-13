@@ -73,13 +73,13 @@ mongo -u username -p pass mongodb03.nersc.gov/mgk_fusion
 6. You can also connect by pasting the connection string:  
 `mongodb://USER:PASS@localhost:2222/?authSource=mgk_fusion&readPreference=primary&appname=MongoDB%20Compass&ssl=false`  
 ### Retrieving files from database    
-* Save the file with ObjectId(5e150c312038695f1da2e956) to *directory/newname*  
+* Save the file with tag ObjectId(5e150c312038695f1da2e956) to *directory/newname*  
 `python3 mgk-dev/mgk_download.py -A My_mgk_login.pkl -OID 5e150c312038695f1da2e956 -D directory -S newname`  
-* Save the file with *filepath* to *directory*:  
+* Save the file with tag *filepath* to *directory*:  
 `python3 mgk-dev/mgk_download.py -A My_mgk_login.pkl -F filepath -D directory`    
 * Save all files in the *collection* with the same *run_collection_name* to *directory* :  
 `python3 mgk-dev/mgk_download.py -A My_mgk_login.pkl  -C collection -T run_collection_name -D directory`    
-* Save files with the particular run of ObjectId(5e150c312038695f1da2ea10) in *collection* to *directory*:  
+* Save all files related to the particular run of ObjectId(5e150c312038695f1da2ea10) in *collection* to *directory*:  
 `python3 mgk-dev/mgk_download.py -A My_mgk_login.pkl  -C collection -OID 5e150c312038695f1da2ea10 -D directory`  
 
 New directory will be created if it does not exist.

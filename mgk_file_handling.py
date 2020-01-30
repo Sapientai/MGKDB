@@ -449,7 +449,7 @@ def download_file_by_path(db, filepath, destination, revision=-1, session=None):
     for record in records:
         _id = record['_id']
         filename = record['filepath'].split('/')[-1]
-        with open(os.path.join(destination, filename+'{}'.format(count) ),'wb+') as f:
+        with open(os.path.join(destination, filename+'_mgk{}'.format(count) ),'wb+') as f:
             fs.download_to_stream(_id, f)
             count +=1
 #            fs.download_to_stream_by_name(filename, f, revision, session)
@@ -627,8 +627,9 @@ def update_mongo(out_dir, db, runs_coll):
                 
     elif update_option == '1':
         files_to_update = input('Please type filenames (without suffixes) for files to update, separated by comma.\n').split(',')
-        print("suffixes availables are {}".format(suffixes.sort()))
-        runs_to_update = input('Please type runs subject to which suffixes to update, separated by comma. If you need to update all runs, just hit ENTER. \n').split(',')      
+        suffixes.sort()
+        print("suffixes availables are:{}".format(suffixes))
+        runs_to_update = input('Please type which suffixes to update, separated by comma. If you need to update all runs, just hit ENTER. \n').split(',')      
         affect_QoI = input('Will the file change QoIs? (Y/N)')
 #        updated = []
         # update the storage chunk
@@ -648,7 +649,7 @@ def update_mongo(out_dir, db, runs_coll):
                 file = os.path.join(out_dir, doc  + suffix)
                 grid_out = fs.find({'filepath': file})
                 for grid in grid_out:
-                    print('File with path tag:\n{}\n'.format(grid['filepath']) )
+                    print('File with path tag:\n{}\n'.format(grid.filepath) )
                     fs.delete(grid._id)
                     print('deleted!')
                 

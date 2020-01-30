@@ -449,7 +449,7 @@ def download_file_by_path(db, filepath, destination, revision=-1, session=None):
     for record in records:
         _id = record['_id']
         filename = record['filepath'].split('/')[-1]
-        with open(os.path.join(destination, filename+'{}'.format(count) ),'wb+') as f:
+        with open(os.path.join(destination, filename+'_mgk{}'.format(count) ),'wb+') as f:
             fs.download_to_stream(_id, f)
             count +=1
 #            fs.download_to_stream_by_name(filename, f, revision, session)

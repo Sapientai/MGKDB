@@ -344,6 +344,138 @@ def gridfs_read(db, filepath):
     file = fs.find_one({"filepath": filepath})
     contents = file.read()
     return(contents)
+
+def Array2Dict_dim1(npArray, key_names=None):
+    '''
+    Convert a 1d numpy array to dictionary
+    '''
+    assert len(npArray.shape) == 1, "Dimension of input numpy array should be 1."
+    
+    arraydict = dict()
+    
+    if key_names:
+        for i in range(len(npArray)):
+            arraydict[key_names[i]] = npArray[i]
+    
+    else:
+        for i in range(len(npArray)):
+            arraydict[str(i)] = npArray[i]
+    
+    return arraydict
+
+def Array2Dict_dim2(npArray, row_keys=None, col_keys=None):
+    '''
+    Convert a 2d numpy array to dictionary
+    '''
+    assert len(npArray.shape) == 2, "Dimension of input numpy array should be 2."
+    
+    arraydict = dict()
+    
+    nrows, ncols = np.shape(npArray)
+    if row_keys and col_keys:
+        for i in range(nrows):
+            row_dict = {}
+            for j in range(ncols):
+                row_dict[col_keys[j]] = npArray[i,j]
+            arraydict[row_keys[i]] = row_dict
+    
+    else:
+        for i in range(nrows):
+            row_dict = {}
+            for j in range(ncols):
+                row_dict[str(j)] = npArray[i,j]
+            arraydict[str(i)] = row_dict
+        
+    return arraydict
+    
+import pickle
+from bson.binary import Binary
+def _npArray2Binary(npArray):
+    """Utility method to turn an numpy array into a BSON Binary string.
+    utilizes pickle protocol 2 (see http://www.python.org/dev/peps/pep-0307/
+    for more details).
+
+    Called by stashNPArrays.
+
+    :param npArray: numpy array of arbitrary dimension
+    :returns: BSON Binary object a pickled numpy array.
+    """
+    return Binary(pickle.dumps(npArray, protocol=2), subtype=128 )
+
+def _binary2npArray(binary):
+    """Utility method to turn a a pickled numpy array string back into
+    a numpy array.
+
+    Called by loadNPArrays, and thus by loadFullData and loadFullExperiment.
+
+    :param binary: BSON Binary object a pickled numpy array.
+    :returns: numpy array of arbitrary dimension
+    """
+    return pickle.loads(binary)
+
+def gridfs_put_npArray(db, value, filepath, filename):
+    fs = gridfs.GridFS(db)
+    obj_id=fs.put(_npArray2Binary(value),encoding='UTF-8',
+                  filename = filename,
+                  filepath = filepath)
+    return obj_id  
+    
+    
+def load(db, collection, query, projection={'Meta':1, 'Diagnostics':1}, getarrays=True):
+    """Preforms a search using the presented query. For examples, see:
+    See http://api.mongodb.org/python/2.0/tutorial.html
+    The basic idea is to send in a dictionaries which key-value pairs like
+    mdb.load({'basename':'ag022012'}).
+
+    :param query: dictionary of key-value pairs to use for querying the mongodb
+    :returns: List of full documents from the collection
+    """
+    
+    results = collection.find(query, projection)
+    
+    if getarrays:
+        allResults = [_loadNPArrays(db, doc) for doc in results]
+    else:
+        allResults = [doc for doc in results]
+    
+    if allResults:
+        if len(allResults) > 1:
+            return allResults
+        elif len(allResults) == 1:
+            return allResults[0]
+        else:
+            return None
+    else:
+        return None
+    
+def _loadNPArrays(db, document):
+    """Utility method to recurse through a document and gather all ObjectIds and
+    replace them one by one with their corresponding data from the gridFS collection
+
+    Skips any entries with a key of '_id'.
+
+    Note that it modifies the document in place.
+
+    :param document: dictionary like-document, storable in mongodb
+    :returns: document: dictionary like-document, storable in mongodb
+    """
+    fs = gridfs.GridFS(db)
+    for (key, value) in document.items():
+        if isinstance(value, ObjectId) and key != '_id':
+            document[key] = _binary2npArray(fs.get(value).read())
+        elif isinstance(value, dict):
+            document[key] = _loadNPArrays(db, value)
+    return document
+
+from diag_plot import diag_plot
+def query_plot(db, collection, query, projection = {'Meta':1, 'Diagnostics':1}):
+    data_list = load(db, collection, query, projection)
+    print('{} records found.'.format(len(data_list)))
+    
+    data_to_plot = [diag_plot(da) for da in data_list]
+    
+    for i in range(len(data_to_plot)):
+         data_to_plot.plot_all()    
     
     
 def isLinear(folder_name):
@@ -692,6 +824,12 @@ def remove_from_mongo(out_dir, db, runs_coll):
 #                    print("Deleting storage for entry \'{}\' deleted with id: {}").format(key, val)
 #                    fs.delete(target_id)
 #                    print("Deleted!")
+                
+        for key, val in run['Diagnostics'].items():
+            if val != 'None':
+                print((key, val))
+                fs.delete(val)
+                print('deleted!')
                     
                 
 #        delete the header file
@@ -837,10 +975,14 @@ def upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords,
                      "confidence": confidence
                     }  
                
-        QoI_dict = get_QoI_from_run(out_dir, suffix)
+        QoI_dict, Diag_dict = get_QoI_from_run(out_dir, suffix)
+        
+        for key, val in Diag_dict.items():
+            Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], key, out_dir)
+        
         param_dict = get_parsed_params(os.path.join(out_dir, 'parameters' + suffix) )
         #combine dictionaries and upload
-        run_data =  {'Meta': meta_dict, 'Files': files_dict, 'QoI': QoI_dict, 'Parameters': param_dict}
+        run_data =  {'Meta': meta_dict, 'Files': files_dict, 'QoI': QoI_dict, 'Diagnostics': Diag_dict, 'Parameters': param_dict}
         runs_coll.insert_one(run_data).inserted_id  
         print('Files with suffix: {} in folder {} uploaded successfully'.format(suffix, out_dir))
         if verbose:
@@ -933,7 +1075,11 @@ def upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords,
                      "confidence": confidence
                     }
         #data dictionary format for nonlinear runs
-        QoI_dict = get_QoI_from_run(out_dir, suffix)
+        QoI_dict, Diag_dict = get_QoI_from_run(out_dir, suffix)
+        
+        for key, val in Diag_dict.items():
+            Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], key, out_dir)
+
 #        Qes = get_Qes(out_dir, suffix)
 #        QoI_dict = {"Qes" : Qes, **QoI                        
 #                    }
@@ -941,7 +1087,7 @@ def upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords,
         #combine dictionaries and upload
 #        
 #        run_data =  {''meta_dict, **files_dict, **run_data_dict} 
-        run_data =  {'Meta': meta_dict, 'Files': files_dict, 'QoI': QoI_dict, 'Parameters': param_dict}
+        run_data =  {'Meta': meta_dict, 'Files': files_dict, 'QoI': QoI_dict, 'Diagnostics': Diag_dict, 'Parameters': param_dict}
         runs_coll.insert_one(run_data).inserted_id  
 
         print('Files with suffix: {} in folder {} uploaded successfully.'.format(suffix, out_dir))

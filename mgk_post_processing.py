@@ -33,6 +33,16 @@ from sys import path
 from sys import exit
 import os
 
+
+from utils.loader import Loader
+from diagnostics.diag_flux_spectra import DiagFluxSpectra
+from diagnostics.diag_amplitude_spectra import DiagAmplitudeSpectra
+from diagnostics.diag_shearing_rate import DiagShearingRate
+from diagnostics.diag_profiles import DiagProfiles 
+
+from data.data import Data
+from utils.run import Simulation
+
 def get_nspec(out_dir,suffix):
     #grab parameters dictionary from ParIO.py - Parameters()
     par = Parameters()
@@ -746,7 +756,12 @@ def get_QoI_from_run(out_dir, suffix):
         QoI_dict['gamma_HB_avg'] = np.nan
         QoI_dict['gamma_HB_min'] = np.nan
 
-    if os.path.isfile(os.path.join(out_dir , 'nrg' + suffix)):
+    Diag_dict = {}
+    
+    '''
+    NRG
+    '''
+    if os.path.isfile(out_dir + '/nrg' + suffix):
         if nspec==1:
             tn,nrg1=get_nrg(out_dir, suffix)
             QoI_dict['QEM/QES']=nrg1[-1,7]/abs(nrg1[-1,6])
@@ -757,8 +772,139 @@ def get_QoI_from_run(out_dir, suffix):
             tn,nrg1,nrg2,nrg3=get_nrg(out_dir, suffix)
             QoI_dict['QEM/QES']=nrg3[-1,7]/(abs(nrg3[-1,6])+abs(nrg1[-1,6]))
         else:
-            exit("Not ready for nspec>3")
+            exit("Not ready for nspec>2")
     else:
         QoI_dict['QEM/QES'] = np.nan
         
-    return QoI_dict
+    t_start = 0.0
+    t_end = 100.0
+    
+#    print('dealing with suffix {}'.format(suffix))
+    sim = Simulation(out_dir, out_dir, [suffix])
+    # act_run = Run(folder, runextensions[0])
+    # sim.run.append(act_run)
+#    print(sim.extensions)
+    sim.prepare()
+    
+    sim.data = Data()
+    sim.data.load_in(sim.run[0], sim.extensions)
+       
+    selected_diags= {'AS':DiagAmplitudeSpectra(sim.data.avail_vars,sim.run[0].specnames),
+                     'FS':DiagFluxSpectra(sim.data.avail_vars, sim.run[0].specnames),
+                     'SR':DiagShearingRate(sim.data.avail_vars,sim.run[0].specnames)
+#                     'PF':DiagProfiles(sim.data.avail_vars,sim.run[0].specnames)
+                     }
+    
+    loader = Loader([selected_diags[key] for key in selected_diags.keys()], sim.run[0], sim.data)
+    loader.set_interval(sim.data, t_start, t_end, 1)
+    
+    particle_names = sim.run[0].specnames
+    
+    
+    for it, time in enumerate(loader.processable_times):
+        for key in selected_diags.keys():
+            selected_diags[key].execute(sim.data, loader.processable[it])
+            
+    '''
+    Time
+    '''
+    Diag_dict['Time'] = loader.processable_times # Is it the same for all diagnostics?
+    
+    '''
+    Spatial grid
+    '''
+    Diag_dict['Grid'] = vars(selected_diags['AS'].run_data.spatialgrid)
+    
+        
+    '''
+    Geometry contains tuple?
+    '''
+    Diag_dict['Geometry'] = {}
+    G_keys=['Cy', 'Cxy', 'gxx', 'gxy', 'gxz', 'gyy', 'gyz', 'gzz', 'Bfield', 
+            'dBdx', 'dBdy', 'dBdz', 'jacobian', 'R', 'Z', 'dxdR', 'dxdZ',
+            'geo_R', 'geo_Z', 'geo_c1', 'geo_c2', 'q', 'dpdx_pm_arr']
+    temp_dict = vars(selected_diags['AS'].geom)
+    for k in G_keys:
+        if k in temp_dict.keys():
+            Diag_dict['Geometry'][k] = temp_dict[k]
+    
+    '''
+    Amplitude Spectra
+    '''
+    Diag_dict['Amplitude Spectra'] = {'kx': selected_diags['AS'].amplitude_kx, 
+                                    'ky': selected_diags['AS'].amplitude_ky}
+    
+    '''
+    Flux Spectra
+    '''
+
+    Diag_dict['Flux Spectra'] = {}
+    for spec in particle_names:
+        spec_flux = getattr(selected_diags['FS'].flux_step, spec)
+        spec_dict = {}
+        for flux in vars(spec_flux).keys():
+            spec_dict[flux]=vars(getattr(spec_flux, flux))
+        Diag_dict['Flux Spectra'][spec] = spec_dict
+    
+    '''
+    Shearing rate, transpose or not?  -- current 'No'
+    '''
+    Diag_dict['Shearing Rate'] = {}
+    Diag_dict['Shearing Rate']['my_pos'] = selected_diags['SR'].my_pos
+    if selected_diags['SR'].run_data.x_local:
+        Diag_dict['Shearing Rate']['x_local'] = 1
+    else:
+        Diag_dict['Shearing Rate']['x_local'] = 0
+    Diag_dict['Shearing Rate']['Er_x'] = np.array([x.Er_x for x in selected_diags['SR'].shearing_rate])
+    Diag_dict['Shearing Rate']['omegaExB_x'] = np.array([x.omegaExB_x for x in selected_diags['SR'].shearing_rate])
+    Diag_dict['Shearing Rate']['phi_zonal_x'] = np.array([x.phi_zonal_x for x in selected_diags['SR'].shearing_rate])
+    Diag_dict['Shearing Rate']['vExB_x'] = np.array([x.vExB_x for x in selected_diags['SR'].shearing_rate])
+    if selected_diags['SR'].run_data.x_local:
+        Diag_dict['Shearing Rate']['abs_phi_fs'] = np.array([x.abs_phi_fs[0:len(selected_diags['SR'].run_data.spatialgrid.kx_pos)] for x in
+                                                             selected_diags['SR'].shearing_rate]) 
+    else:
+        Diag_dict['Shearing Rate']['abs_phi_fs'] = None
+        
+    
+    '''
+    Profiles
+    '''
+# =============================================================================
+#     Diag_dict['Profiles'] = {}
+#     if selected_diags['PF'].run_data.x_global or selected_diags['PF'].run_data.is3d:
+#         y_ax = selected_diags['PF'].run_data.spatialgrid.x_a
+#     else:
+#         y_ax = selected_diags['PF'].run_data.spatialgrid.x
+#     
+#     Diag_dict['Profiles']['x_a'] = y_ax
+#         
+#     for i_s, spec in enumerate(particle_names):
+#         omn_b = selected_diags['PF'].run_data.profilesdata.omn0s[:, i_s]
+#         T_b = selected_diags['PF'].run_data.profilesdata.T0s[:, i_s]/selected_diags['PF'].run_data.pars["temp" + spec]/selected_diags['PF'].run_data.pars["Tref"]
+#         n_b = selected_diags['PF'].run_data.profilesdata.n0s[:, i_s]/selected_diags['PF'].run_data.pars["dens" + spec]/selected_diags['PF'].run_data.pars["nref"]
+# 
+#         temp = np.array(getattr(getattr(selected_diags['PF'].profiles_step, spec), 'T')) * selected_diags['PF'].rhostarref
+#         n = np.array(getattr(getattr(selected_diags['PF'].profiles_step, spec), 'n')) * selected_diags['PF'].rhostarref
+#         u = np.array(getattr(getattr(selected_diags['PF'].profiles_step, spec), 'u')) * selected_diags['PF'].rhostarref
+# 
+#         omt = -np.gradient(np.log(T_b + temp), selected_diags['PF'].run_data.spatialgrid.x_a, axis=1) / \
+#             selected_diags['PF'].run_data.pars["minor_r"]
+#         omn = -np.gradient(np.log(n_b + n), selected_diags['PF'].run_data.spatialgrid.x_a, axis=1) / \
+#             selected_diags['PF'].run_data.pars["minor_r"]  
+#             
+#         spec_dict={}
+#         spec_dict['omn_b'] = omn_b
+#         spec_dict['T_b'] = T_b
+#         spec_dict['n_b'] = n_b
+#         spec_dict['temp'] = temp
+#         spec_dict['n'] = n
+#         spec_dict['u'] = u
+#         spec_dict['omt'] = omt
+#         spec_dict['omn'] = omn
+#     
+#         Diag_dict['Profiles'][spec] = spec_dict
+# =============================================================================
+    
+        
+    return QoI_dict, Diag_dict
+

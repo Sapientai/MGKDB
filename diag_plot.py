@@ -80,8 +80,9 @@ class diag_plot():
                 fig.suptitle( str(self._id) )
                 
             fig.tight_layout()
-            fig.show()
-    
+            #plt.show()
+            fig.show()  
+
     def diag_flux_spectra(self):
         
         kx = self.data['Grid']['kx_pos']
@@ -167,6 +168,7 @@ class diag_plot():
             ax_loglog_ky.set_title("{}".format(spec))
             ax_loglog_kx.set_title("{}".format(spec))
             #            fig.tight_layout()
+            #plt.show()
             fig.show()
     
     def diag_shearing_rate(self):
@@ -177,14 +179,13 @@ class diag_plot():
         time_requested = self.data['Time']        
         
         def plot_a_map(ax, x, y, f, x_lbl, y_lbl, ttl):
-            cm1 = ax.pcolormesh(x, y, f)
-            #            cm1 = ax.contourf(x, y, f,
-            #                            100, cmap=self.plotbase.cmap_bidirect)
+            #cm1 = ax.pcolormesh(x, y, f)
+            cm1 = ax.contourf(x, y, f, 100, cmap=self.plotbase.cmap_bidirect)
             ax.set_rasterization_zorder(z=-10)
             ax.set_xlabel(x_lbl)
             ax.set_ylabel(y_lbl)
             ax.set_title(ttl)
-            fig.colorbar(cm1)
+            #fig.colorbar(cm1)
 
         self.plotbase = Plotting()
 
@@ -217,6 +218,7 @@ class diag_plot():
                        self.data['Shearing Rate']['omegaExB_x'].T,
                        r'$t c_{ref}/L_{ref}$', x_lbl, r'$\omega_{ExB} [c_{ref}/L_{ref}]$')
             fig.show()
+            #plt.show()
 
             # time traces
             my_pos = self.data['Shearing Rate']['my_pos']
@@ -254,6 +256,7 @@ class diag_plot():
 #                    output.info_txt.see(END)
 
             fig.show()
+            #plt.show()
 
         # zonal spectra
         if self.data['Shearing Rate']['x_local']:
@@ -278,6 +281,7 @@ class diag_plot():
             ax.set_xlabel(r'$k_x \rho_{ref}$')
 
             fig.show()
+            #plt.show()
 
         # radial plots
         fig = plt.figure()
@@ -306,6 +310,8 @@ class diag_plot():
         ax.set_ylabel(r'$\omega_{ExB} [c_{ref} \rho^*_{ref}]$')
 
         fig.tight_layout()    
+        #plt.show()
+        fig.show()
     
     
     def plot_all(self):

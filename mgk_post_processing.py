@@ -421,7 +421,7 @@ def my_corr_func_complex(v1,v2,time,show_plot=False,v1eqv2=True):
     corr_time=0.0
     i=0
 #    print(cfunc)
-    while corr_time==0.0:
+    while corr_time==0.0 and i < N:
 #        print(i)
         if (abs(cfunc[i])-max_corr/np.e) > 0.0 and (abs(cfunc[i+1])-max_corr/np.e) <= 0.0:
             
@@ -863,7 +863,7 @@ def get_QoI_from_run(out_dir, suffix):
         Diag_dict['Shearing Rate']['abs_phi_fs'] = np.array([x.abs_phi_fs[0:len(selected_diags['SR'].run_data.spatialgrid.kx_pos)] for x in
                                                              selected_diags['SR'].shearing_rate]) 
     else:
-        Diag_dict['Shearing Rate']['abs_phi_fs'] = None
+        Diag_dict['Shearing Rate']['abs_phi_fs'] = 'None'
         
     
     '''

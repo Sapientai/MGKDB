@@ -29,7 +29,7 @@ from mgk_post_processing import *
 from ParIO import * 
 import numpy as np
 #from pymongo import MongoClient
-#from bson.objectid import ObjectId
+from bson.objectid import ObjectId
 #from bson import json_util
 import os
 from pathlib import Path
@@ -439,12 +439,13 @@ def load(db, collection, query, projection={'Meta':1, 'Diagnostics':1}, getarray
         allResults = [doc for doc in results]
     
     if allResults:
-        if len(allResults) > 1:
-            return allResults
-        elif len(allResults) == 1:
-            return allResults[0]
-        else:
-            return None
+#        if len(allResults) > 1:
+#            return allResults
+#        elif len(allResults) == 1:
+#            return allResults[0]
+#        else:
+#            return None
+        return allResults
     else:
         return None
     
@@ -721,7 +722,7 @@ def update_mongo(out_dir, db, runs_coll):
     if update_option == '0':
         files_to_update = input('Please type FULL file names to update, separated by comma.\n').split(',')
         keys_to_update = input('Please type key names for each file you typed, separated by comma.\n').split(',')
-        affect_QoI = input('Will the file change QoIs? (Y/N)')
+        affect_QoI = input('Will the file change QoIs/Diagnostics? (Y/N)')
         updated = []
         print('Uploading files .......')
         # update the storage chunk
@@ -746,9 +747,19 @@ def update_mongo(out_dir, db, runs_coll):
         for entry in updated:
             for suffix in suffixes:
                 if affect_QoI in ['Y', 'y']:
-                    QoI_dir = get_QoI_from_run(out_dir, suffix)
+                    QoI_dir, Diag_dict = get_QoI_from_run(out_dir, suffix)
+                    run = runs_coll.find_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix})
+                    for key, val in run['Diagnostics'].items():
+                        if val != 'None':
+                            print((key, val))
+                            fs.delete(val)
+                            print('deleted!')
+
+                    for key, val in Diag_dict.items():
+                        Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], key, out_dir)
+
                     runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, 
-                                 { "$set": {'QoI': QoI_dir}} 
+                            { "$set": {'QoI': QoI_dir, 'Diagnostics':Diag_dict}} 
                                  )
                     
                 runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix}, 
@@ -762,7 +773,7 @@ def update_mongo(out_dir, db, runs_coll):
         suffixes.sort()
         print("suffixes availables are:{}".format(suffixes))
         runs_to_update = input('Please type which suffixes to update, separated by comma. If you need to update all runs, just hit ENTER. \n').split(',')      
-        affect_QoI = input('Will the file change QoIs? (Y/N)')
+        affect_QoI = input('Will the file change QoIs/Diagnostics? (Y/N)')
 #        updated = []
         # update the storage chunk
         print('Uploading files .......')
@@ -774,10 +785,21 @@ def update_mongo(out_dir, db, runs_coll):
         for doc in files_to_update:
             for suffix in run_suffixes:
                 if affect_QoI in ['Y', 'y']:
-                    QoI_dir = get_QoI_from_run(out_dir, suffix)
-                    runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, 
-                                 { "$set": {'QoI': QoI_dir}} 
+                    QoI_dir, Diag_dict = get_QoI_from_run(out_dir, suffix)
+                    run = runs_coll.find_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix})
+                    for key, val in run['Diagnostics'].items():
+                        if val != 'None':
+                            print((key, val))
+                            fs.delete(val)
+                            print('deleted!')
+
+                    for key, val in Diag_dict.items():
+                        Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], key, out_dir)
+
+                    runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix },
+                            { "$set": {'QoI': QoI_dir, 'Diagnostics':Diag_dict}}
                                  )
+
                 file = os.path.join(out_dir, doc  + suffix)
                 grid_out = fs.find({'filepath': file})
                 for grid in grid_out:
@@ -946,6 +968,9 @@ def upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords,
 #                if (Q_name + suffix) == line.split('/')[-1]:
                 if os.path.join(out_dir,Q_name + suffix) == line:
 #                    files_dict[Key] = line.split()[0]
+                    if '.' in Key:
+                        Key = '_'.join(Key.split('.'))
+
                     files_dict[Key] = _id
                     object_ids.pop(_id)
                     
@@ -1036,18 +1061,15 @@ def upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords,
                 if os.path.join(out_dir,Q_name + suffix) == line:
 #                if (Q_name + suffix) == line.split('/')[-1]:    
 #                    files_dict[Key] = line.split()[0]
-                    files_dict[Key] = _id
-                    object_ids.pop(_id)
-                    
-#                elif line.find(out_dir+'/'+Q_name) != -1 and Key not in files_dict:
-#                    files_dict[Key] = line.split()[0]
-#                    
-#                elif line.find(out_dir+'/'+Q_name + suffix + '.log') != -1 and Key not in files_dict:
-#                    files_dict[Key] = line.split()[0]
-#                    
-#                elif line.find(out_dir+'/'+Q_name + suffix + '.dat') != -1 and Key not in files_dict:
-#                    files_dict[Key] = line.split()[0]
+                    if '.' in Key:
+                        Key = '_'.join(Key.split('.'))
 
+                    files_dict[Key] = _id
+                    try:
+                        object_ids.pop(_id)
+                    except KeyError:
+                        continue
+                    
 #            if line.find(os.path.join(out_dir,'scan.log')) != -1:
             if os.path.join(out_dir,'scan.log') == line:
 #                files_dict['scanlog'] = line.split()[0]

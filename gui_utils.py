@@ -385,7 +385,7 @@ class Window(Frame):
         QoIFrame = Frame(t)
         QoIFrame.pack(fill=X)
         self.QoI_change = BooleanVar(value=True)
-        QoICheckbox = Checkbutton(QoIFrame, text="Will files to update change default QoI to collect?", 
+        QoICheckbox = Checkbutton(QoIFrame, text="Will files-to-update change QoI/Diagnostic?", 
                                         variable=self.QoI_change, onvalue=True, offvalue=False)
         QoICheckbox.pack()
         
@@ -687,11 +687,19 @@ class Window(Frame):
             for entry in updated:
                 for suffix in suffixes:
                     if affect_QoI:
-                        QoI_dir = get_QoI_from_run(out_dir, suffix)
-                        runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, 
-                                     { "$set": {'QoI': QoI_dir}} 
-                                     )
-                        
+                        QoI_dir, Diag_dict = get_QoI_from_run(out_dir, suffix)
+                        run = runs_coll.find_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix})
+                        for key, val in run['Diagnostics'].items():
+                            if val != 'None':
+                                print((key, val))
+                                fs.delete(val)
+                                print('deleted!')
+
+                        for key, val in Diag_dict.items():
+                            Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], key, out_dir)
+
+                        runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, { "$set": {'QoI': QoI_dir, 'Diagnostics':Diag_dict}}  )
+
                     runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix}, 
                                      {"$set":{'Files.'+entry[0]: entry[1]}}
                                      )
@@ -715,10 +723,21 @@ class Window(Frame):
             for doc in files_to_update:
                 for suffix in run_suffixes:
                     if affect_QoI:
-                        QoI_dir = get_QoI_from_run(out_dir, suffix)
-                        runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, 
-                                     { "$set": {'QoI': QoI_dir}} 
-                                     )
+                        QoI_dir, Diag_dict = get_QoI_from_run(out_dir, suffix)
+                        run = runs_coll.find_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix})
+                        for key, val in run['Diagnostics'].items():
+                            if val != 'None':
+                                print((key, val))
+                                fs.delete(val)
+                                print('deleted!')
+
+                        for key, val in Diag_dict.items():
+                            Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], key, out_dir)
+
+                        runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix },
+                            { "$set": {'QoI': QoI_dir, 'Diagnostics':Diag_dict}}
+                                 )                        
+                    
                     file = out_dir + '/' + doc  + suffix
                     grid_out = fs.find({'filepath': file})
                     for grid in grid_out:

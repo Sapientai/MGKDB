@@ -5,14 +5,13 @@ Created on Wed Feb 26 15:08:36 2020
 
 Make plots of some diagnostics
 """
-from mgk_file_handling import load
+from mgk_file_handling import load, _binary2npArray, _loadNPArrays
 import os
 from mgk_login import mgk_login
 import argparse
 from sys import exit
 from diag_plot import diag_plot
 from bson.objectid  import ObjectId
-
 #==========================================================
 # argument parser
 #==========================================================
@@ -73,6 +72,60 @@ def diag_plot_from_query(db, collection, query, projection={'Meta':1, 'Diagnosti
             input('Press ENTER to continue ...')
     else:
         print('The database returns None for your query.')
+
+
+        
+import gridfs
+from pathlib import Path
+import json
+
+def download_from_query(db, collection, query, destination='./'):
+    fs = gridfs.GridFSBucket(db)
+    records_found = collection.find(query)
+    
+    for record in records_found:
+        
+        dir_name = record['Meta']['run_collection_name']
+        path = os.path.join(destination, dir_name.split('/')[-1])
+        if not os.path.exists(path):
+            try:
+                path = os.path.join(destination, dir_name.split('/')[-1])
+                #os.mkdir(path)
+                Path(path).mkdir(parents=True)
+            except OSError:
+                print ("Creation of the directory %s failed" % path)
+        #else:
+        
+        '''
+        Download saved files
+        '''
+        for key, val in record['Files'].items():
+            if val != 'None':
+                filename = db.fs.files.find_one(val)['filename']
+                #print(db.fs.files.find_one(val)).keys()
+                with open(os.path.join(path, filename),'wb+') as f:
+    #                    fs.download_to_stream_by_name(filename, f, revision=-1, session=None)
+                    fs.download_to_stream(val, f, session=None)
+                record['Files'][key] = str(val)
+        #print(record)
+        
+        '''
+        Download diagnostics
+        '''
+        for key, val in record['Diagnostics'].items():
+            if isinstance(val, ObjectId):
+                data = _loadNPArrays(db, val)
+                record['Diagnostics'][key] = data
+        
+        record['_id'] = str(record['_id'])
+        
+        f_path = os.path.join(path, 'mgkdb_summary_for'+record['Meta']['run_suffix']+'.json')
+        if os.path.isfile(f_path):
+            with open(f_path, 'w') as f:
+                json.dump(record, f)
+            print("Successfully downloaded files in the collection to directory %s " % path)
+        else:
+            exit('File exists already!')
 
 
 

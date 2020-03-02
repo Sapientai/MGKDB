@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from utils import averages
 from diagnostics.baseplot import Plotting
 import time
+import os
 
 class diag_plot():
     def __init__(self, data_dict, save_fig = True, save_dir = './'):
@@ -33,7 +34,7 @@ class diag_plot():
         for quant in self.data['Amplitude Spectra']['kx'].keys():
 
             fig = plt.figure(figsize=(6, 8))
-            fig_list.append(fig)
+#            fig_list.append(fig)
 
             ax_loglog_kx = fig.add_subplot(3, 2, 1)
             ax_loglin_kx = fig.add_subplot(3, 2, 3)
@@ -86,7 +87,7 @@ class diag_plot():
             #plt.show()
             fig.show() 
             
-            fig.savefig('AmplitudeSpectra-{}-{}.png'.format(quant, time.strftime("%y%m%d-%H%M%S")))
+            fig.savefig(os.path.join(self.save_dir, 'AmplitudeSpectra-{}-{}.png'.format(quant, time.strftime("%y%m%d-%H%M%S"))) )
 
     def diag_flux_spectra(self):
         
@@ -176,7 +177,7 @@ class diag_plot():
             #            fig.tight_layout()
             #plt.show()
             fig.show()
-            fig.savefig('FluxSpectra-{}-{}-{}.png'.format(spec,flux, time.strftime("%y%m%d-%H%M%S")))
+            fig.savefig(os.path.join(self.save_dir, 'FluxSpectra-{}-{}-{}.png'.format(spec,flux, time.strftime("%y%m%d-%H%M%S"))))
     
     def diag_shearing_rate(self):
         
@@ -225,7 +226,7 @@ class diag_plot():
                        self.data['Shearing Rate']['omegaExB_x'].T,
                        r'$t c_{ref}/L_{ref}$', x_lbl, r'$\omega_{ExB} [c_{ref}/L_{ref}]$')
             fig.show()
-            fig.savefig('ShearingRate-map-{}.png'.format(time.strftime("%y%m%d-%H%M%S")))
+            fig.savefig(os.path.join(self.save_dir, 'ShearingRate-map-{}.png'.format(time.strftime("%y%m%d-%H%M%S"))))
             #plt.show()
 
             # time traces
@@ -264,7 +265,7 @@ class diag_plot():
 #                    output.info_txt.see(END)
 
             fig.show()
-            fig.savefig('ShearingRate-TT.png'.format(time.strftime("%y%m%d-%H%M%S")) )
+            fig.savefig(os.path.join(self.save_dir, 'ShearingRate-TT.png'.format(time.strftime("%y%m%d-%H%M%S")) ))
             #plt.show()
 
         # zonal spectra
@@ -290,7 +291,7 @@ class diag_plot():
             ax.set_xlabel(r'$k_x \rho_{ref}$')
 
             fig.show()
-            fig.savefig('ShearingRate-ZS-{}.png'.format(time.strftime("%y%m%d-%H%M%S")))
+            fig.savefig(os.path.join(self.save_dir, 'ShearingRate-ZS-{}.png'.format(time.strftime("%y%m%d-%H%M%S"))))
             #plt.show()
 
         # radial plots
@@ -322,7 +323,7 @@ class diag_plot():
         fig.tight_layout()    
         #plt.show()
         fig.show()
-        fig.savefig('ShearingRate-R-{}.png'.format(time.strftime("%y%m%d-%H%M%S")))
+        fig.savefig(os.path.join(self.save_dir, 'ShearingRate-R-{}.png'.format(time.strftime("%y%m%d-%H%M%S"))))
     
     
     def plot_all(self):

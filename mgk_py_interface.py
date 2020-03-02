@@ -58,14 +58,14 @@ mgk_fusion = login.connect()
 user = login.login['user']
 
 
-def diag_plot_from_query(db, collection, query, projection={'Meta':1, 'Diagnostics':1}):
+def diag_plot_from_query(db, collection, query, projection={'Meta':1, 'Diagnostics':1},save_fig = True, save_dir = './'):
 
     data = load(db, collection, query, projection)
     if data is not None:
         n_records = len(data)
         print('{} records returned from your query.'.format(n_records) )
         
-        p = [diag_plot(data[i]) for i in range(n_records)]
+        p = [diag_plot(data[i], save_fig, save_dir) for i in range(n_records)]
         
         for i in range(n_records):
             p[i].plot_all()

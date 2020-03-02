@@ -632,6 +632,9 @@ def download_dir_by_name(db, runs_coll, dir_name, destination):
         fs.download_to_stream(inDb[1]['Files']['geneerr'], f, session=None)
 
     for record in inDb:
+        '''
+        Download 'files'
+        '''
         for key, val in record['Files'].items():
             if val != 'None' and key not in ['scanlog', 'scaninfo', 'geneerr']:
                 filename = db.fs.files.find_one(val)['filename']
@@ -642,8 +645,18 @@ def download_dir_by_name(db, runs_coll, dir_name, destination):
         record['Files']['scanlog'] = str(record['Files']['scanlog'])
         record['Files']['scaninfo'] = str(record['Files']['scaninfo'])
         record['Files']['geneerr'] = str(record['Files']['geneerr'])
+        
+        '''
+        Deal with diagnostic data?
+        '''
+        for key, val in record['Diagnostics'].items():
+            if isinstance(val, ObjectId):
+#                data = _loadNPArrays(db, val)
+#                data = _binary2npArray(fsf.get(val).read()) # no need to store data
+                record['Diagnostics'][key] = str(val)
+                
         record['_id'] = str(record['_id'])
-        with open(os.path.join(path, 'mgkdb_summary_for'+record['Meta']['run_suffix']+'.json'), 'w') as f:
+        with open(os.path.join(path, 'mgkdb_summary_for_run'+record['Meta']['run_suffix']+'.json'), 'w') as f:
             json.dump(record, f)
            
     print ("Successfully downloaded to the directory %s " % path)
@@ -656,7 +669,6 @@ def download_runs_by_id(db, runs_coll, _id, destination):
     
     fs = gridfs.GridFSBucket(db)
     record = runs_coll.find_one({ "_id": _id })
-    record['_id'] = str(_id)
     dir_name = record['Meta']['run_collection_name']
     path = os.path.join(destination, dir_name.split('/')[-1])
     if not os.path.exists(path):
@@ -667,7 +679,9 @@ def download_runs_by_id(db, runs_coll, _id, destination):
         except OSError:
             print ("Creation of the directory %s failed" % path)
     #else:
-
+    '''
+    Download 'files'
+    '''
     for key, val in record['Files'].items():
         if val != 'None':
             filename = db.fs.files.find_one(val)['filename']
@@ -676,8 +690,19 @@ def download_runs_by_id(db, runs_coll, _id, destination):
 #                    fs.download_to_stream_by_name(filename, f, revision=-1, session=None)
                 fs.download_to_stream(val, f, session=None)
             record['Files'][key] = str(val)
+            
+    '''
+    Deal with diagnostic data
+    '''
+    for key, val in record['Diagnostics'].items():
+        if isinstance(val, ObjectId):
+#                data = _binary2npArray(fsf.get(val).read()) # no need to store data
+            record['Diagnostics'][key] = str(val)
+
     #print(record)
-    with open(os.path.join(path, 'mgkdb_summary_for'+record['Meta']['run_suffix']+'.json'), 'w') as f:
+    record['_id'] = str(_id)
+
+    with open(os.path.join(path, 'mgkdb_summary_for_run'+record['Meta']['run_suffix']+'.json'), 'w') as f:
         json.dump(record, f)
     print("Successfully downloaded files in the collection to directory %s " % path)    
     

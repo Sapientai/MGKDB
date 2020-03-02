@@ -12,6 +12,7 @@ import argparse
 from sys import exit
 from diag_plot import diag_plot
 from bson.objectid  import ObjectId
+#import pickle
 #==========================================================
 # argument parser
 #==========================================================
@@ -80,13 +81,18 @@ from pathlib import Path
 import json
 
 def download_from_query(db, collection, query, destination='./'):
+    '''
+    Collection must be LinearRuns or NonlinRuns, at current stage.
+    '''
     fs = gridfs.GridFSBucket(db)
+    fsf = gridfs.GridFS(db)
     records_found = collection.find(query)
     
     for record in records_found:
         
         dir_name = record['Meta']['run_collection_name']
         path = os.path.join(destination, dir_name.split('/')[-1])
+        print(path)
         if not os.path.exists(path):
             try:
                 path = os.path.join(destination, dir_name.split('/')[-1])
@@ -106,6 +112,7 @@ def download_from_query(db, collection, query, destination='./'):
                 with open(os.path.join(path, filename),'wb+') as f:
     #                    fs.download_to_stream_by_name(filename, f, revision=-1, session=None)
                     fs.download_to_stream(val, f, session=None)
+                    
                 record['Files'][key] = str(val)
         #print(record)
         
@@ -114,18 +121,20 @@ def download_from_query(db, collection, query, destination='./'):
         '''
         for key, val in record['Diagnostics'].items():
             if isinstance(val, ObjectId):
-                data = _loadNPArrays(db, val)
-                record['Diagnostics'][key] = data
+#                data = _loadNPArrays(db, val)
+#                data = _binary2npArray(fsf.get(val).read()) # no need to store data
+                record['Diagnostics'][key] = str(val)
         
         record['_id'] = str(record['_id'])
         
-        f_path = os.path.join(path, 'mgkdb_summary_for'+record['Meta']['run_suffix']+'.json')
+        f_path = os.path.join(path, 'mgkdb_summary_for_run'+record['Meta']['run_suffix']+'.json')
         if os.path.isfile(f_path):
+            exit('File exists already!')
+        else:
             with open(f_path, 'w') as f:
                 json.dump(record, f)
+#                pickle.dump(record, f, protocol=pickle.HIGHEST_PROTOCOL)
             print("Successfully downloaded files in the collection to directory %s " % path)
-        else:
-            exit('File exists already!')
 
 
 

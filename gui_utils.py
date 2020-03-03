@@ -183,7 +183,11 @@ class Window(Frame):
         parEntry.pack(side=LEFT, fill=X, padx=5, expand=True)
         parEntry.focus_set()
         
-        parButton = Button(parFrame, text="BROWSE", command = browse)
+        def browse_file():
+            fname = filedialog.askopenfilename()
+            parEntry.insert(0, fname)
+            
+        parButton = Button(parFrame, text="BROWSE", command = browse_file)
         parButton.pack(side=RIGHT, padx=5, pady=5)        
         
         
@@ -546,7 +550,7 @@ class Window(Frame):
                       "verbose": verbose,
                       "keywords": keywords,
                       "extra": extra,
-                      "large files": output_folder,
+                      "large files": large_files,
                       "confidence": confidence,
                       "input heat": input_heat,
                       "isLinear": linear,
@@ -571,7 +575,7 @@ class Window(Frame):
                     lin = ['linear']
                     keywords_lin = keywords + lin
                     runs_coll = database.LinearRuns
-                    if isUploaded(out_dir, runs_coll):
+                    if isUploaded(output_folder, runs_coll):
                         self.create_update_window()
                     else:
                         upload_linear(database, folder, par_file, user, linear, confidence, 
@@ -679,7 +683,7 @@ class Window(Frame):
                         print('deleted!')
                         
                 with open(file, 'rb') as f:
-                    _id = fs.put(f, encoding='UTF-8', filepath=file, filename = filepath.split('/')[-1])
+                    _id = fs.put(f, encoding='UTF-8', filepath=file, filename = file.split('/')[-1])
     #            _id = str(_id)
                 updated.append([field, _id])
         
@@ -711,9 +715,9 @@ class Window(Frame):
             affect_QoI = self.QoI_change.get()
             
             if runs_to_update == 'ALL':
-                run_suffixes = runs_to_update
-            else:
                 run_suffixes = suffixes
+            else:
+                run_suffixes = runs_to_update
                 
             if linear:
                 runs_coll = database.LinearRuns
@@ -746,7 +750,7 @@ class Window(Frame):
                         print('deleted!')
                     
                     with open(file, 'rb') as f:
-                        _id = fs.put(f, encoding='UTF-8', filepath=file, filename = filepath.split('/')[-1])
+                        _id = fs.put(f, encoding='UTF-8', filepath=file, filename = file.split('/')[-1])
     #                _id = str(_id)
                     runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, 
                                      { "$set": {'Files.'+ doc: _id} }

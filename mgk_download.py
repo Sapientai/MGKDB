@@ -83,7 +83,7 @@ elif OID:
         download_file_by_id(database, ObjectId(OID), destination, fname, session = None)
 
 elif tar_dir:
-    if collection == 'linear':
+    if collection in ['linear', 'Linear', 'LinearRuns']:
         download_dir_by_name(database, database.LinearRuns, tar_dir, destination)
-    elif collection == 'nonlinear':
+    elif collection in ['nonlinear','Nonlinear', 'NonlinRuns']:
         download_dir_by_name(database, database.NonlinRuns, tar_dir, destination)

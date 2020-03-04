@@ -1165,5 +1165,5 @@ class View_window(Frame):
 if __name__ == '__main__':
     main_window = Tk()
     main_window.geometry("1080x480")
-    app = Login_window(main_window)
+    mgk=Login_window(main_window)
     main_window.mainloop()

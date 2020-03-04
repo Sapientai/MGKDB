@@ -22,7 +22,7 @@ class mgk_login(object):
                       }
         
     def from_saved(self, file_path):
-        with open(file_path, 'rb') as pkl:
+        with open(file_path.strip(), 'rb') as pkl:
             info = pickle.load(pkl)
         
         self.login = info

@@ -488,14 +488,17 @@ def isLinear(folder_name):
         pars = par.pardict
         linear = not pars['nonlinear']
         return(linear)
-    #check folder name for linear
-    elif folder_name.find('linear') != -1:
-        linear = True 
-        return(linear)
+        
     #check folder name for nonlin
     elif folder_name.find('nonlin') != -1:
         linear = False
         return(linear)
+        
+    #check folder name for linear
+    elif folder_name.find('linear') != -1:
+        linear = True 
+        return(linear)
+
     else:
         assert linear is None, "Can not decide, please include linear/nonlinear as the suffix of your data folder!"
         

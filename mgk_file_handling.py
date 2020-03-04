@@ -717,7 +717,7 @@ def download_runs_by_id(db, runs_coll, _id, destination):
 
     with open(os.path.join(path, 'mgkdb_summary_for_run'+record['Meta']['run_suffix']+'.json'), 'w') as f:
         json.dump(record, f)
-    print("Successfully downloaded files in the collection to directory %s " % path)    
+    print("Successfully downloaded files in the collection {} to directory {}".format( record['_id'],path) )   
     
 
 

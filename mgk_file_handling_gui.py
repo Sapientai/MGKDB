@@ -963,7 +963,10 @@ def upload_linear(db, out_dir, par_file, user, linear, confidence, input_heat, k
                         Key = '_'.join(Key.split('.'))
 
                     files_dict[Key] = _id
-                    object_ids.pop(_id)
+                    try:
+                        object_ids.pop(_id)
+                    except KeyError:
+                        continue
                     
 #            if line.find('geneerr.log') != -1:
 #                files_dict['geneerrlog'] = line.split()[0]

@@ -975,7 +975,7 @@ def upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords,
 #    suffixes = scan_info(out_dir)
     
     #update files dictionary
-    print(out_dir)
+#    print(out_dir)
     object_ids = upload_file_chunks(db, out_dir, large_files, extra)  # it changes Docs and Keys globally 
 #    print(object_ids)         
     suffixes = get_suffixes(out_dir)
@@ -1003,7 +1003,10 @@ def upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords,
                         Key = '_'.join(Key.split('.'))
 
                     files_dict[Key] = _id
-                    object_ids.pop(_id)
+                    try:
+                        object_ids.pop(_id)
+                    except KeyError:
+                        continue
                     
 #            if line.find('geneerr.log') != -1:
 #                files_dict['geneerrlog'] = line.split()[0]

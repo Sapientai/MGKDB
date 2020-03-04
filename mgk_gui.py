@@ -921,6 +921,7 @@ class Download_window(Frame):
         self.rcn = StringVar()
         dirEntry = Entry(dirFrame, textvariable=self.rcn)
         dirEntry.pack(side=LEFT, fill=X, padx=5, expand=True)
+        dirEntry.config(state=DISABLED)
         dirEntry.focus_set()
         
         '''
@@ -970,10 +971,6 @@ class Download_window(Frame):
         Linear_Button.pack(side='left')
         NonLinear_Button.pack(side='left')
         
-        if self.isLinear.get():
-            self.runs_coll = self.database['database'].LinearRuns
-        else:
-            self.runs_coll = self.database['database'].NonlinRuns
         
         '''
         Download to 
@@ -1028,17 +1025,26 @@ class Download_window(Frame):
     
     def down(self):
         
+        if self.isLinear.get():
+            self.runs_coll = self.database['database'].LinearRuns
+        else:
+            self.runs_coll = self.database['database'].NonlinRuns
+        
+#        print(self.isLinear.get())
         ids_list_raw = self.oid.get().split(',')
         self.ids_list = [_id.strip() for _id in ids_list_raw]
         
+#        print(self.ids_list)
         tar_list_raw = self.rcn.get().split(',')
         self.tar_list = [_dir.strip() for _dir in tar_list_raw]
         
+#        print(self.runs_coll)
         if self.dl_option.get() == int(0):
             for oid in self.ids_list:
                 download_runs_by_id(self.database['database'], self.runs_coll, ObjectId(oid), self.dl_dir.get())
-        elif self.dl_option == int(1): 
-            for doc in self.self.tar_list:
+        elif self.dl_option.get() == int(1): 
+            for doc in self.tar_list:
+                print(doc)
                 download_dir_by_name(self.database['database'], self.runs_coll, doc, self.dl_dir.get())
         else:
             exit('Invalid download option encountered!')
@@ -1134,8 +1140,6 @@ class View_window(Frame):
         dlButton = Button(utilsFrame, text="Plot", command= self.plot)
         dlButton.pack(side=RIGHT, padx=5, pady=5)
         
-
-        
         utilsFrame.pack()
         
 #    def start_plot(self):
@@ -1147,7 +1151,7 @@ class View_window(Frame):
         ids_list_raw = self.oid.get().split(',')
         self.ids_list = [_id.strip() for _id in ids_list_raw]
         for _id in self.ids_list:
-            data_dict = load(self.database['database'], self.runs_coll, {'_id':ObjectId(_id)})
+            data_dict = load(self.database['database'], self.runs_coll, {'_id':ObjectId(_id)}) # load method returns a list
             fig = diag_plot(data_dict, save_fig = False)
             if self.AS.get():
                 fig.diag_amplitude_spectra()            
@@ -1166,4 +1170,9 @@ if __name__ == '__main__':
     main_window = Tk()
     main_window.geometry("1080x480")
     mgk=Login_window(main_window)
+    def on_closing():
+        if messagebox.askokcancel("Quit", "Do you want to quit?"):
+            main_window.destroy()
+
+    main_window.protocol("WM_DELETE_WINDOW", on_closing)
     main_window.mainloop()

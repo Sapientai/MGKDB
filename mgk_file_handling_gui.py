@@ -626,13 +626,18 @@ def download_dir_by_name(db, runs_coll, dir_name, destination):
     #else:
     fs = gridfs.GridFSBucket(db)
     inDb = runs_coll.find({ "Meta.run_collection_name": dir_name })
-
-    with open(os.path.join(path, 'scan.log'),'wb+') as f:
-        fs.download_to_stream(inDb[0]['Files']['scanlog'], f, session=None)
-    with open(os.path.join(path, 'scan_info.dat'),'wb+') as f:
-        fs.download_to_stream(inDb[1]['Files']['scaninfo'], f, session=None)
-    with open(os.path.join(path, 'geneerr.log'),'wb+') as f:
-        fs.download_to_stream(inDb[1]['Files']['geneerr'], f, session=None)
+    
+    if inDb[0]['Files']['scanlog'] != 'None':
+        with open(os.path.join(path, 'scan.log'),'wb+') as f:
+            fs.download_to_stream(inDb[0]['Files']['scanlog'], f, session=None)
+            
+    if inDb[0]['Files']['scaninfo'] != 'None':
+        with open(os.path.join(path, 'scan_info.dat'),'wb+') as f:
+            fs.download_to_stream(inDb[0]['Files']['scaninfo'], f, session=None)
+    
+    if inDb[0]['Files']['geneerr'] != 'None':    
+        with open(os.path.join(path, 'geneerr.log'),'wb+') as f:
+            fs.download_to_stream(inDb[0]['Files']['geneerr'], f, session=None)
 
     for record in inDb:
         for key, val in record['Files'].items():
@@ -682,7 +687,9 @@ def download_runs_by_id(db, runs_coll, _id, destination):
         except OSError:
             print ("Creation of the directory %s failed" % path)
     #else:
-
+    '''
+    Download 'files'
+    '''
     for key, val in record['Files'].items():
         if val != 'None':
             filename = db.fs.files.find_one(val)['filename']
@@ -693,7 +700,7 @@ def download_runs_by_id(db, runs_coll, _id, destination):
             record['Files'][key] = str(val)
             
     '''
-    Deal with diagnostic data?
+    Deal with diagnostic data.
     '''
     fsf=gridfs.GridFS(db)
     for key, val in record['Diagnostics'].items():

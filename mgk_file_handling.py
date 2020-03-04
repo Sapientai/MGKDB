@@ -618,7 +618,6 @@ def download_dir_by_name(db, runs_coll, dir_name, destination):
     path = os.path.join(destination, dir_name.split('/')[-1])
     if not os.path.exists(path):    
         try:
-
             #os.mkdir(path)
             Path(path).mkdir(parents=True) 
         except OSError:
@@ -627,12 +626,17 @@ def download_dir_by_name(db, runs_coll, dir_name, destination):
     fs = gridfs.GridFSBucket(db)
     inDb = runs_coll.find({ "Meta.run_collection_name": dir_name })
 
-    with open(os.path.join(path, 'scan.log'),'wb+') as f:
-        fs.download_to_stream(inDb[0]['Files']['scanlog'], f, session=None)
-    with open(os.path.join(path, 'scan_info.dat'),'wb+') as f:
-        fs.download_to_stream(inDb[1]['Files']['scaninfo'], f, session=None)
-    with open(os.path.join(path, 'geneerr.log'),'wb+') as f:
-        fs.download_to_stream(inDb[1]['Files']['geneerr'], f, session=None)
+    if inDb[0]['Files']['scanlog'] != 'None':
+        with open(os.path.join(path, 'scan.log'),'wb+') as f:
+            fs.download_to_stream(inDb[0]['Files']['scanlog'], f, session=None)
+            
+    if inDb[0]['Files']['scaninfo'] != 'None':
+        with open(os.path.join(path, 'scan_info.dat'),'wb+') as f:
+            fs.download_to_stream(inDb[0]['Files']['scaninfo'], f, session=None)
+    
+    if inDb[0]['Files']['geneerr'] != 'None':    
+        with open(os.path.join(path, 'geneerr.log'),'wb+') as f:
+            fs.download_to_stream(inDb[0]['Files']['geneerr'], f, session=None)
 
     for record in inDb:
         '''

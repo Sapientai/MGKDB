@@ -7,6 +7,8 @@ Created on Mon Feb 17 16:05:27 2020
 A Plotting class for visualizing the diagnostic plots from mgk_fusion
 """
 import numpy as np
+#import matplotlib
+#matplotlib.use('GTK') # uncomment if using MAC
 import matplotlib.pyplot as plt
 from utils import averages
 from diagnostics.baseplot import Plotting

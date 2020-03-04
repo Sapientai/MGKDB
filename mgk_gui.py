@@ -79,8 +79,8 @@ class Login_window(Frame):
         hostEntry.pack(fill=X, padx=5, expand=True)
         hostEntry.focus_set()
         
-#        hostEntry.insert(0, 'mongodb03.nersc.gov') # set default value
-        hostEntry.insert(0, 'localhost')
+        hostEntry.insert(0, 'mongodb03.nersc.gov') # set default value
+#        hostEntry.insert(0, 'localhost')
         '''
         port
         '''
@@ -128,7 +128,7 @@ class Login_window(Frame):
         usernameEntry.pack(fill=X, padx=5, expand=True)
         usernameEntry.focus_set()
         
-        usernameEntry.insert(0, 'dykuang')
+#        usernameEntry.insert(0, 'dykuang')
         
         '''
         password
@@ -144,7 +144,7 @@ class Login_window(Frame):
         passwordEntry.pack(fill=X, padx=5, expand=True)
         passwordEntry.focus_set()
         
-        passwordEntry.insert(0,'1234')
+#        passwordEntry.insert(0,'1234')
         
         '''
         utils
@@ -1157,12 +1157,8 @@ class View_window(Frame):
         self.master.destroy()  
       
 
-def get_specs():
+if __name__ == '__main__':
     main_window = Tk()
-    main_window.geometry("1080x960")
+    main_window.geometry("1080x480")
     app = Login_window(main_window)
     main_window.mainloop()
-    return app.state
-
-if __name__ == '__main__':
-    specs = get_specs()

@@ -12,6 +12,7 @@ import argparse
 from sys import exit
 from diag_plot import diag_plot
 from bson.objectid  import ObjectId
+import numpy as np
 #import pickle
 #==========================================================
 # argument parser
@@ -119,12 +120,16 @@ def download_from_query(db, collection, query, destination='./'):
         '''
         Download diagnostics
         '''
+        fsf=gridfs.GridFS(db)
+
         for key, val in record['Diagnostics'].items():
             if isinstance(val, ObjectId):
 #                data = _loadNPArrays(db, val)
 #                data = _binary2npArray(fsf.get(val).read()) # no need to store data
                 record['Diagnostics'][key] = str(val)
-        
+                data = _binary2npArray(fsf.get(val).read()) 
+                np.save( os.path.join(path,str(record['_id'])+'-'+key), data)
+                
         record['_id'] = str(record['_id'])
         
         f_path = os.path.join(path, 'mgkdb_summary_for_run'+record['Meta']['run_suffix']+'.json')

@@ -78,16 +78,16 @@ class diag_plot():
                 ax_loglog_ky.set_title("{}".format(quant[0:ind] + " " + quant[ind + 1:]))
                 ax_loglog_kx.set_title("{}".format(quant[0:ind] + " " + quant[ind + 1:]))
                 
-            if self.meta is not None:
-                fig.suptitle(str(self._id) + ' from ' + str(self.meta))
-            else:
-                fig.suptitle( str(self._id) )
+#            if self.meta is not None:
+#                fig.suptitle(str(self._id) + ' from ' + str(self.meta))
+#            else:
+            fig.suptitle( str(self._id) )
                 
             fig.tight_layout()
             #plt.show()
             fig.show() 
-            
-            fig.savefig(os.path.join(self.save_dir, 'AmplitudeSpectra-{}-{}.png'.format(quant, time.strftime("%y%m%d-%H%M%S"))) )
+            if self.save_fig:
+                fig.savefig(os.path.join(self.save_dir, 'AmplitudeSpectra-{}-{}.png'.format(quant, time.strftime("%y%m%d-%H%M%S"))) )
 
     def diag_flux_spectra(self):
         
@@ -114,10 +114,10 @@ class diag_plot():
 
             spec_flux = self.data['Flux Spectra'][spec]
             
-            if self.meta is not None:
-                fig.suptitle(str(self._id) + ' from ' + str(self.meta))
-            else:
-                fig.suptitle( str(self._id) )
+#            if self.meta is not None:
+#                fig.suptitle(str(self._id) + ' from ' + str(self.meta))
+#            else:
+            fig.suptitle( str(self._id) )
 
             for flux in spec_flux.keys():
 
@@ -177,7 +177,8 @@ class diag_plot():
             #            fig.tight_layout()
             #plt.show()
             fig.show()
-            fig.savefig(os.path.join(self.save_dir, 'FluxSpectra-{}-{}-{}.png'.format(spec,flux, time.strftime("%y%m%d-%H%M%S"))))
+            if self.save_fig:
+                fig.savefig(os.path.join(self.save_dir, 'FluxSpectra-{}-{}-{}.png'.format(spec,flux, time.strftime("%y%m%d-%H%M%S"))))
     
     def diag_shearing_rate(self):
         
@@ -202,10 +203,11 @@ class diag_plot():
         if len(time_requested) > 1:
             # some maps
             fig = plt.figure()
-            if self.meta is not None:
-                fig.suptitle(str(self._id) + ' from ' + str(self.meta))
-            else:
-                fig.suptitle( str(self._id) )
+#            if self.meta is not None:
+#                fig.suptitle(str(self._id) + ' from ' + str(self.meta))
+#            else:
+            fig.suptitle( str(self._id) )
+                
             ax = fig.add_subplot(2, 2, 1)
             plot_a_map(ax, time_requested, x,
                        self.data['Shearing Rate']['phi_zonal_x'].T,
@@ -226,17 +228,18 @@ class diag_plot():
                        self.data['Shearing Rate']['omegaExB_x'].T,
                        r'$t c_{ref}/L_{ref}$', x_lbl, r'$\omega_{ExB} [c_{ref}/L_{ref}]$')
             fig.show()
-            fig.savefig(os.path.join(self.save_dir, 'ShearingRate-map-{}.png'.format(time.strftime("%y%m%d-%H%M%S"))))
+            if self.save_fig:
+                fig.savefig(os.path.join(self.save_dir, 'ShearingRate-map-{}.png'.format(time.strftime("%y%m%d-%H%M%S"))))
             #plt.show()
 
             # time traces
             my_pos = self.data['Shearing Rate']['my_pos']
 #            print(my_pos)
             fig = plt.figure()
-            if self.meta is not None:
-                fig.suptitle(str(self._id) + ' from ' + str(self.meta))
-            else:
-                fig.suptitle( str(self._id) )
+#            if self.meta is not None:
+#                fig.suptitle(str(self._id) + ' from ' + str(self.meta))
+#            else:
+            fig.suptitle( str(self._id) )
             ax = fig.add_subplot(2 + self.data['Shearing Rate']['x_local'], 1, 1)
 #            print(self.data['Shearing Rate']['vExB_x'][my_pos].shape)
             ax.plot(time_requested, self.data['Shearing Rate']['vExB_x'][:,my_pos].T)
@@ -265,16 +268,17 @@ class diag_plot():
 #                    output.info_txt.see(END)
 
             fig.show()
-            fig.savefig(os.path.join(self.save_dir, 'ShearingRate-TT.png'.format(time.strftime("%y%m%d-%H%M%S")) ))
+            if self.save_fig:
+                fig.savefig(os.path.join(self.save_dir, 'ShearingRate-TT.png'.format(time.strftime("%y%m%d-%H%M%S")) ))
             #plt.show()
 
         # zonal spectra
         if self.data['Shearing Rate']['x_local']:
             fig = plt.figure()
-            if self.meta is not None:
-                fig.suptitle(str(self._id) + ' from ' + str(self.meta))
-            else:
-                fig.suptitle( str(self._id) )
+#            if self.meta is not None:
+#                fig.suptitle(str(self._id) + ' from ' + str(self.meta))
+#            else:
+            fig.suptitle( str(self._id) )
             ax = fig.add_subplot(3, 1, 1)
             ax.plot(self.data['Grid']['kx_pos'], averages.mytrapz(self.data['Shearing Rate']['abs_phi_fs'], time_requested))
             ax.set_xlabel(r'$k_x \rho_{ref}$')
@@ -291,15 +295,17 @@ class diag_plot():
             ax.set_xlabel(r'$k_x \rho_{ref}$')
 
             fig.show()
-            fig.savefig(os.path.join(self.save_dir, 'ShearingRate-ZS-{}.png'.format(time.strftime("%y%m%d-%H%M%S"))))
+            if self.save_fig:
+                fig.savefig(os.path.join(self.save_dir, 'ShearingRate-ZS-{}.png'.format(time.strftime("%y%m%d-%H%M%S"))))
             #plt.show()
 
         # radial plots
         fig = plt.figure()
-        if self.meta is not None:
-            fig.suptitle(str(self._id) + ' from ' + str(self.meta))
-        else:
-            fig.suptitle( str(self._id) )
+#        if self.meta is not None:
+#            fig.suptitle(str(self._id) + ' from ' + str(self.meta))
+#        else:
+        fig.suptitle( str(self._id) )
+        
         ax = fig.add_subplot(3, 1, 1)
         ax.plot(x,
                 averages.mytrapz(self.data['Shearing Rate']['phi_zonal_x'],
@@ -323,7 +329,8 @@ class diag_plot():
         fig.tight_layout()    
         #plt.show()
         fig.show()
-        fig.savefig(os.path.join(self.save_dir, 'ShearingRate-R-{}.png'.format(time.strftime("%y%m%d-%H%M%S"))))
+        if self.save_fig:
+            fig.savefig(os.path.join(self.save_dir, 'ShearingRate-R-{}.png'.format(time.strftime("%y%m%d-%H%M%S"))))
     
     
     def plot_all(self):

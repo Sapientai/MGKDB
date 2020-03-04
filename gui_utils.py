@@ -58,7 +58,7 @@ class Window(Frame):
         hostFrame = Frame(self)
         hostFrame.pack(fill=X)
 
-        hostLabel = Label(hostFrame, text="host: ", width=10)
+        hostLabel = Label(hostFrame, text="host: ", width=20)
         hostLabel.pack(side=LEFT, padx = 5, pady=5)
         
         self.host = StringVar()
@@ -74,7 +74,7 @@ class Window(Frame):
         portFrame = Frame(self)
         portFrame.pack(fill=X)
 
-        portLabel = Label(portFrame, text="port: ", width=10)
+        portLabel = Label(portFrame, text="port: ", width=20)
         portLabel.pack(side=LEFT, padx = 5, pady=5)
         
         self.port = StringVar()
@@ -91,7 +91,7 @@ class Window(Frame):
         dbnameFrame = Frame(self)
         dbnameFrame.pack(fill=X)
 
-        dbnameLabel = Label(dbnameFrame, text="database: ", width=10)
+        dbnameLabel = Label(dbnameFrame, text="database: ", width=20)
         dbnameLabel.pack(side=LEFT, padx = 5, pady=5)
         
         self.dbname = StringVar()
@@ -107,7 +107,7 @@ class Window(Frame):
         usernameFrame = Frame(self)
         usernameFrame.pack(fill=X)
 
-        usernameLabel = Label(usernameFrame, text="Username: ", width=10)
+        usernameLabel = Label(usernameFrame, text="Username: ", width=20)
         usernameLabel.pack(side=LEFT, padx = 5, pady=5)
         
         self.username = StringVar()
@@ -122,7 +122,7 @@ class Window(Frame):
         passwordFrame = Frame(self)
         passwordFrame.pack(fill=X)
 
-        passwordLabel = Label(passwordFrame, text="Password: ", width=10)
+        passwordLabel = Label(passwordFrame, text="Password: ", width=20)
         passwordLabel.pack(side=LEFT, padx = 5, pady=5)
         
         self.password = StringVar()
@@ -136,7 +136,7 @@ class Window(Frame):
         dirFrame = Frame(self)
         dirFrame.pack(fill=X)
 
-        dirLabel = Label(dirFrame, text="Target Directory: ", width=15)
+        dirLabel = Label(dirFrame, text="Target Directory: ", width=25)
         dirLabel.pack(side=LEFT, padx = 5, pady=5)
         
         self.out_dir = StringVar()
@@ -159,7 +159,7 @@ class Window(Frame):
         keywordsFrame = Frame(self)
         keywordsFrame.pack(fill=X)
 
-        keywordsLabel = Label(keywordsFrame, text="keywords: ", width=10)
+        keywordsLabel = Label(keywordsFrame, text="keywords: ", width=20)
         keywordsLabel.pack(side=LEFT, padx = 5, pady=5)
         
         self.keywords = StringVar()
@@ -197,7 +197,7 @@ class Window(Frame):
         confiFrame = Frame(self)
         confiFrame.pack(fill=X)
 
-        confiLabel = Label(confiFrame, text="Confidence: (1-10)", width=15)
+        confiLabel = Label(confiFrame, text="Confidence: (1-10)", width=20)
         confiLabel.pack(side=LEFT, padx = 5, pady=5)
         
         self.confidence = StringVar()
@@ -211,7 +211,7 @@ class Window(Frame):
         heatFrame = Frame(self)
         heatFrame.pack(fill=X)
 
-        heatLabel = Label(heatFrame, text="Input Heat: ", width=10)
+        heatLabel = Label(heatFrame, text="Input Heat: ", width=20)
         heatLabel.pack(side=LEFT, padx = 5, pady=5)
         
         self.input_heat = StringVar()
@@ -479,15 +479,15 @@ class Window(Frame):
                 
         
         upt_Button_0 = Radiobutton(updateFrame, text="Remove and upload all", variable=self.update_option,
-                             indicatoron=False, value= int(0), width=20, command = update_check)
-        upt_Button_1 = Radiobutton(updateFrame, text="Some files, shared by runs", variable=self.update_option,
-                             indicatoron=False, value= int(1), width=20, command = update_check)
-        upt_Button_2 = Radiobutton(updateFrame, text="Some files, certain runs", variable=self.update_option,
-                             indicatoron=False, value= int(2), width=20, command = update_check)
+                             indicatoron=False, value= int(0), width=60, command = update_check)
+        upt_Button_1 = Radiobutton(updateFrame, text="Some files, shared by all runs", variable=self.update_option,
+                             indicatoron=False, value= int(1), width=60, command = update_check)
+        upt_Button_2 = Radiobutton(updateFrame, text="Some files, each subject to a single run", variable=self.update_option,
+                             indicatoron=False, value= int(2), width=60, command = update_check)
         
-        upt_Button_0.pack(side='left')
-        upt_Button_1.pack(side='left') 
-        upt_Button_2.pack(side='left')        
+        upt_Button_0.pack(side='top', padx = 5, pady=5)
+        upt_Button_1.pack(side='top',padx = 5, pady=5) 
+        upt_Button_2.pack(side='top',padx = 5, pady=5)        
         
         
         '''

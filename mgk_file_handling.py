@@ -647,13 +647,16 @@ def download_dir_by_name(db, runs_coll, dir_name, destination):
         record['Files']['geneerr'] = str(record['Files']['geneerr'])
         
         '''
-        Deal with diagnostic data?
+        Deal with diagnostic data
         '''
+        fsf=gridfs.GridFS(db)
         for key, val in record['Diagnostics'].items():
             if isinstance(val, ObjectId):
 #                data = _loadNPArrays(db, val)
 #                data = _binary2npArray(fsf.get(val).read()) # no need to store data
                 record['Diagnostics'][key] = str(val)
+                data = _binary2npArray(fsf.get(val).read()) 
+                np.save( os.path.join(path,str(record['_id'])+'-'+key), data)
                 
         record['_id'] = str(record['_id'])
         with open(os.path.join(path, 'mgkdb_summary_for_run'+record['Meta']['run_suffix']+'.json'), 'w') as f:
@@ -694,10 +697,13 @@ def download_runs_by_id(db, runs_coll, _id, destination):
     '''
     Deal with diagnostic data
     '''
+    fsf=gridfs.GridFS(db)
     for key, val in record['Diagnostics'].items():
         if isinstance(val, ObjectId):
 #                data = _binary2npArray(fsf.get(val).read()) # no need to store data
             record['Diagnostics'][key] = str(val)
+            data = _binary2npArray(fsf.get(val).read()) 
+            np.save( os.path.join(path,str(record['_id'])+'-'+key), data)
 
     #print(record)
     record['_id'] = str(_id)

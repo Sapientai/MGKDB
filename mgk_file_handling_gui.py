@@ -29,7 +29,7 @@ from mgk_post_processing import *
 from ParIO import * 
 import numpy as np
 #from pymongo import MongoClient
-#from bson.objectid import ObjectId
+from bson.objectid import ObjectId
 #from bson import json_util
 import os
 from pathlib import Path
@@ -642,6 +642,18 @@ def download_dir_by_name(db, runs_coll, dir_name, destination):
         record['Files']['scanlog'] = str(record['Files']['scanlog'])
         record['Files']['scaninfo'] = str(record['Files']['scaninfo'])
         record['Files']['geneerr'] = str(record['Files']['geneerr'])
+        
+        '''
+        Deal with diagnostic data.
+        '''
+        fsf=gridfs.GridFS(db)
+        for key, val in record['Diagnostics'].items():
+            if isinstance(val, ObjectId):
+#                data = _loadNPArrays(db, val)
+                data = _binary2npArray(fsf.get(val).read()) # no need to store data
+                np.save(os.path.join(path,str(record['_id'])+'-'+key), data)
+                record['Diagnostics'][key] = str(val)
+                
         record['_id'] = str(record['_id'])
         with open(os.path.join(path, 'mgkdb_summary_for'+record['Meta']['run_suffix']+'.json'), 'w') as f:
             json.dump(record, f)
@@ -676,6 +688,16 @@ def download_runs_by_id(db, runs_coll, _id, destination):
 #                    fs.download_to_stream_by_name(filename, f, revision=-1, session=None)
                 fs.download_to_stream(val, f, session=None)
             record['Files'][key] = str(val)
+            
+    '''
+    Deal with diagnostic data?
+    '''
+    fsf=gridfs.GridFS(db)
+    for key, val in record['Diagnostics'].items():
+        if isinstance(val, ObjectId):
+            record['Diagnostics'][key] = str(val)
+            data = _binary2npArray(fsf.get(val).read()) 
+            np.save( os.path.join(path,str(record['_id'])+'-'+key), data)
     #print(record)
     with open(os.path.join(path, 'mgkdb_summary_for'+record['Meta']['run_suffix']+'.json'), 'w') as f:
         json.dump(record, f)

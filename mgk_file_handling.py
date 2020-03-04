@@ -1058,6 +1058,8 @@ def upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords,
     '''
     ex_dict = dict()
     for _id, line in object_ids.items():
+        if '.' in line:
+            line = '_'.join(line.split('.'))  # if . appears in the key such as nrg_001.h5 -> nrg_001_h5
         ex_dict[line] = _id
     if ex_dict: 
         db.ex.Lin.insert_one(ex_dict)        
@@ -1162,6 +1164,8 @@ def upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords,
     
     ex_dict = dict()
     for _id, line in object_ids.items():
+        if '.' in line:
+            line = '_'.join(line.split('.'))
         ex_dict[line] = _id
     if ex_dict:
 #        print(ex_dict.values())

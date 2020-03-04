@@ -23,6 +23,7 @@ import sys
 from tkinter.scrolledtext import ScrolledText
 #import json
 from diag_plot import diag_plot
+from threading import Thread
 
 class StdRedirector(object):
     '''
@@ -999,14 +1000,14 @@ class Download_window(Frame):
         utils
         '''
         utilsFrame = Frame(self.master)
-        utilsFrame.pack(fill=X)        
-        
-        dlButton = Button(utilsFrame, text="Download", command= self.down)
-        dlButton.pack(side=RIGHT, padx=5, pady=5)
+        utilsFrame.pack(fill=X) 
         
         closeButton = Button(utilsFrame, text="Close", command = self.quit)
         closeButton.pack(side=RIGHT, padx=5, pady=5) 
         
+        dlButton = Button(utilsFrame, text="Download", command= self.down)
+        dlButton.pack(side=RIGHT, padx=5, pady=5)
+
         utilsFrame.pack()
         
         '''
@@ -1136,6 +1137,10 @@ class View_window(Frame):
 
         
         utilsFrame.pack()
+        
+#    def start_plot(self):
+#        thread = Thread(target=self.plot)
+#        thread.start()
         
     def plot(self):
 #        fs = gridfs.GridFS(self.database['database'])

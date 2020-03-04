@@ -1017,6 +1017,8 @@ def upload_linear(db, out_dir, par_file, user, linear, confidence, input_heat, k
     '''
     ex_dict = dict()
     for _id, line in object_ids.items():
+        if '.' in line:
+            line = '_'.join(line.split('.'))
         ex_dict[line] = _id
     if ex_dict: 
         db.ex.Lin.insert_one(ex_dict)        
@@ -1136,6 +1138,8 @@ def upload_nonlin(db, out_dir, par_file, user, linear, confidence, input_heat, k
     ex_dict = dict()
     for _id, line in object_ids.items():
         ex_dict[line] = _id
+        if '.' in line:
+            line = '_'.join(line.split('.'))
     if ex_dict:
 #        print(ex_dict.values())
         db.ex.Nonlin.insert_one(ex_dict)    

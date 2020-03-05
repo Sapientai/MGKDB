@@ -25,6 +25,8 @@ Post processing script containing:
 #from mgk_file_handling import *
 import numpy as np
 import optparse as op
+import matplotlib
+matplotlib.use('TkAgg') # uncomment if using MAC, others WXAgg, GTKAgg, QT4Agg, QT5Agg, TkAgg, GTK, GDK, GTKCairo, PS 
 import matplotlib.pyplot as plt
 from fieldlib import *
 from ParIO import * 

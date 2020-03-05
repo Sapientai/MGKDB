@@ -585,6 +585,7 @@ class Update_window(Frame):
     
     def __init__(self, master, dbstate):
         self.master = master
+        self.master.title("MGKDB--UPDATE")
         self.dbstate = dbstate
 
         topTextFrame = Frame(self.master)
@@ -872,6 +873,7 @@ class Download_window(Frame):
     def __init__(self, master, db):
         self.master = master
         self.database = db
+        self.master.title("MGKDB--Download Panel")
         
         topTextFrame = Frame(self.master)
         topTextFrame.pack(fill=X)
@@ -1059,6 +1061,7 @@ class View_window(Frame):
     def __init__(self, master, db):
         self.master = master
         self.database = db
+        self.master.title("MGKDB--View Panel")
     
 #        topTextFrame = Frame(self.master)
 #        topTextFrame.pack(fill=X)

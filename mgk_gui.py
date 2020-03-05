@@ -1046,7 +1046,7 @@ class Download_window(Frame):
                 download_runs_by_id(self.database['database'], self.runs_coll, ObjectId(oid), self.dl_dir.get())
         elif self.dl_option.get() == int(1): 
             for doc in self.tar_list:
-                print(doc)
+#                print(doc)
                 download_dir_by_name(self.database['database'], self.runs_coll, doc, self.dl_dir.get())
         else:
             exit('Invalid download option encountered!')
@@ -1085,11 +1085,7 @@ class View_window(Frame):
                              indicatoron=False, value= False, width=8)
         Linear_Button.pack(side='left')
         NonLinear_Button.pack(side='left')
-        
-        if self.isLinear.get():
-            self.runs_coll = self.database['database'].LinearRuns
-        else:
-            self.runs_coll = self.database['database'].NonlinRuns        
+               
         
         '''
         Id
@@ -1151,6 +1147,11 @@ class View_window(Frame):
         
     def plot(self):
 #        fs = gridfs.GridFS(self.database['database'])
+        if self.isLinear.get():
+            self.runs_coll = self.database['database'].LinearRuns
+        else:
+            self.runs_coll = self.database['database'].NonlinRuns
+            
         ids_list_raw = self.oid.get().split(',')
         self.ids_list = [_id.strip() for _id in ids_list_raw]
         for _id in self.ids_list:

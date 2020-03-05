@@ -1017,8 +1017,6 @@ def upload_linear(db, out_dir, par_file, user, linear, confidence, input_heat, k
             print('A summary is generated as below:\n')
             print(run_data)
     
-    
-    
     '''
     Get a dictionary of what's left in object_ids
     '''
@@ -1141,12 +1139,11 @@ def upload_nonlin(db, out_dir, par_file, user, linear, confidence, input_heat, k
     '''
     Get a dictionary of what's left in object_ids
     '''
-    
     ex_dict = dict()
-    for _id, line in object_ids.items():
-        ex_dict[line] = _id
+    for _id, line in object_ids.items():        
         if '.' in line:
             line = '_'.join(line.split('.'))
+        ex_dict[line] = _id
     if ex_dict:
 #        print(ex_dict.values())
         db.ex.Nonlin.insert_one(ex_dict)    

@@ -143,4 +143,16 @@ def download_from_query(db, collection, query, destination='./'):
 
 
 
+def get_oid_from_query(db, collection, query):
+    
+    records_found = collection.find(query)
+    
+    oid_list = []
+    
+    for record in records_found:
+        oid_list.append(record['_id'])
+        
+    
+    return oid_list
+            
 

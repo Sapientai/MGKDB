@@ -475,7 +475,7 @@ class Upload_window(Frame):
 
     def upload(self, event=None):  
         
-        print(self.database['host'])
+#        print(self.database['host'])
         
         multiple_runs = self.multiruns.get()
         output_folder = os.path.abspath(self.out_dir.get())
@@ -495,20 +495,20 @@ class Upload_window(Frame):
         Docs_ex = self.exFiles.get().split(',')
         Keys_ex = self.exKeys.get().split(',')
         
-        self.state = {**self.database,
-              "multi_runs": multiple_runs, 
-              "out_dir": output_folder,
-              "verbose": verbose,
-              "keywords": keywords,
-              "extra": extra,
-              "large files": large_files,
-              "confidence": confidence,
-              "input heat": input_heat,
-              "isLinear": linear,
-              "exFiles": Docs_ex,
-              "exKeys": Keys_ex,
-              "parfile": par_file
-              }
+#        self.state = {**self.database,
+#              "multi_runs": multiple_runs, 
+#              "out_dir": output_folder,
+#              "verbose": verbose,
+#              "keywords": keywords,
+#              "extra": extra,
+#              "large files": large_files,
+#              "confidence": confidence,
+#              "input heat": input_heat,
+#              "isLinear": linear,
+#              "exFiles": Docs_ex,
+#              "exKeys": Keys_ex,
+#              "parfile": par_file
+#              }
 #        
 #        print(self.state)
         
@@ -578,6 +578,33 @@ class Upload_window(Frame):
                             messagebox.showinfo("MGKDB", "Upload complete!")   
                             
     def create_update_window(self):
+        
+        multiple_runs = self.multiruns.get()
+        output_folder = os.path.abspath(self.out_dir.get())
+        linear = self.isLinear.get()
+        keywords = self.keywords.get().split(',')
+        large_files = self.largeFile.get()
+        verbose = self.verbose.get()
+        confidence = self.confidence.get()
+        input_heat = self.input_heat.get()
+        extra = self.extra.get()
+        par_file = self.par_file.get()
+        
+        self.state = {**self.database,
+              "multi_runs": multiple_runs, 
+              "out_dir": output_folder,
+              "verbose": verbose,
+              "keywords": keywords,
+              "extra": extra,
+              "large files": large_files,
+              "confidence": confidence,
+              "input heat": input_heat,
+              "isLinear": linear,
+              "exFiles": Docs_ex,
+              "exKeys": Keys_ex,
+              "parfile": par_file
+              }
+        
         self.updateWindow = Toplevel(self.master)
         self.app = Update_window(self.updateWindow, dbstate=self.state)
 
@@ -714,27 +741,31 @@ class Update_window(Frame):
         
         upt_Button_0.pack(side='top')
         upt_Button_1.pack(side='top') 
-        upt_Button_2.pack(side='top')        
+        upt_Button_2.pack(side='top') 
         
-        def quit(self):
-            self.master.destroy() 
-            
+                   
         '''
         utils
         '''
         utilsFrame = Frame(self.master)
-        utilsFrame.pack(fill=X)       
+        utilsFrame.pack(fill=X) 
+        
+        cancelButton = Button(utilsFrame, text="Cancel", command=self.quit)
+        cancelButton.pack(side=RIGHT, padx=5, pady=5)
+        
         goButton = Button(utilsFrame, text="Update", command=self.update)
 #        self.master.bind("<Return>", self.go)
         goButton.pack(side=RIGHT, padx=5, pady=5)
 
-        cancelButton = Button(utilsFrame, text="Cancel", command=self.quit)
-        cancelButton.pack(side=RIGHT, padx=5, pady=5)  
+  
+        
+    def quit(self):
+        self.master.destroy()
         
     def update(self, event=None):
         
         out_dir = self.dbstate['out_dir']
-        multiple_runs = self.dbstate['multi_runs']
+#        multiple_runs = self.dbstate['multi_runs']
         linear = self.dbstate['isLinear']
         keywords = self.dbstate['keywords']
         large_files = self.dbstate['large files']
@@ -892,9 +923,15 @@ class Download_window(Frame):
             if self.dl_option.get() == int(0):
                 dirEntry.config(state=DISABLED)
                 IdEntry.config(state=NORMAL)
+                qEntry.config(state=DISABLED)
             elif self.dl_option.get() == int(1):
                 dirEntry.config(state=NORMAL)
                 IdEntry.config(state=DISABLED)
+                qEntry.config(state=DISABLED)
+            elif self.dl_option.get() == int(2):
+                dirEntry.config(state=DISABLED)
+                IdEntry.config(state=DISABLED)
+                qEntry.config(state=NORMAL)
             
             else:
                 exit("Invalide value encountered!")
@@ -906,10 +943,12 @@ class Download_window(Frame):
                              indicatoron=False, value= int(0), width=80, command = option_check)
         dl_Button_1 = Radiobutton(dlFrame, text="Download all runs with the same run_collection_name", variable=self.dl_option,
                              indicatoron=False, value= int(1), width=80, command = option_check)
-        
+        dl_Button_2 = Radiobutton(dlFrame, text="Download with query", variable=self.dl_option,
+                             indicatoron=False, value= int(2), width=80, command = option_check)
+
         dl_Button_0.pack(side='top',padx = 5, pady=5)
         dl_Button_1.pack(side='top',padx = 5, pady=5) 
-         
+        dl_Button_2.pack(side='top',padx = 5, pady=5)
         
         '''
         run_collection_name
@@ -941,20 +980,22 @@ class Download_window(Frame):
         IdEntry.focus_set()
         
         '''
-        Get Query, how to parse a string to query?
+        Query
         '''
-#        QrFrame = Frame(self.master)
-#        QrFrame.pack(fill=X)
-#
-#        QrLabel = Label(QrFrame, text="Query: ", width=25)
-#        QrLabel.pack(side=LEFT, padx = 5, pady=5)
-#        
-#        self.Qr = StringVar()
-#        QrEntry = Entry(QrFrame, textvariable=self.Qr)
-#        QrEntry.pack(side=LEFT, fill=X, padx=5, expand=True)
-#        QrEntry.focus_set()
-#        
-#        self.query = json.load(self.Qr)
+        qFrame = Frame(self.master)
+        qFrame.pack(fill=X)
+
+        qLabel = Label(qFrame, text="Filter: ", width=25)
+        qLabel.pack(side=LEFT, padx = 5, pady=5)
+        
+        self.query = StringVar()
+        qEntry = Entry(qFrame, textvariable=self.query)
+        qEntry.pack(side=LEFT, fill=X, padx=5, expand=True)
+        qEntry.config(state=DISABLED)
+        qEntry.focus_set()
+       
+        qButton = Button(qFrame, text="Find", command = self.find)
+        qButton.pack(side=RIGHT, padx=5, pady=5)
         
         '''
         islinear option
@@ -1023,7 +1064,20 @@ class Download_window(Frame):
         text_box.pack(side=BOTTOM, fill=X, padx = 10, expand=True)
             
         sys.stdout = StdRedirector(text_box)
-    
+        
+    def find(self):
+        if self.isLinear.get():
+            self.runs_coll = self.database['database'].LinearRuns
+        else:
+            self.runs_coll = self.database['database'].NonlinRuns
+        q_dict = Str2Query(self.query.get())
+        records = self.runs_coll.find(q_dict)
+        self.ids_list = []
+        print('{} records found.'.format(records.count()))
+        for _record in records:
+            print(_record['_id'])
+            print(_record['Meta'])
+            self.ids_list.append(_record['_id'])          
     
     def down(self):
         
@@ -1032,22 +1086,23 @@ class Download_window(Frame):
         else:
             self.runs_coll = self.database['database'].NonlinRuns
         
-#        print(self.isLinear.get())
-        ids_list_raw = self.oid.get().split(',')
-        self.ids_list = [_id.strip() for _id in ids_list_raw]
-        
-#        print(self.ids_list)
-        tar_list_raw = self.rcn.get().split(',')
-        self.tar_list = [_dir.strip() for _dir in tar_list_raw]
-        
 #        print(self.runs_coll)
         if self.dl_option.get() == int(0):
+            ids_list_raw = self.oid.get().split(',')
+            self.ids_list = [_id.strip() for _id in ids_list_raw]
             for oid in self.ids_list:
                 download_runs_by_id(self.database['database'], self.runs_coll, ObjectId(oid), self.dl_dir.get())
         elif self.dl_option.get() == int(1): 
+            tar_list_raw = self.rcn.get().split(',')
+            self.tar_list = [_dir.strip() for _dir in tar_list_raw]
             for doc in self.tar_list:
 #                print(doc)
                 download_dir_by_name(self.database['database'], self.runs_coll, doc, self.dl_dir.get())
+        
+        elif self.dl_option.get() == int(2):
+            for oid in self.ids_list:
+                download_runs_by_id(self.database['database'], self.runs_coll, oid, self.dl_dir.get())
+
         else:
             exit('Invalid download option encountered!')
         
@@ -1085,8 +1140,35 @@ class View_window(Frame):
                              indicatoron=False, value= False, width=8)
         Linear_Button.pack(side='left')
         NonLinear_Button.pack(side='left')
-               
         
+        '''
+        Query option
+        '''
+        self.q_option= IntVar()
+        
+        def option_check():
+        
+            if self.q_option.get() == int(0):
+                qEntry.config(state=DISABLED)
+                IdEntry.config(state=NORMAL)
+            elif self.q_option.get() == int(1):
+                qEntry.config(state=NORMAL)
+                IdEntry.config(state=DISABLED)
+            
+            else:
+                exit("Invalide value encountered!")
+                
+        qopFrame = Frame(self.master)
+        qopFrame.pack(fill=X)
+        
+        qop_Button_0 = Radiobutton(qopFrame, text="Query with ID", variable=self.q_option,
+                             indicatoron=False, value= int(0), width=80, command = option_check)
+        qop_Button_1 = Radiobutton(qopFrame, text="General Queries", variable=self.q_option,
+                             indicatoron=False, value= int(1), width=80, command = option_check)
+        
+        qop_Button_0.pack(side='top',padx = 5, pady=5)
+        qop_Button_1.pack(side='top',padx = 5, pady=5) 
+
         '''
         Id
         '''
@@ -1099,9 +1181,28 @@ class View_window(Frame):
         self.oid = StringVar()
         IdEntry = Entry(IdFrame, textvariable=self.oid)
         IdEntry.pack(side=LEFT, fill=X, padx=5, expand=True)
+        IdEntry.config(state=DISABLED)
         IdEntry.focus_set() 
         
+        '''
+        Query
+        '''
+        qFrame = Frame(self.master)
+        qFrame.pack(fill=X)
+
+        qLabel = Label(qFrame, text="Filter: ", width=25)
+        qLabel.pack(side=LEFT, padx = 5, pady=5)
         
+        self.query = StringVar()
+        qEntry = Entry(qFrame, textvariable=self.query)
+        qEntry.pack(side=LEFT, fill=X, padx=5, expand=True)
+        qEntry.config(state=DISABLED)
+        qEntry.focus_set()
+       
+        qButton = Button(qFrame, text="Find", command = self.find)
+        qButton.pack(side=RIGHT, padx=5, pady=5)
+        
+         
         '''
         Plot Option
         '''
@@ -1141,42 +1242,83 @@ class View_window(Frame):
         
         utilsFrame.pack()
         
+        '''
+        Window for console output
+        '''
+        outFrame = Frame(self.master)
+        outFrame.pack(fill=X)
+        
+        outLabel = Label(outFrame, text="Console", width=10)
+        outLabel.pack(side=TOP, padx = 5, pady=5)
+        
+        text_box = ScrolledText(outFrame, state='disabled')
+        text_box.configure(font='TkFixedFont')
+        text_box.pack(side=BOTTOM, fill=X, padx = 10, expand=True)
+        
+        sys.stdout = StdRedirector(text_box)
+        
 #    def start_plot(self):
 #        thread = Thread(target=self.plot)
 #        thread.start()
+        
+    def find(self):
+        if self.isLinear.get():
+            self.runs_coll = self.database['database'].LinearRuns
+        else:
+            self.runs_coll = self.database['database'].NonlinRuns
+        print(self.query.get())
+        q_dict = Str2Query(self.query.get())
+        records = self.runs_coll.find(q_dict)
+        self.ids_list = []
+        print('{} records found.'.format(records.count()))
+        for _record in records:
+            print(_record['_id'])
+            print(_record['Meta'])
+            self.ids_list.append(_record['_id'])
+
         
     def plot(self):
 #        fs = gridfs.GridFS(self.database['database'])
         if self.isLinear.get():
             self.runs_coll = self.database['database'].LinearRuns
-        else:
+        else:           
             self.runs_coll = self.database['database'].NonlinRuns
             
-        ids_list_raw = self.oid.get().split(',')
-        self.ids_list = [_id.strip() for _id in ids_list_raw]
+        if self.q_option.get() == int(0):    
+            ids_list_raw = self.oid.get().split(',')
+            self.ids_list = [_id.strip() for _id in ids_list_raw]
+            
         for _id in self.ids_list:
             data_dict = load(self.database['database'], self.runs_coll, {'_id':ObjectId(_id)}) # load method returns a list
-            fig = diag_plot(data_dict, save_fig = False)
-            if self.AS.get():
-                fig.diag_amplitude_spectra()            
-            
-            if self.FS.get():
-                fig.diag_flux_spectra()
-
-            if self.SR.get():
-                fig.diag_shearing_rate()
+            if data_dict == None:
+                print('Cannot find this id: {} in this collection.'.format(_id))
+                break
+            else:
+                fig = diag_plot(data_dict, save_fig = False)
+                if self.AS.get():
+                    fig.diag_amplitude_spectra()            
+                
+                if self.FS.get():
+                    fig.diag_flux_spectra()
+    
+                if self.SR.get():
+                    fig.diag_shearing_rate()
         
     def quit(self):
         self.master.destroy()  
       
 
-if __name__ == '__main__':
+def make_gui():
     main_window = Tk()
     main_window.geometry("1080x480")
     mgk=Login_window(main_window)
+    
     def on_closing():
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
             main_window.destroy()
 
     main_window.protocol("WM_DELETE_WINDOW", on_closing)
     main_window.mainloop()
+    
+if __name__ == '__main__':
+    make_gui()

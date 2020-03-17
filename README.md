@@ -31,8 +31,8 @@
    
 
 7. Some example queries:  
-   * `db.LinearRuns.find({"Parameters_dict.kymin": {$lt: 20}}).count()`   
-   * `db.LinearRuns.find({"Parameters_dict.kymin": 160},{"Parameters_dict.kymin":1})`    
+   * `db.LinearRuns.find({"Parameters.kymin": {$lt: 20}}).count()`   
+   * `db.LinearRuns.find({"Parameters.kymin": 160},{"Parameters.kymin":1})`    
    * `db.fs.files.find({$text:{$search : "\"autopar_0013\""}}).pretty()`   
    (text index needs to be created first. In mongo shell, type `db.collection.createIndex( { "$**": "text" } )` check [here](https://docs.mongodb.com/v3.2/core/index-text/) for details) 
   
@@ -86,6 +86,7 @@ New directory will be created if it does not exist.
 
 ## Some concerns during test.
 * User must have an account on the server. Upload/Download is indirect : local--server--database.  
+* Uploading with command line will have a DIFFERENT `run_collection_name` than the case when the SAME folder is uploaded via the mgk gui.  
 * Parameters should be named like "parameters.dat" or "parameters_suffix"(suffix can be something like 0001, 01, ...) for the script to scan correctly.  
 * If two files sharing the same prefix as in the DOC list, for example "parameters" and "parameters_0001", both files will be uploaded, but the objectId of "parameters" will not be recorded in the summary dictionary. Instead, its objectId will be
 collected into an *ex* collection. You may choose to add it back to some collections. If not, the database admin will drop this collection and the physical storage for them on a regular basis. You may change the filename of the file you do not want to upload to avoid this.  For example, 'parameters' -> '_parameters'. 

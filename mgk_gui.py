@@ -1266,7 +1266,7 @@ class View_window(Frame):
             self.runs_coll = self.database['database'].LinearRuns
         else:
             self.runs_coll = self.database['database'].NonlinRuns
-        print(self.query.get())
+#        print(self.query.get())
         q_dict = Str2Query(self.query.get())
         records = self.runs_coll.find(q_dict)
         self.ids_list = []

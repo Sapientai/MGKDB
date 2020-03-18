@@ -7,7 +7,7 @@ Created on Tue Jan  7 14:39:26 2020
 For downloading files from mgk_fusion in shell
 """
 
-from mgk_file_handling import download_dir_by_name, download_file_by_path, download_file_by_id, download_runs_by_id
+from mgk_file_handling import get_oid_from_query, Str2Query, download_dir_by_name, download_file_by_path, download_file_by_id, download_runs_by_id
 import gridfs
 from mgk_login import mgk_login
 import argparse
@@ -20,6 +20,7 @@ from bson.objectid import ObjectId
 #==========================================================
 parser = argparse.ArgumentParser(description='Process input for downloading files')
 
+parser.add_argument('-Q', '--query', default= None,help='mongodb query')
 parser.add_argument('-T', '--target', default= None,help='run collection_name, i.e. gene output folder path')
 parser.add_argument('-F', '--file', default = None, help='filename to be downloaded if any')
 parser.add_argument('-C', '--collection', default = None, help='collection name in the database')
@@ -37,6 +38,7 @@ OID = args.objectID
 destination = args.destination
 collection = args.collection
 fname = args.saveas
+query = args.query
 
 '''
 The login module
@@ -71,7 +73,20 @@ else:
 
 database = login.connect()
 
-if filepath:
+if query:
+#    print(query[1])
+#    print(query[23])
+    print("working on query: {} ......".format(query))
+    if collection in ['linear', 'Linear', 'LinearRuns']:
+        found = get_oid_from_query(database, database.LinearRuns, Str2Query(query))
+        for oid in found:
+            download_runs_by_id(database, database.LinearRuns, oid, destination)
+    elif collection in ['nonlinear','Nonlinear', 'NonlinRuns']:
+        found = get_oid_from_query(database, database.NonlinRuns, Str2Query(query))
+        for oid in found:
+            download_runs_by_id(database, database.NonlinRuns, oid, destination)
+        
+elif filepath:
     download_file_by_path(database, filepath, destination, revision=-1, session=None)   
     
 elif OID:

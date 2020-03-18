@@ -387,6 +387,41 @@ def Array2Dict_dim2(npArray, row_keys=None, col_keys=None):
             arraydict[str(i)] = row_dict
         
     return arraydict
+
+def Rep_OID(dic):
+    '''
+    Check a dictionary tree and replace any 'ObjectId' string to ObjectId object
+    '''
+    for key, val in dic.items():
+        if isinstance(val, str) and 'ObjectId' in val:
+#            oid_str = val[8:-1]
+            oid_str = val[val.find('(')+1: val.find(')')].strip()
+            dic[key] = ObjectId(oid_str)
+
+        elif isinstance(val, dict):
+            dic[key] = Rep_OID(val)
+    return dic
+
+def Str2Query(s):
+    '''
+    Convert a string s to python dictionary for querying the database
+    '''
+    q_dict = json.loads(s)
+    q_dict = Rep_OID(q_dict)
+    
+    return q_dict
+
+def get_oid_from_query(db, collection, query):
+    
+    records_found = collection.find(query)
+    
+    oid_list = []
+    
+    for record in records_found:
+        oid_list.append(record['_id'])
+        
+    
+    return oid_list
     
 import pickle
 from bson.binary import Binary

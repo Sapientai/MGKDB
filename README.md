@@ -1,3 +1,20 @@
+# **MGKDB**
+========
+
+On this page:  
+
+* [Play it locally](#markdown-header-play-it-locally)  
+
+* [Test it on Cori](#markdown-header-test-it-on-cori)  
+    * [Use command line](#markdown-header-test-it-on-cori)  
+    * [Use Gui](#markdown-header-use-gui)
+    * [Retrieving files from database](#markdown-header-retrieving-files-from-database)
+
+* [Some concerns during test](#markdown-header-some-concerns-during-test)  
+
+---
+
+
 ## Play it locally
 
 1. Download [MongoDB](https://www.mongodb.com/what-is-mongodb) and install it according to the [documentation](https://docs.mongodb.com/manual/administration/install-community/). If you would also like a gui, you can also download [MongoDB Compass](https://www.mongodb.com/products/compass)
@@ -72,7 +89,7 @@ mongo -u username -p pass mongodb03.nersc.gov/mgk_fusion
    * Click "connect".      
 6. You can also connect by pasting the connection string:  
 `mongodb://USER:PASS@localhost:2222/?authSource=mgk_fusion&readPreference=primary&appname=MongoDB%20Compass&ssl=false`  
-### Retrieving files from database    
+#### Retrieving files from database    
 * Save the file with tag ObjectId(5e150c312038695f1da2e956) to *directory/newname*  
 `python3 mgk-dev/mgk_download.py -A My_mgk_login.pkl -OID 5e150c312038695f1da2e956 -D directory -S newname`  
 * Save the file with tag *filepath* to *directory*:  

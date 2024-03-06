@@ -49,14 +49,6 @@ On this page:
    * `db.LinearRuns.find({"Parameters.kymin": 160},{"Parameters.kymin":1})`    
    * `db.fs.files.find({$text:{$search : "\"autopar_0013\""}}).pretty()`   
    (text index needs to be created first. In mongo shell, type `db.collection.createIndex( { "$**": "text" } )` check [here](https://docs.mongodb.com/v3.2/core/index-text/) for details) 
-  
-8. Many parts are still under construction.   
-   * Default QoIs to get from each run.  Need update in `get_QoI_from_run` in `mgk_post_processing.py` for adding these quantities.    
-   * Integrity check.  
-   * Put the database in a remote server and authentication management for different users.    
-   * Other user interfaces such as a web based frontend.    
-   * Visualizations after the scan and visualization option after querying the database.  
-   * Compatibilities with other tools.
 
 ## Test it on Cori
 

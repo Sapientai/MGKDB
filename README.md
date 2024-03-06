@@ -3,7 +3,7 @@
 
 On this page:  
 
-* [Play it locally](#markdown-header-play-it-locally)  
+* [Test it locally](#markdown-header-play-it-locally)  
 
 * [Test it on Cori](#markdown-header-test-it-on-cori)  
     * [Use command line](#markdown-header-test-it-on-cori)  

@@ -69,14 +69,8 @@ On this page:
 3. If this is the first time you upload files, it will ask you to type login credentials. You need to get a username and pass for the database. (Just email me with your preferred name and pass, I will then create read/write access for you).  
 The default value for server, port, database name are:  **mongodb03.nersc.gov, 27017, mgk_fusion**. You will have the option to save the credential after you finished manually entering these info.
 After you choose to save it. You can use `-A` option to locate your saved `.pkl` file to make uploads next time. For example `python3 mgk-dev/mgk_uploader.py -T /global/homes/d/dykuang/mgk-dev/data_linear_multi -A DK_mgk_login_admin.pkl`
-#### Use Gui
-1. After installing MongoCompass locally, you can view the database locally following the instructions below.
-
-
-
-### Using MongoDB Compass
-Another method is to use a GUI such as MongDB Compass.
-* Download [MongoDB Compass](https://www.mongodb.com/products/compass)
+#### Use GUI: MongoDB Compass
+* Download [MongoDB Compass](https://www.mongodb.com/products/compass) and install it
 * On the terminal, forward the ssh tunnel port to a local port : `ssh -i .ssh/nersc -f <nersc_username>@perlmutter.nersc.gov -L 2222:mongodb03.nersc.gov:27017 -N
 `. I used 2222 here, but you can use other port specifications.
     You will be asked to provide login credentials on perlmutter for this.

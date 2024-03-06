@@ -111,13 +111,6 @@ mongo -u <db_username> -p <db_password> mongodb03.nersc.gov/mgk_fusion
 1. Cloning the repo via git.  
 2. Load python3 via `module load python3` 
 
-#### Use Command Line
-1. Run the uploader by `python3 mgk-dev/mgk_uploader.py -T /global/homes/d/dykuang/mgk-dev/data_linear_multi`.  Option -T is for specifying your target folder. Use option --help for display other options information.  
-2. If you encounter "module not found" error. You can use `conda install`. For example, `conda install pymongo`.  
-3. If this is the first time you upload files, it will ask you to type login credentials. You need to get a username and pass for the database. (Just email me with your preferred name and pass, I will then create read/write access for you).  
-The default value for server, port, database name are:  **mongodb03.nersc.gov, 27017, mgk_fusion**. You will have the option to save the credential after you finished manually entering these info.
-After you choose to save it. You can use `-A` option to locate your saved `.pkl` file to make uploads next time. For example `python3 mgk-dev/mgk_uploader.py -T /global/homes/d/dykuang/mgk-dev/data_linear_multi -A DK_mgk_login_admin.pkl`
-
 #### Use GUI: MongoDB Compass
 * Download [MongoDB Compass](https://www.mongodb.com/products/compass) and install it
 * On the terminal, forward the ssh tunnel port to a local port : `ssh -i .ssh/nersc -f <nersc_username>@perlmutter.nersc.gov -L 2222:mongodb03.nersc.gov:27017 -N

@@ -7,15 +7,12 @@ On this page:
 
 * [Test it on Cori](#markdown-header-test-it-on-cori)  
     * [Use command line](#markdown-header-test-it-on-cori)  
-    * [Use Gui](#markdown-header-use-gui)
     * [Retrieving files from database](#markdown-header-retrieving-files-from-database)
-
-* [Some concerns during test](#markdown-header-some-concerns-during-test)  
 
 ---
 
 
-## Play it locally
+## Test DB  locally
 
 1. Download [MongoDB](https://www.mongodb.com/what-is-mongodb) and install it according to the [documentation](https://docs.mongodb.com/manual/administration/install-community/). If you would also like a gui, you can also download [MongoDB Compass](https://www.mongodb.com/products/compass)
 
@@ -73,15 +70,7 @@ On this page:
 The default value for server, port, database name are:  **mongodb03.nersc.gov, 27017, mgk_fusion**. You will have the option to save the credential after you finished manually entering these info.
 After you choose to save it. You can use `-A` option to locate your saved `.pkl` file to make uploads next time. For example `python3 mgk-dev/mgk_uploader.py -T /global/homes/d/dykuang/mgk-dev/data_linear_multi -A DK_mgk_login_admin.pkl`
 #### Use Gui
-1. In order for the GUI to work, you must login to cori via -Y option `ssh -l username -Y cori.nersc.gov`.      
-2. Load python3 and then run "python3 /path_to/gui_utils.py".    
-3. If everything went smoothly, you will see informations like "... successfully" printed on terminal. If not, please shoot me an email with the error message, so that I can try to locate the error.  
-4. You can also entering the mongo shell to check what is in the database now. Modify the following shell script and save it for your convenience.    
-```
-module load mongodb
-mongo -u username -p pass mongodb03.nersc.gov/mgk_fusion
-```       
-5. If you had MongoCompass installed locally, you are also able to view the database locally following the instructions below.  
+1. After installing MongoCompass locally, you can view the database locally following the instructions below.  
    * Forward the ssh tunnel port to a local port : `ssh -i .ssh/nersc -f YOURACCOUNT@cori.nersc.gov -L 2222:mongodb03.nersc.gov:27017 -N`. I used 2222 here, but you can use other port specifications.
     You will be asked to provide login credentials on cori for this.    
    * At the start page, fill in fields as below:(Replace the username and password with yours.)  
@@ -89,6 +78,7 @@ mongo -u username -p pass mongodb03.nersc.gov/mgk_fusion
    * Click "connect".      
 6. You can also connect by pasting the connection string:  
 `mongodb://USER:PASS@localhost:2222/?authSource=mgk_fusion&readPreference=primary&appname=MongoDB%20Compass&ssl=false`  
+
 #### Retrieving files from database    
 * Save the file with tag ObjectId(5e150c312038695f1da2e956) to *directory/newname*  
 `python3 mgk-dev/mgk_download.py -A My_mgk_login.pkl -OID 5e150c312038695f1da2e956 -D directory -S newname`  
@@ -101,13 +91,5 @@ mongo -u username -p pass mongodb03.nersc.gov/mgk_fusion
 
 New directory will be created if it does not exist.
 
-## Some concerns during test.
-* User must have an account on the server. Upload/Download is indirect : local--server--database.  
-* Uploading with command line will have a DIFFERENT `run_collection_name` than the case when the SAME folder is uploaded via the mgk gui.  
-* Parameters should be named like "parameters.dat" or "parameters_suffix"(suffix can be something like 0001, 01, ...) for the script to scan correctly.  
-* If two files sharing the same prefix as in the DOC list, for example "parameters" and "parameters_0001", both files will be uploaded, but the objectId of "parameters" will not be recorded in the summary dictionary. Instead, its objectId will be
-collected into an *ex* collection. You may choose to add it back to some collections. If not, the database admin will drop this collection and the physical storage for them on a regular basis. You may change the filename of the file you do not want to upload to avoid this.  For example, 'parameters' -> '_parameters'. 
-* The option multipleruns is not tested. "permission error" on cori.
-* If using mongodb compass, it is better to refresh the connection after you made some update, so that it shows the most recent results.  
-* If using GUI, you may expect quite a response latency while using the "Browse" button for selecting target folder to upload if it is relatively "far away" from currently location. You can just type it the path in the entry to reduce this latency.  
-* If you had Read/Write access to the database, be careful while using mongodb compass, you may accidently modify the database.  
+### Caution:
+* If you have Read/Write access to the database, be careful while using mongodb compass, you may accidently modify the database.  

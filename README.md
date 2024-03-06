@@ -3,7 +3,7 @@
 
 On this page:  
 
-* [Play it locally](#markdown-header-play-it-locally)  
+* [Test it locally](#markdown-header-play-it-locally)  
 
 * [Test it on Cori](#markdown-header-test-it-on-cori)  
     * [Use command line](#markdown-header-test-it-on-cori)  
@@ -69,15 +69,16 @@ On this page:
 3. If this is the first time you upload files, it will ask you to type login credentials. You need to get a username and pass for the database. (Just email me with your preferred name and pass, I will then create read/write access for you).  
 The default value for server, port, database name are:  **mongodb03.nersc.gov, 27017, mgk_fusion**. You will have the option to save the credential after you finished manually entering these info.
 After you choose to save it. You can use `-A` option to locate your saved `.pkl` file to make uploads next time. For example `python3 mgk-dev/mgk_uploader.py -T /global/homes/d/dykuang/mgk-dev/data_linear_multi -A DK_mgk_login_admin.pkl`
-#### Use Gui
-1. After installing MongoCompass locally, you can view the database locally following the instructions below.  
-   * Forward the ssh tunnel port to a local port : `ssh -i .ssh/nersc -f YOURACCOUNT@cori.nersc.gov -L 2222:mongodb03.nersc.gov:27017 -N`. I used 2222 here, but you can use other port specifications.
-    You will be asked to provide login credentials on cori for this.    
-   * At the start page, fill in fields as below:(Replace the username and password with yours.)  
-![picture](mongocompasslogin.png)     
-   * Click "connect".      
-6. You can also connect by pasting the connection string:  
-`mongodb://USER:PASS@localhost:2222/?authSource=mgk_fusion&readPreference=primary&appname=MongoDB%20Compass&ssl=false`  
+#### Use GUI: MongoDB Compass
+* Download [MongoDB Compass](https://www.mongodb.com/products/compass) and install it
+* On the terminal, forward the ssh tunnel port to a local port : `ssh -i .ssh/nersc -f <nersc_username>@perlmutter.nersc.gov -L 2222:mongodb03.nersc.gov:27017 -N
+`. I used 2222 here, but you can use other port specifications.
+    You will be asked to provide login credentials on perlmutter for this.
+* Now in the MongoDB Compass application, paste the following connection string (add your database username and password appropriately) in the **URL** block:  
+`mongodb://<db_username>:<db_password>@localhost:2222/?authSource=mgk_fusion&readPreference=primary&directConnection=true&ssl=false`
+* Click connect 
+* Once you're logged in, you can click on mgk_fusion on the left side panel to view the database 
+
 
 #### Retrieving files from database    
 * Save the file with tag ObjectId(5e150c312038695f1da2e956) to *directory/newname*  

@@ -18,7 +18,7 @@ On this page:
 
 2. If successfully installed, you are probably now in mongo shell environment. You can now create a local database (For test) by   
 ```
-   use mgk_fusion  ----- % create an empty database with name 'mydb'   
+   use mgk_fusion  ----- % create an empty database with name 'mgk_fusion'   
 
    db.createUser(   
     {   

@@ -111,7 +111,7 @@ mongo -u <db_username> -p <db_password> mongodb03.nersc.gov/mgk_fusion
 1. Cloning the repo via git.  
 2. Load python3 via `module load python3` 
 
-#### Use GUI: MongoDB Compass
+### Use GUI: MongoDB Compass
 * Download [MongoDB Compass](https://www.mongodb.com/products/compass) and install it
 * On the terminal, forward the ssh tunnel port to a local port : `ssh -i .ssh/nersc -f <nersc_username>@perlmutter.nersc.gov -L 2222:mongodb03.nersc.gov:27017 -N
 `. I used 2222 here, but you can use other port specifications.

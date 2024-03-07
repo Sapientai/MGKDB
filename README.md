@@ -60,8 +60,10 @@ mongo -u <db_username> -p <db_password> mongodb03.nersc.gov/mgk_fusion
 Please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/MGKDB-at-NERSC) for step-by-step instructions for these
 
 ### GUI : Using MongoDB Compass
-
-Detailed instructions are provided [here](https://github.com/Sapientai/MGKDB/wiki/MGKDB-at-NERSC) 
+* On your laptop terminal, forward the ssh tunnel port to a local port : ssh -i .ssh/nersc -f <nersc_username>@perlmutter.nersc.gov -L 2222:mongodb03.nersc.gov:27017 -N . You can use any other port instead of 2222 above. You will be asked to provide login credentials on perlmutter for this.
+* Now in the MongoDB Compass application, paste the following connection string (add your database username and password appropriately) in the URL block: * mongodb://<db_username>:<db_password>@localhost:2222/?authSource=mgk_fusion&readPreference=primary&directConnection=true&ssl=false
+* Click connect
+* Once you're logged in, you can click on mgk_fusion on the left side panel to view the database
 
 ### Caution:
 * If you have Read/Write access to the database, be careful while using mongodb compass, you may accidently modify the database.  

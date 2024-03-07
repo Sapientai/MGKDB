@@ -14,7 +14,7 @@ You can build and interact with the database via at least 3 methods:
    * [Pymongo](https://api.mongodb.com/python/current/api/index.html)  
    * The GUI, such as MongoDB Compass.  
 
-Please refer to this [Wiki] (https://github.com/Sapientai/MGKDB/wiki/Local-MGKDB) for step-by-step instructions on building MGKDB locally
+Please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/MGKDB-at-NERSC) for step-by-step instructions on building MGKDB locally
 
 ## Connecting to MGKDB on NERSC
 
@@ -60,7 +60,7 @@ mongo -u <db_username> -p <db_password> mongodb03.nersc.gov/mgk_fusion
 1. Cloning the repo via git.  
 2. Load python3 via `module load python3` 
 
-Please refer to the Wiki for step-by-step instructions for these
+Please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/Local-MGKDB) for step-by-step instructions for these
 
 ### Caution:
 * If you have Read/Write access to the database, be careful while using mongodb compass, you may accidently modify the database.  

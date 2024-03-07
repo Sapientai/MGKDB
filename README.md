@@ -17,16 +17,15 @@ You can build and interact with the database via at least 3 methods:
 Please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/MGKDB-at-NERSC) for step-by-step instructions on building MGKDB locally
 
 ## Connecting to MGKDB on NERSC
-
-1. Clone the repo : `git@github.com:Sapientai/MGKDB.git`  
-2. Load python3 :  `module load python3` 
-
 Users can interact with the database in 3 ways: 
 
 ### Using Command Line tools
 Command line tools can be used to download data from the database and upload data to the database.
 
-#### Supplying Credentials
+1. Clone the repo : `git@github.com:Sapientai/MGKDB.git`  
+2. Load python3 :  `module load python3` 
+
+##### Supplying Credentials
 When using these command line scripts, users will need to provide credentials to access the database in one of two ways:  
 * Provide a .pkl file with credentials \
 or \
@@ -57,10 +56,12 @@ module load mongodb/4.0.28
 mongo -u <db_username> -p <db_password> mongodb03.nersc.gov/mgk_fusion
 ```
 3. Now, one can use `db` commands.
-1. Cloning the repo via git.  
-2. Load python3 via `module load python3` 
 
 Please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/MGKDB-at-NERSC) for step-by-step instructions for these
+
+### GUI : Using MongoDB Compass
+
+Detailed instructions are provided [here](https://github.com/Sapientai/MGKDB/wiki/MGKDB-at-NERSC) 
 
 ### Caution:
 * If you have Read/Write access to the database, be careful while using mongodb compass, you may accidently modify the database.  

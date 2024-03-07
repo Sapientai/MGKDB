@@ -14,7 +14,7 @@ You can build and interact with the database via at least 3 methods:
    * [Pymongo](https://api.mongodb.com/python/current/api/index.html)  
    * The GUI, such as MongoDB Compass.  
 
-Please refer to the Wiki for step-by-step instructions on building MGKDB locally
+Please refer to this [Wiki page](https://github.com/Sapientai/MGKDB/wiki/Local-MGKDB) for step-by-step instructions on building MGKDB locally
 
 ## Connecting to MGKDB on NERSC
 

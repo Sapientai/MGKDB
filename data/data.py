@@ -1,110 +1,81 @@
 """ Module containing the Data class"""
 # -*- coding: utf-8 -*-
 
-import warnings
-from data.base_file import create_GENEfile
-import utils.fourier as fourier
-
+from data.base_file import GENEfile
+import numpy as np
 
 class Data:
-    """ Class to provide the data of a simulation run from the different GENE files"""
-    def __init__(self):
-        self.avail_vars = {}
-        self.run_data = None
-        self.field = None
-        self.avail_times = None
+    """ Class to provide the data containers of a GENE parameters/simulation"""
+    def __init__(self, in_folder, extensions, runs=None):  
+        self.av_vars = {'field': False,
+                        'mom': False}
+    
+        self.av_times={'field': None,
+                        'mom': None}
+        self.field=None
+        self.mom=[]
+        
+        if runs:
+            if not isinstance(runs, list):
+                runs = [runs]
+            if not isinstance(extensions, list):
+                extensions = [extensions]
+            for run,ext in zip(runs,extensions):
+                self.__map_a_run(in_folder, ext, run.parameters)
+                
+                    
+    def __map_a_run(self, folder, extension, parameters):
+        """
+        for each field that has been saved in this restart we
+        1. create a file object if needed,
+        2. update the available variables
+        3. get the times
+        """
+        # field file
+        if parameters.pnt.istep_field > 0:
+            if not self.av_vars['field']:
+                self.field=GENEfile(folder, extension, 'field', parameters)
+                self.av_vars['field']=True
+                t,s,f=self.field.get_times_and_inds()
+                self.av_times['field']=TimeStep(t,s,f)
+            else:    
+                self.field.redirect(folder,extension, parameters)
+                t,s,f=self.field.get_times_and_inds()
+                self.av_times['field'].join_continuation(t,s,f)
+                
+        # mom files
+        if parameters.pnt.istep_mom > 0:
+            if not self.av_vars['mom']:
+                self.av_vars['mom']=True
+                for i_spec in np.arange(parameters.pnt.n_spec):
+                    self.mom.append(GENEfile(folder, extension, 'mom', parameters,parameters.species[i_spec]['name']))
+                
+                t,s,f=self.mom[0].get_times_and_inds()
+                self.av_times['mom']=TimeStep(t,s,f)
+            else:    
+                self.field.redirect(folder,extension,parameters)
+                t,s,f=self.field.get_times_and_inds()
+                self.av_times['mom'].join_continuation(t,s,f)
+   
 
-    def load_in(self, run_data, extensions=None):
-        """ Load the GENE files that are present"""
-        class AvailableTimes:
-            pass
 
-        class TimeStep:
-            def __init__(self, times, steps, files):
-                self.times = times
-                self.steps = steps
-                self.files = files
+class AvailableTimes:
+    pass
 
-        self.avail_times = AvailableTimes()
 
-        self.run_data = run_data
-
-        # **********************************
-        # add other outputs here  once coded
-        # **********************************
-#TODO: embed this into a method
-
-        # Field file
-        if run_data.pnt.istep_field > 0:
-            self.field = create_GENEfile('field', run_data, spec=None,
-                                         extensions=extensions)
-            self.avail_vars = {'field': self.field.varname}
-            times, steps, files = self.field.set_times_and_inds()
-            self.avail_times.field = TimeStep(times, steps, files)
-
-        # mom are same for all species, so we create an object for each species
-        # but one entry for times
-        if run_data.pnt.istep_mom > 0:
-            for specname in run_data.specnames:
-                setattr(self, 'mom_' + specname,
-                        create_GENEfile('mom', run_data, spec=specname,
-                                        extensions=extensions))
-
-            self.avail_vars.update(
-                    {'mom':
-                        getattr(getattr(self, 'mom_' + run_data.specnames[0]),
-                                'varname')})
-            times, steps, files = getattr(getattr(self, 'mom_' +
-                                                  run_data.specnames[0]), 'set_times_and_inds')()
-            setattr(self.avail_times, 'mom', TimeStep(times, steps, files))
-
-        if run_data.pnt.istep_srcmom > 0:
-            for specname in run_data.specnames:
-                setattr(self, 'srcmom_' + specname,
-                        create_GENEfile('srcmom', run_data, spec=specname,
-                                        extensions=extensions))
-            self.avail_vars.update(
-                    {'srcmom':
-                        getattr(getattr(self, 'srcmom_' +
-                                        run_data.specnames[0]), 'varname')})
-            times, steps, files = getattr(getattr(self, 'srcmom_' +
-                                                  run_data.specnames[0]),
-                                            'set_times_and_inds')()
-            setattr(self.avail_times, 'srcmom', TimeStep(times, steps, files))
-
-        if run_data.pnt.istep_vsp > 0:
-            self.vsp = create_GENEfile('vsp', run_data, spec=None,
-                                       extensions=extensions)
-            self.avail_vars.update({'vsp': self.vsp.varname})
-            times, steps, files = self.vsp.set_times_and_inds()
-            setattr(self.avail_times, 'vsp', TimeStep(times, steps, files))
-
-    def apply_fouriertransforms(self, diagspace, var, geom):
-        """ Fourier transform the data as required by a diagnostic"""
-        if diagspace.xavg and diagspace.yavg:  # Nothing to do if both are averaged
-            return var
-        xaxis = -3  # By default the last three dimensions of var are x, y, z.
-        yaxis = -2  # This is changed if averages are applied
-        zaxis = -1
-        if diagspace.yavg:
-            xaxis += 1
-            yaxis += 1
-        if diagspace.zavg:
-            xaxis += 1
-            yaxis += 1
-
-        if diagspace.x_fourier != self.run_data.x_local and not diagspace.xavg:
-            if self.run_data.x_local:
-                var = fourier.kx_to_x(var, self.run_data.pnt.nx0, axis=xaxis)
+class TimeStep:
+    def __init__(self, times, steps, files):
+        self.times = times  # times in GENE units
+        self.steps = steps  # step in the file 
+        self.files = files  # file extension      
+        
+    def join_continuation(self, times, steps, files):
+        self.steps = np.append(self.steps[self.times<times[0]], steps)
+        for i, e in reversed(list(enumerate(self.files))):
+            if not self.times[i] < times[0]:
+                self.files.remove(e)
             else:
-                var = fourier.x_to_kx(var, axis=xaxis)
-        if diagspace.y_fourier != self.run_data.y_local and not diagspace.yavg:
-            if self.run_data.y_local:
-                var = fourier.ky_to_y(var, self.run_data.pnt.nky0, axis=yaxis)
-            else:
-                if self.run_data.x_local:
-                    warnings.warn("y-global is not supported", RuntimeWarning)
-                var = fourier.y_to_ky(var, geom, axis=yaxis)
-        if diagspace.z_fourier:
-            var = fourier.z_to_kz(var, geom, axis=zaxis)
-        return var
+                break
+        self.files.extend(files)
+        self.times = np.append(self.times[self.times<times[0]], times)
+        

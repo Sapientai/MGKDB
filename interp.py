@@ -1,6 +1,5 @@
-import numpy as np
 from scipy import interpolate
-import matplotlib.pyplot as plt
+import numpy as np
 
 def interp(xin,yin,xnew):
     """
@@ -17,7 +16,7 @@ def interp(xin,yin,xnew):
 
     return yout
 
-def full_interp(func_xin,xin,xconv,yconv,yout,verify_interp = False):
+def full_interp(func_xin,xin,xconv,yconv,yout):
     """
     Takes function func_xin on grid xin and outputs the function on yout grid
     func_xin: function to interpolate
@@ -28,34 +27,23 @@ def full_interp(func_xin,xin,xconv,yconv,yout,verify_interp = False):
     """
 
     #If necessary truncate func_xin onto correct range
-    #if xin[0] < xconv[0]:
-    #    low_index = np.argmin(abs(xconv-xin[0]))
-    #else:
-    #    low_index = 0
-    #if xin[-1] > xconv[-1]:
-    #    high_index = np.argmin(abs(xconv-xin[-1]))
-    #else:
-    #    high_index = -1
-#
-#    if high_index == -1:
-#        func_xin = func_xin[low_index:]
-#        xin = xin[low_index:]
-#    else:
-#        func_xin = func_xin[low_index:high_index]
-#        xin = xin[low_index:high_index]
+    if xin[0] < xconv[0]:
+        low_index = np.argmin(abs(xconv-xin[0]))
+    else:
+        low_index = 0
+    if xin[-1] > xconv[-1]:
+        high_index = np.argmin(abs(xconv-xin[-1]))
+    else:
+        high_index = -1
 
-    #print len(xin),len(func_xin),len(xconv)
-    #plt.plot(xin)
-    #plt.plot(xconv)
-    #plt.show()
+    if high_index == -1:
+        func_xin = func_xin[low_index:]
+    else:
+        func_xin = func_xin[low_index:high_index]
+
     func_xconv = interp(xin,func_xin,xconv)
     func_yout = interp(yconv,func_xconv,yout)
-    xout = interp(yconv,xconv,yout) 
-    if verify_interp:
-        plt.plot(xin,func_xin,'x',label='Original')
-        plt.plot(xout,func_yout,label='New')
-        plt.legend()
-        plt.show()
-    
+
     return func_yout
+
 

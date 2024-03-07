@@ -31,7 +31,7 @@ class Plotting:
             mpl.rc('font', size=15)
         else:
             self.cmap_unidirect = mpl.cm.viridis
-            mpl.rc('font', size=20)
+            mpl.rc('font', size=15)
         # for quantities with critical value (e.g. 0 for phi)
         self.cmap_bidirect = mpl.cm.bwr
         self.color_list = plt.cm.Dark2(np.linspace(0, 1.0, 9))  # Plot line colors
@@ -42,7 +42,7 @@ class Plotting:
         mpl.rc('figure', facecolor=(1, 1, 1, 0))
         mpl.rc('figure', frameon=False)
         mpl.rc('savefig', facecolor=(1, 1, 1, 0))
-        mpl.rc('savefig', frameon=False)
+        #mpl.rc('savefig', frameon=False)
         # mpl 1.5 introduces a new, more flexible prop_cycle parameter, so different line styles
         # can be defined in the else case as well
         if parse_version(mpl.__version__) <= parse_version("1.4"):
@@ -55,12 +55,20 @@ class Plotting:
                        'Gammanc': r'$\Gamma_{\mathrm{NC}}/\Gamma_{gB}$',
                        'Qturb': r'$Q_{\mathrm{turb}}/Q_{gB}$', 'Qnc': r'$Q_{\mathrm{NC}}/Q_{gB}$',
                        'Piturb': r'$\Pi_{\mathrm{turb}}/\Pi_{gB}$',
-                       'Pinc': r'$\Pi_{\mathrm{turb}}/\Pi_{gB}$', "jbs": r'$j_\mathrm{BS}$',
-                       "phi": r"$\phi$", "apar": r"$A_\parallel$", "dens": r"$n$",
-                       "tpar": r"$T_\parallel$", "tperp": r"$T_\perp$",
+                       'Pinc': r'$\Pi_{\mathrm{turb}}/\Pi_{gB}$', 
+                       "jbs": r'$j_\mathrm{BS}$',
+                       "phi": r"$\phi$", 
+                       "apar": r"$A_\parallel$", 
+                       "dens": r"$n$",
+                       "tpar": r"$T_\parallel$", 
+                       "tperp": r"$T_\perp$",
                        "qpar": r"$q_\parallel + 1.5p_0 u_\parallel$",
-                       "qperp": r"$q_\perp + p_0 u_\parallel$", "upar": r"$u_\parallel$",
-                       "bpar": r"$B_\parallel$"}
+                       "qperp": r"$q_\perp + p_0 u_\parallel$", 
+                       "upar": r"$u_\parallel$",
+                       "densI1": r"$nI1$",
+                       "TparI1": r"$TparI1$",
+                       "TppI1": r"$TppI1$",
+                       "bpar":  r"$B_\parallel$"}
 
     def plot_contour_quant(self, ax, fig, x, y, data, is_complex, xlabel=None, ylabel=None,
                            title=None, is_bidirect=False, axcb=None):

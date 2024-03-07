@@ -3,7 +3,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
-import utils.averages as averages
+import putils.averages as averages
 
 from diagnostics.diagnostic import Diagnostic
 from diagnostics.baseplot import Plotting
@@ -40,13 +40,14 @@ class DiagContours(Diagnostic):
                      "zind": {'tag': "z ind", 'values': None},
                      "f_x": {'tag': "Fourier x", 'values': [False, True]},
                      "f_y": {'tag': "Fourier y", 'values': [False, True]},
-                     'save_h5': {'tag': "Save h5", 'values': [True, False]},
+                     'save_h5': {'tag': "Save h5", 'values': [False, True]},
                      't_avg': {'tag': "t avg", 'values': [False, True]}, }
 
         self.set_defaults()
 
         self.options_gui = Diagnostic.OptionsGUI()
         self.contours = {}
+        self.contours_parallel = {}
 
     def set_options(self, run_data, specnames=None):
 
@@ -54,47 +55,28 @@ class DiagContours(Diagnostic):
             raise RuntimeError("No quantities given for contours")
 
         # parallel position, unset mean outboard midplane, -1 all
-        zind = self.opts['zind']['value']
-        if not zind:
-            zind = int(run_data.pnt.nz0/2)
-            zrange = (zind, zind + 1)
-        elif zind == -1:
-            zind = None
-            zrange = (None, None)
-        else:
-            zrange = (zind, zind + 1)
+        self.z_ind = self.opts['zind']['value']
+        self.z_avg = False
+        if self.zind == -1:
+            self.z_avg = True
 
         # radial position, unset or -1 means all
-        xind = self.opts['xind']['value']
-        if not xind or xind == -1:
-            xind = None
-            xrange = (None, None)
-        else:
-            xrange = (xind, xind + 1)
+        self.x_ind = self.opts['xind']['value']
+        self.x_avg = False
+        if self.x_ind == -1:
+            self.x_avg = True
 
-        # binormal position, unset means zero, -1 means all
-        yind = self.opts['yind']['value']
-
-        if not yind or yind == -1:
-            yind = None
-            yrange = (None, None)
-        else:
-            yrange = (yind, yind + 1)
+        # radial position, unset or -1 means all
+        self.y_ind = self.opts['yind']['value']
+        self.y_avg = False
+        if self.y_ind == -1:
+            self.y_avg = True
 
         # Fourier in x
-        x_fourier = self.opts['f_x']['value']
-
+        self.x_fourier = self.opts['f_x']['value']
         # Fourier in y
-        y_fourier = self.opts['f_y']['value']
+        self.y_fourier = self.opts['f_y']['value']
 
-        # diagspace is unique for each call, so it can be here
-        # it should however be outside, since we can construct all grids
-        # and have them in common for all diagnostics and select here only
-        # the indexes we weant to plot
-        self.diagspace = DiagSpace(run_data.spatialgrid, x_fourier, y_fourier, False, xrange,
-                                   yrange, zrange, False, False, False)
-
-        self.geom = run_data.geometry
         self.run_data = run_data
 
         # This is special since we dont save stuff by default, so just do what we need
@@ -118,7 +100,7 @@ class DiagContours(Diagnostic):
 
         return self.needed_vars
 
-    def execute(self, data, step):
+    def execute(self, data, parameters, geometry, spatialgrid,  step):
         """ not much to do other than appending data """
 
         # loop over files
@@ -129,26 +111,17 @@ class DiagContours(Diagnostic):
                 if self.needed_vars[file][quant]:
                     if file == 'field':
                         # no species dependency
-                        data_in = getattr(getattr(data, file), quant)(step.time,
-                                                                      getattr(step, file))
-                        data_in = data.apply_fouriertransforms(self.diagspace, data_in, self.geom)
-                        self.contours[quant].append(data_in[self.diagspace.diagslice])
+                        data_in = getattr(data.field,'quant')(step.time, step.field, parameters)
+                        data_in = self._apply_fouriertransforms(data_in, geometry)
+                        self.contours[quant].append(data_in)
                     else:
                         # spec dependent
                         for spec in self.specnames:
-                            data_in = getattr(getattr(data, file + '_' + spec), quant)(step.time,
-                                                                                       getattr(step,
-                                                                                               file))
+                            data_in = getattr(getattr(data, file + '_' + spec), quant)(
+                                    step.time, step.field, parameters)
 
-                            # dont know if we should use this
-                            data_in = averages.av3d_by_switch(self.diagspace.xavg,
-                                                              self.diagspace.yavg,
-                                                              self.diagspace.zavg)(data_in,
-                                                                                   self.geom)
-                            data_in = data.apply_fouriertransforms(self.diagspace, data_in,
-                                                                   self.geom)
-                            self.contours[quant + '#' + spec].append(
-                                    data_in[self.diagspace.diagslice])
+                            data_in = self._apply_fouriertransforms(data_in, geometry)
+                            self.contours[quant + '#' + spec].append(data_in)
 
     def plot(self, time_requested, output=None, out_folder=None):
         """ Not much to explain """
@@ -164,6 +137,9 @@ class DiagContours(Diagnostic):
                     {"phi": r"$\phi$", "A_par": r"$A_{//}$", "B_par": r"$B_{//}$", "dens": r"$n$",
                      "T_par": r"T_{//}", "T_perp": r"T_{\perp}", "u_par": r"u_{//}",
                      "q_par": r"q_{//}", "q_perp": r"q_{\perp}"})
+
+        z_lbl = r"$z$"
+        z = self.run_data.spatialgrid.z
 
         if self.opts['f_x']['value']:
             x_lbl = r"$k_x\rho_{ref}$"
@@ -194,7 +170,8 @@ class DiagContours(Diagnostic):
                 ax = fig.add_subplot(111)
                 plotbase.plot_contour_quant(ax, fig, x, y,
                                             averages.mytrapz(self.contours[quant], time_requested),
-                                            is_f, x_lbl, y_lbl, ttl)
+                                            is_f, x_lbl, y_lbl, ttl, is_bidirect=True)
+
         else:
             for quant in self.contours:
                 ind_str = quant.find('#')
@@ -206,5 +183,15 @@ class DiagContours(Diagnostic):
                 fig = plt.figure()
                 ax = fig.add_subplot(111)
                 plotbase.plot_contour_quant_timeseries(ax, fig, x, y, self.contours[quant], is_f,
-                                                       time_requested, x_lbl, y_lbl, ttl)
+                                                       time_requested, x_lbl, y_lbl, ttl, is_bidirect=True)
+
+                fig = plt.figure()
+                ax = fig.add_subplot(111)
+                print(np.size(self.contours_parallel[quant]))
+                plotbase.plot_contour_quant_timeseries(ax, fig, x, z, self.contours_parallel[quant], is_f,
+                                                       time_requested, x_lbl, z_lbl, ttl, is_bidirect=True)
+
         plt.show()
+
+    def _apply_foutier_Transforms(self, data, geometry):
+        

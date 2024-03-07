@@ -36,6 +36,7 @@ from pathlib import Path
 import gridfs
 #import re
 #from sshtunnel import SSHTunnelForwarder
+from time import strftime
 import json
 #=======================================================
 # database specification. Local test
@@ -54,15 +55,14 @@ import json
 # =============================================================================
 
 # Default_Keys for summary files, keys should not contain '.' #
-Default_Keys = ['scan_id',  'submit_id',  'eqdisk_id' ]
+# Default_Keys = ['scan_id',  'submit_id',  'eqdisk_id' ]
 
 #==============================================================================
 #standard files#
 # Q: is geneerr with suffix? 
-Docs = ['autopar', 'codemods', 'energy',  'nrg', 
-              'parameters', 's_alpha', 'scan.log', 'scan_info.dat', 'geneerr.log']
-Keys = ['autopar', 'codemods', 'energy',  'nrg', 
-              'parameters', 's_alpha', 'scanlog', 'scaninfo', 'geneerr']
+
+Docs = ['autopar', 'codemods', 'nrg', 'omega','parameters']
+Keys = ['autopar', 'codemods', 'nrg', 'omega','parameters']
 
 #Large files#
 Docs_L = ['field', 'mom', 'vsp']
@@ -85,15 +85,11 @@ file_related_docs = Docs + Docs_L + Docs_ex
 
 
 def reset_docs_keys():
-    global Default_Keys, Docs, Keys, Docs_L, Keys_L, Docs_ex, Keys_ex, meta, file_related_keys,\
+    global Docs, Keys, Docs_L, Keys_L, Docs_ex, Keys_ex, meta, file_related_keys,\
            file_related_docs
     
-    Default_Keys = ['scan_id',  'submit_id',  'eqdisk_id' ]
-
-    Docs = ['autopar', 'codemods', 'energy', 'nrg',  
-                  'parameters', 's_alpha', 'scan.log', 'scan_info.dat', 'geneerr.log']
-    Keys = ['autopar', 'codemods', 'energy', 'nrg',  
-                  'parameters', 's_alpha', 'scanlog', 'scaninfo', 'geneerr']
+    Docs = ['autopar', 'codemods', 'nrg', 'omega','parameters']
+    Keys = ['autopar', 'codemods', 'nrg', 'omega','parameters']
     
     #Large files#
     Docs_L = ['field', 'mom', 'vsp']
@@ -297,20 +293,20 @@ def get_file_list(out_dir, begin):
     return files_list     
 
 
-def get_suffixes(out_dir):
-    suffixes = []
+# def get_suffixes(out_dir):
+#     suffixes = []
     
-    #scan files in GENE output directory, find all run suffixes, return as list
-    files = next(os.walk(out_dir))[2]
-    for count, name in enumerate(files, start=0):
-        if name.startswith('parameters_'):
-            suffix = name.split('_',1)[1]
-            if '_' not in suffix: # suffixes like "1_linear" will not be considered.
-                suffix = '_' + suffix
-                suffixes.append(suffix)
-        elif name.lower().startswith('parameters.dat'):
-            suffixes = ['.dat']                
-    return suffixes
+#     #scan files in GENE output directory, find all run suffixes, return as list
+#     files = next(os.walk(out_dir))[2]
+#     for count, name in enumerate(files, start=0):
+#         if name.startswith('parameters_'):
+#             suffix = name.split('_',1)[1]
+#             if '_' not in suffix: # suffixes like "1_linear" will not be considered.
+#                 suffix = '_' + suffix
+#                 suffixes.append(suffix)
+#         elif name.lower().startswith('parameters.dat'):
+#             suffixes = ['.dat']                
+#     return suffixes
 
 
 def gridfs_put(db, filepath):
@@ -446,7 +442,7 @@ def gridfs_put_npArray(db, value, filepath, filename):
     return obj_id  
     
     
-def load(db, collection, query, projection={'Meta':1, 'Diagnostics':1}, getarrays=True):
+def load(db, collection, query, projection={'Meta':1, 'gyrokinetics':1, 'Diagnostics':1}, getarrays=True):
     """Preforms a search using the presented query. For examples, see:
     See http://api.mongodb.org/python/2.0/tutorial.html
     The basic idea is to send in a dictionaries which key-value pairs like
@@ -650,29 +646,19 @@ def download_dir_by_name(db, runs_coll, dir_name, destination):
     #else:
     fs = gridfs.GridFSBucket(db)
     inDb = runs_coll.find({ "Meta.run_collection_name": dir_name })
-    
-    if inDb[0]['Files']['scanlog'] != 'None':
-        with open(os.path.join(path, 'scan.log'),'wb+') as f:
-            fs.download_to_stream(inDb[0]['Files']['scanlog'], f, session=None)
-            
-    if inDb[0]['Files']['scaninfo'] != 'None':
-        with open(os.path.join(path, 'scan_info.dat'),'wb+') as f:
-            fs.download_to_stream(inDb[0]['Files']['scaninfo'], f, session=None)
-    
+       
     if inDb[0]['Files']['geneerr'] != 'None':    
         with open(os.path.join(path, 'geneerr.log'),'wb+') as f:
             fs.download_to_stream(inDb[0]['Files']['geneerr'], f, session=None)
 
     for record in inDb:
         for key, val in record['Files'].items():
-            if val != 'None' and key not in ['scanlog', 'scaninfo', 'geneerr']:
+            if val != 'None' and key not in ['geneerr']:
                 filename = db.fs.files.find_one(val)['filename']
                 with open(os.path.join(path, filename),'wb+') as f:
 #                    fs.download_to_stream_by_name(filename, f, revision=-1, session=None)
                     fs.download_to_stream(val, f, session=None)
                 record['Files'][key] = str(val)
-        record['Files']['scanlog'] = str(record['Files']['scanlog'])
-        record['Files']['scaninfo'] = str(record['Files']['scaninfo'])
         record['Files']['geneerr'] = str(record['Files']['geneerr'])
         
         '''
@@ -750,23 +736,23 @@ def update_Meta(out_dir, runs_coll, suffix):
     for key, val in zip(keys, vals):
     
         runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix}, 
-                         {"$set":{'Meta.'+key: val} }
+                         {"$set":{'Meta.'+key: val, "Meta.last_updated": strftime("%y%m%d-%H%M%S")} }
                          )    
     print("Meta{} in {} updated correctly".format(suffix, out_dir))
 
     
-def update_Parameter(out_dir, runs_coll, suffix):
-    
-    param_dict = get_parsed_params(os.path.join(out_dir, 'parameters' + suffix) )
-    runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix}, 
-                     {"$set":{'Parameters': param_dict}}
-                     )
-    
-    print("Parameters{} in {} updated correctly".format(suffix, out_dir))
+#def update_Parameter(out_dir, runs_coll, suffix):
+#    
+#    param_dict = get_parsed_params(os.path.join(out_dir, 'parameters' + suffix) )
+#    runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix}, 
+#                     {"$set":{'Parameters': param_dict}}
+#                     )
+#    
+#    print("Parameters{} in {} updated correctly".format(suffix, out_dir))
     
 
 
-def update_mongo(out_dir, db, runs_coll):
+def update_mongo(out_dir, db, runs_coll, user, linear):
     '''
     only update file related entries, no comparison made before update
 
@@ -801,8 +787,9 @@ def update_mongo(out_dir, db, runs_coll):
         for entry in updated:
             for suffix in suffixes:
                 if affect_QoI in ['Y', 'y']:
-                    QoI_dir, Diag_dict = get_QoI_from_run(out_dir, suffix)
                     run = runs_coll.find_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix})
+                    GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear)        
+                    Diag_dict = get_diag_from_run(out_dir, suffix)                    
                     for key, val in run['Diagnostics'].items():
                         if val != 'None':
                             print((key, val))
@@ -812,12 +799,15 @@ def update_mongo(out_dir, db, runs_coll):
                     for key, val in Diag_dict.items():
                         Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], key, out_dir)
 
-                    runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, 
-                            { "$set": {'QoI': QoI_dir, 'Diagnostics': Diag_dict}} 
+                    runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix}, 
+                            { "$set": {'gyrokinetics': GK_dict, 'Diagnostics': Diag_dict}} 
                                  )
                     
                 runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix}, 
-                                 {"$set":{'Files.'+entry[0]: entry[1]}}
+                                 {"$set":{'Files.'+entry[0]: entry[1], 
+                                          "Meta.last_updated": strftime("%y%m%d-%H%M%S")
+                                          }
+                                 }
                                  )
         
         print("Update complete")
@@ -838,7 +828,8 @@ def update_mongo(out_dir, db, runs_coll):
         for doc in files_to_update:
             for suffix in run_suffixes:
                 if affect_QoI in ['Y', 'y']:
-                    QoI_dir, Diag_dict = get_QoI_from_run(out_dir, suffix)
+                    GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear)        
+                    Diag_dict = get_diag_from_run(out_dir, suffix) 
                     run = runs_coll.find_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix})
                     for key, val in run['Diagnostics'].items():
                         if val != 'None':
@@ -849,8 +840,8 @@ def update_mongo(out_dir, db, runs_coll):
                     for key, val in Diag_dict.items():
                         Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], key, out_dir)
 
-                    runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, 
-                            { "$set": {'QoI': QoI_dir, 'Diagnostics': Diag_dict}} 
+                    runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix}, 
+                            { "$set": {'gyrokinetics': GK_dict, 'Diagnostics': Diag_dict}} 
                                  )
                 file = os.path.join(out_dir, doc  + suffix)
                 grid_out = fs.find({'filepath': file})
@@ -861,8 +852,8 @@ def update_mongo(out_dir, db, runs_coll):
                 with open(file, 'rb') as f:
                     _id = fs.put(f, encoding='UTF-8', filepath=file, filename=file.split('/')[-1])
 #                _id = str(_id)
-                runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, 
-                                 { "$set": {'Files.'+ doc: _id} }
+                runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix}, 
+                                 { "$set": {'Files.'+ doc: _id, "Meta.last_updated": strftime("%y%m%d-%H%M%S")} }
                                  )
         print("Update complete")
     
@@ -1001,40 +992,33 @@ def upload_linear(db, out_dir, par_file, user, linear, confidence, input_heat, k
                         object_ids.pop(_id)
                     except KeyError:
                         continue
-                    
-#            if line.find('geneerr.log') != -1:
-#                files_dict['geneerrlog'] = line.split()[0]
-#            if line.find(os.path.join(out_dir,'scan.log') ) != -1:
-            if os.path.join(out_dir,'scan.log') == line:
-#                files_dict['scanlog'] = line.split()[0]
-                files_dict['scanlog'] = _id
-                object_ids.pop(_id)
-#            if line.find(os.path.join(out_dir,'scan_info.dat') ) != -1:
-#                files_dict['scaninfo'] = line.split()[0]
-            if os.path.join(out_dir,'scan_info.dat') == line:
-                files_dict['scaninfo'] = _id
-                object_ids.pop(_id)
-#            if line.find(os.path.join(out_dir,'geneerr.log') ) != -1:
+
             if os.path.join(out_dir,'geneerr.log') == line:
                 files_dict['geneerr'] = _id
                 object_ids.pop(_id)
       
         
         #metadata dictonary
+        time_upload = strftime("%y%m%d-%H%M%S")
         meta_dict = {"user": user,
                      "run_collection_name": out_dir,
                      "run_suffix": '' + suffix,
                      "keywords": keywords,
-                     "confidence": confidence
+                     "confidence": confidence,
+                     "time_uploaded": time_upload,
+                     "last_updated": time_upload
                     }  
                
-        QoI_dict, Diag_dict = get_QoI_from_run(out_dir, suffix)
+#        QoI_dict, Diag_dict = get_QoI_from_run(out_dir, suffix)
+        
+        Diag_dict = get_diag_from_run(out_dir, suffix)
+        GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear)        
         for key, val in Diag_dict.items():
             Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], key, out_dir)
 
-        param_dict = get_parsed_params(os.path.join(out_dir, 'parameters' + suffix) )
+#        param_dict = get_parsed_params(os.path.join(out_dir, 'parameters' + suffix) )
         #combine dictionaries and upload
-        run_data =  {'Meta': meta_dict, 'Files': files_dict, 'QoI': QoI_dict, 'Diagnostics': Diag_dict, 'Parameters': param_dict}
+        run_data =  {'Meta': meta_dict, 'Files': files_dict, 'gyrokinetics': GK_dict, 'Diagnostics': Diag_dict}
         runs_coll.insert_one(run_data).inserted_id  
         print('Files with suffix: {} in folder {} uploaded successfully'.format(suffix, out_dir))
         if verbose:
@@ -1102,43 +1086,29 @@ def upload_nonlin(db, out_dir, par_file, user, linear, confidence, input_heat, k
                        # print(object_ids)
                         continue
                     
-#                elif line.find(out_dir+'/'+Q_name) != -1 and Key not in files_dict:
-#                    files_dict[Key] = line.split()[0]
-#                    
-#                elif line.find(out_dir+'/'+Q_name + suffix + '.log') != -1 and Key not in files_dict:
-#                    files_dict[Key] = line.split()[0]
-#                    
-#                elif line.find(out_dir+'/'+Q_name + suffix + '.dat') != -1 and Key not in files_dict:
-#                    files_dict[Key] = line.split()[0]
-
-#            if line.find(os.path.join(out_dir,'scan.log')) != -1:
-            if os.path.join(out_dir,'scan.log') == line:
-#                files_dict['scanlog'] = line.split()[0]
-                files_dict['scanlog'] = _id
-                object_ids.pop(_id)
-#            if line.find(os.path.join(out_dir, 'scan_info.dat')) != -1:
-            if os.path.join(out_dir,'scan_info.dat') == line:
-#                files_dict['scaninfo'] = line.split()[0]
-                files_dict['scaninfo'] = _id
-                object_ids.pop(_id)
-#            if line.find(os.path.join(out_dir , 'geneerr.log') ) != -1:
             if os.path.join(out_dir,'geneerr.log') == line:
                 files_dict['geneerr'] = _id
                 object_ids.pop(_id)
         #find relevant quantities from in/output
 #        print(suffix)
         
-        param_dict = get_parsed_params( os.path.join(out_dir, 'parameters' + suffix) )
+#        param_dict = get_parsed_params( os.path.join(out_dir, 'parameters' + suffix) )
 
         #metadata dictonary
+        time_upload = strftime("%y%m%d-%H%M%S")
         meta_dict = {"user": user,
                      "run_collection_name": out_dir,
                      "run_suffix": '' + suffix,
                      "keywords": keywords,
-                     "confidence": confidence
+                     "confidence": confidence,
+                     "time_uploaded": time_upload,
+                     "last_updated": time_upload
                     }
         #data dictionary format for nonlinear runs
-        QoI_dict, Diag_dict = get_QoI_from_run(out_dir, suffix)
+#        QoI_dict, Diag_dict = get_QoI_from_run(out_dir, suffix)
+        
+        Diag_dict = get_diag_from_run(out_dir, suffix)
+        GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear)
         
         for key, val in Diag_dict.items():
             Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], key, out_dir)
@@ -1149,7 +1119,7 @@ def upload_nonlin(db, out_dir, par_file, user, linear, confidence, input_heat, k
         #combine dictionaries and upload
 #        
 #        run_data =  {''meta_dict, **files_dict, **run_data_dict} 
-        run_data =  {'Meta': meta_dict, 'Files': files_dict, 'QoI': QoI_dict, 'Diagnostics': Diag_dict, 'Parameters': param_dict}
+        run_data =  {'Meta': meta_dict, 'Files': files_dict, 'gyrokinetics': GK_dict, 'Diagnostics': Diag_dict}
         runs_coll.insert_one(run_data).inserted_id  
 
 #        print('Run collection \'' + suffix + 'in ' + out_dir +'\' uploaded succesfully.')        
@@ -1188,7 +1158,7 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
                 upload_linear(db, out_dir, user, linear, confidence, input_heat, keywords,
                               large_files, extra, verbose)
             elif update == '1':
-                update_mongo(out_dir, db, runs_coll)
+                update_mongo(out_dir, db, runs_coll, user, linear)
             else:
                 print('Run collection \'' + out_dir + '\' skipped.')
         else:
@@ -1208,7 +1178,7 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
                 upload_nonlin(db, out_dir, user, linear, confidence, input_heat, keywords, 
                               large_files, extra, verbose)
             elif update == '1':
-                update_mongo(out_dir, db, runs_coll)
+                update_mongo(out_dir, db, runs_coll, user, linear)
 
             else:
                 print('Run collection \'' + out_dir + '\' skipped.')

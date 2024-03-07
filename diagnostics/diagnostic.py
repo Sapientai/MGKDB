@@ -14,21 +14,24 @@ class Diagnostic(abc.ABC):
         self.opts = {}
         self.needed_vars = {}
 
-    @abc.abstractmethod
-    def set_options(self, run_data, specnames=None):
-        """ This method must be called before starting the diagnstotic loop.
-            Will set the optiopns for the specific run and return info to the loader."""
+#    @abc.abstractmethod
+#    def set_options(self, run_data, specnames=None):
+#        """ This method must be called before starting the diagnstotic loop.
+#            This Will set the optiopns for the specific run and return
+#            info to the loader."""
 
     @abc.abstractmethod
-    def execute(self, data, step):
+    def execute(self, data, parameters, geometry, spatial_grid, step):
         """ The diagnostic itself"""
-
-    # for diagnostics requring time averages, execute saves time dependent data
-    # in a relative (h5) file. For non time-average we just keep data in memory.
 
     @abc.abstractmethod
     def plot(self, time_requested, output=None, out_folder=None):
         """ Plot method plots the results"""
+
+#    @abc.abstractmethod
+#    def save(self, time_requested, output=None, out_folder=None):
+#        """ This saves the data on disk"""
+
 
     def set_defaults(self):
         """ we set the default options, in case the option gui is not called"""
@@ -57,7 +60,8 @@ class Diagnostic(abc.ABC):
         """ filters the available data accoridng to request"""
         if self.avail_vars:
             return list(itertools.chain.from_iterable(
-                [self.avail_vars[x].values() for x in self.avail_vars.keys() if x in filtered]))
+                [self.avail_vars[x].values()
+                    for x in self.avail_vars.keys() if x in filtered]))
         else:
             return None
 
@@ -92,7 +96,7 @@ class Diagnostic(abc.ABC):
 
     def get_spec_from_opts(self):
         spec_tmp = self.opts['spec']['value']
-        self.specnames = [spec_tmp] if spec_tmp != 'all' else self.run_data.specnames
+        self.specnames = [spec_tmp] if spec_tmp != 'all' else self.specnames
 
     def __reload__(self, avail_vars, specnames):
         """ when we select a fdiagnostic or we change the file keeping it selcted,
@@ -100,6 +104,7 @@ class Diagnostic(abc.ABC):
         self.avail_vars = avail_vars
         self.specnames = specnames
         self.set_defaults()
+
 
     class OptionsGUI():
         """ This manages the additional gui to set options"""

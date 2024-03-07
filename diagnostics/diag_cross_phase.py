@@ -4,10 +4,11 @@ import warnings
 from tkinter import END
 import matplotlib.pyplot as plt
 import numpy as np
+from putils import fourier
 from diagnostics.diagnostic import Diagnostic
 from diagnostics.baseplot import Plotting
 from diagnostics.diagspace import DiagSpace
-
+import os
 
 class DiagCrossPhase(Diagnostic):
     """Diagnostic for the cross phases between pairs of variables in ky space."""
@@ -32,14 +33,16 @@ class DiagCrossPhase(Diagnostic):
                      "quant_2": {'tag': "Quant 2", 'values': None, 'files': ['mom']},
                      "spec": {'tag': "Spec", 'values': self.list_specnames()},
                      "xind": {'tag': "x ind", 'values': None},
-                     "zind": {'tag': "z ind", 'values': None},
-                     'save_h5': {'tag': "Save h5", 'values': [True, False]}, }
+                     "zind": {'tag': "z ind", 'values': None}}
 
         self.set_defaults()
 
         self.options_gui = Diagnostic.OptionsGUI()
 
-    def set_options(self, run_data, specnames=None):
+    def set_options(self, run, specnames, out_folder):
+        
+        self.ky = run.spatialgrid[0].ky
+        self.pnt = run.parameters[0].asnamedtuple()
 
         if self.opts['quant_1']['value'] is None:
             raise RuntimeError("No quantity 1 given for cross phase")
@@ -75,11 +78,11 @@ class DiagCrossPhase(Diagnostic):
         # it should however be outside, since we can construct all grids
         # and have them in common for all diagnostics and select here only
         # the indexes we weant to plot
-        self.diagspace = DiagSpace(run_data.spatialgrid, False, True, False, xrange, yrange, zrange,
+        self.diagspace = DiagSpace(run.spatialgrid[0], False, True, False, xrange, yrange, zrange,
                                    xavg, yavg, zavg)
 
-        self.geom = run_data.geometry
-        self.run_data = run_data
+#        self.geom = run.geometry
+#        self.run_data = run_data
 
         # This is special since we dont save stuff by default, so just do what we need
         self.get_spec_from_opts()
@@ -100,15 +103,15 @@ class DiagCrossPhase(Diagnostic):
 
         return self.needed_vars
 
-    def execute(self, data, step):
+    def execute(self, data, parameters, geometry, spatialgrid,  step):
 
         # loop over quaitites in that file
         for quant_1 in self.needed_vars["field"].keys():
             # loop over quaitites in that file
             if self.needed_vars["field"][quant_1]:
                 data_in_1 = getattr(getattr(data, "field"), quant_1)(step.time,
-                                                                     getattr(step, "field"))
-                data_in_1 = data.apply_fouriertransforms(self.diagspace, data_in_1)
+                                                                     getattr(step, "field"), geometry)
+                data_in_1 = fourier.apply_fouriertransforms(self.pnt, self.diagspace, data_in_1, geometry)
 
         # loop over quaitites in that file
         for quant_2 in self.needed_vars["mom"].keys():
@@ -118,8 +121,8 @@ class DiagCrossPhase(Diagnostic):
                 for spec in self.specnames:
                     data_in_2 = getattr(getattr(data, "mom" + '_' + spec), quant_2)(step.time,
                                                                                     getattr(step,
-                                                                                            "mom"))
-                    data_in_2 = data.apply_fouriertransforms(self.diagspace, data_in_2)
+                                                                                            "mom"), geometry)
+                    data_in_2 = fourier.apply_fouriertransforms(self.pnt, self.diagspace, data_in_2, geometry)
 
                     angle = np.angle(data_in_1/data_in_2)
 
@@ -129,24 +132,34 @@ class DiagCrossPhase(Diagnostic):
                     #                         self.diagspace.zavg)(angle, self.geom)
 
                     self.cross_phase[spec].append(angle[self.diagspace.diagslice])
+    
+    def dict_to_mgkdb(self):
+        Diag_dict = {}
+        Diag_dict['nx0'] = self.pnt.nx0
+        Diag_dict['nz0'] = self.pnt.nz0
+        Diag_dict['cross_phase'] = self.cross_phase
+        
+        return Diag_dict
 
-    def plot(self, time_requested, output=None, out_folder=None):
+    def plot(self, time_requested, output=None, out_folder=None, terminal=None, suffix = None):
         """ Cross-phases """
 
         if output:
             output.info_txt.insert(END, "Cross phase:\n")
 
-        ky = self.run_data.spatialgrid.ky
+#        ky = self.ky
         nbins = 64
 
-        out = np.zeros((len(ky), nbins))
+        out = np.zeros((len(self.ky), nbins))
 
         self.plotbase = Plotting()
 
         for spec in self.specnames:
-            for i_ky in range(len(ky)):
-                phase_ky = self.cross_phase[spec][:][:][i_ky][:][:].flatten()
-                hist, bin_edges = np.histogram(phase_ky/self.run_data.pnt.nx0/self.run_data.pnt.nz0,
+            array = np.array(self.cross_phase[spec])           
+            for i_ky in range(len(self.ky)):
+                phase_ky = array[:,:,i_ky,...].flatten()
+#                phase_ky = self.cross_phase[spec][:][:][i_ky][:][:].flatten()
+                hist, bin_edges = np.histogram(phase_ky/self.pnt.nx0/self.pnt.nz0,
                                                bins=nbins, range=(-np.pi, np.pi))
                 out[i_ky, :] = hist
 
@@ -154,7 +167,17 @@ class DiagCrossPhase(Diagnostic):
             plt.xlabel('Phase angle/rad', fontsize=14)
             plt.ylabel(r'$k_y\rho_s$', fontsize=16)
             # cm1 = plt.contourf(bin_edges[1:],ky[1:],out[1:,:],50,cmap=self.plotbase.cmap_bidirect)
-            cm1 = plt.pcolormesh(bin_edges[1:], ky[1:], out[1:, :])
+            cm1 = plt.pcolormesh(bin_edges[1:], self.ky[1:], out[1:, :])
             fig.colorbar(cm1)
             fig.tight_layout()
-            fig.show()
+            if out_folder is not None:
+                fig.savefig(os.path.join(out_folder, 'CrossPhase_{}{}.png'.format(spec, suffix)), bbox_inches='tight')
+                plt.close(fig)
+            else:
+                fig.show()
+            
+    def save(time_requested, output=None, out_folder=None):
+        pass
+
+    def finalize():
+        pass

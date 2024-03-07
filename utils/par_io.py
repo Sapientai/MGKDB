@@ -178,5 +178,11 @@ class Parameters:
         valid = {}
         for item in self.pardict:
             if " " not in item:
-                valid[item] = self.pardict[item]
+                if '(' in item or ')' in item:
+                    item_reduced = item.replace('(', '_')
+                    item_reduced = item_reduced.replace(')', '_')
+                    valid[item_reduced] = self.pardict[item]
+                else:
+                    valid[item] = self.pardict[item]
+                    
         return namedtuple('ParTuple', valid.keys())(*valid.values())

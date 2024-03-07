@@ -10,7 +10,7 @@ import scipy.linalg as linalg
 import utils.aux_func as aux_func
 from diagnostics.baseplot import Plotting
 from diagnostics.diagnostic import Diagnostic
-
+import os
 
 class DiagFrequencyGrowthRate(Diagnostic):
     # pylint: disable=invalid-name
@@ -33,29 +33,32 @@ class DiagFrequencyGrowthRate(Diagnostic):
         self.opts = {"weight": {'tag': 'weight', 'values': [False, True]},
                      "kyind": {'tag': "ky ind", 'values': None},
                      "zind": {'tag': "z ind", 'values': None},
-                     "show": {'tag': "Show time traces", 'values': [False, True]},
-                     "save_h5": {'tag': 'Save h5', 'values': [True, False]}}
+                     "show": {'tag': "Show time traces", 'values': [False, True]}}
 
         self.set_defaults()
 
         self.options_gui = Diagnostic.OptionsGUI()
 
-    def set_options(self, run_data, species):
+    def set_options(self, run, specnames, out_folder):
 
         self.phi = []
-        self.geom = run_data.geometry
-        self.run_data = run_data
-        self.specnames = self.run_data.specnames
+#        self.geom = run_data.geometry
+#        self.run_data = run_data
+        self.specnames = specnames
+        
+        self.pnt = run.parameters[0].asnamedtuple()
 
         self.weight = 1 if self.opts['weight']['value'] else 0
+        
+        self.ky = run.spatialgrid[0].ky
 
         kyind = self.opts['kyind']['value']
         if not kyind or kyind == -1:
             self.kyind = 0.0, 100
         else:
             self.kyind = kyind.split(',')
-        self.kyind_min = aux_func.find_nearest(run_data.spatialgrid.ky, float(self.kyind[0]))
-        self.kyind_max = aux_func.find_nearest(run_data.spatialgrid.ky, float(self.kyind[1]))
+        self.kyind_min = aux_func.find_nearest(run.spatialgrid[0].ky, float(self.kyind[0]))
+        self.kyind_max = aux_func.find_nearest(run.spatialgrid[0].ky, float(self.kyind[1]))
 
         # z position, unset or -1 means all
         zind = self.opts['zind']['value']
@@ -63,48 +66,48 @@ class DiagFrequencyGrowthRate(Diagnostic):
             self.zind = -100, 100  # this will choose the minimum and maximum values
         else:
             self.zind = zind.split(',')
-        self.zind_min, self.zind_max = aux_func.find_nearest_points(run_data.spatialgrid.z, float(self.zind[0]), float(self.zind[1]))
+        self.zind_min, self.zind_max = aux_func.find_nearest_points(run.spatialgrid[0].z, float(self.zind[0]), float(self.zind[1]))
 
         self.get_needed_vars(['field'])
 
         return self.needed_vars
 
-    def execute(self, data, step):
+    def execute(self, data, parameters, geometry, spatialgrid,  step):
 
-        phi = getattr(getattr(data, 'field'), "phi")(step.time, step.field)
+        phi = getattr(getattr(data, 'field'), "phi")(step.time, step.field, parameters)
         renorm = 0.0
 
-        if self.run_data.flux_tube:
+        if self.pnt.flux_tube:
             phi_ = np.zeros(len(range(self.kyind_min, self.kyind_max+1)), dtype=np.complex64)
             # loop over all ky modes
             for i_ky, j in enumerate(range(self.kyind_min, self.kyind_max+1)):
-                for i in range(0, self.run_data.pnt.nx0-1):
+                for i in range(0, self.pnt.nx0-1):
                     renorm = renorm + np.dot(np.squeeze(phi[i, j, self.zind_min:self.zind_max+1]**(2 * self.weight)),
-                                             self.geom.jacobian[self.zind_min:self.zind_max+1])
+                                             geometry.jacobian[self.zind_min:self.zind_max+1])
                     phi_[i_ky] = phi_[i_ky] + \
                         np.dot(np.squeeze(phi[i, j, self.zind_min:self.zind_max+1]**(2 * self.weight) * phi[i, j, self.zind_min:self.zind_max+1]),
-                               self.geom.jacobian[self.zind_min:self.zind_max+1])
+                               geometry.jacobian[self.zind_min:self.zind_max+1])
                 phi_[i_ky] = phi_[i_ky] / renorm
 
-        elif self.run_data.x_global:
+        elif self.pnt.x_global:
             phi_ = np.zeros(len(range(self.kyind_min, self.kyind_max+1)), dtype=np.complex64)
             # loop over all ky modes
             for i_ky, j in enumerate(range(self.kyind_min, self.kyind_max+1)):
-                for i in range(0, self.run_data.pnt.nx0-1):
+                for i in range(0, self.pnt.nx0-1):
                     renorm = renorm + np.dot(np.squeeze(phi[i, i_ky, self.zind_min:self.zind_max+1]**(2 * self.weight)),
-                                             self.geom.jacobian.T[i, self.zind_min:self.zind_max+1])
+                                             geometry.jacobian.T[i, self.zind_min:self.zind_max+1])
                     phi_[i_ky] = phi_[i_ky] + \
                         np.dot(np.squeeze(phi[i, i_ky, self.zind_min:self.zind_max+1]**(2 * self.weight) * phi[i, i_ky, self.zind_min:self.zind_max+1]),
-                               self.geom.jacobian.T[i, self.zind_min:self.zind_max+1])
+                               geometry.jacobian.T[i, self.zind_min:self.zind_max+1])
                 phi_[i_ky] = phi_[i_ky] / renorm
 
-        elif self.run_data.is3d:
+        elif self.pnt.is3d:
             phi_ = np.zeros(len(range(self.kyind_min, self.kyind_max+1)), dtype=np.complex64)
-            phi_c = np.fft.fft(phi, axis=1)/self.run_data.pnt.ny0
-            jaco_xz = np.mean(self.geom.jacobian.T, axis=1)
+            phi_c = np.fft.fft(phi, axis=1)/self.pnt.ny0
+            jaco_xz = np.mean(geometry.jacobian.T, axis=1)
                         # loop over all ky modes
             for i_ky, j in enumerate(range(self.kyind_min, self.kyind_max+1)):
-                for i in range(0, self.run_data.pnt.nx0-1):
+                for i in range(0, self.pnt.nx0-1):
                     renorm = renorm + np.dot(np.squeeze(phi_c[i, i_ky, self.zind_min:self.zind_max+1]**(2 * self.weight)), jaco_xz[i, self.zind_min:self.zind_max+1])
                     phi_[i_ky] = phi_[i_ky] + \
                         np.dot(np.squeeze(phi_c[i, i_ky, self.zind_min:self.zind_max+1]**(2 * self.weight) * phi_c[i, i_ky, self.zind_min:self.zind_max+1]), jaco_xz[i, self.zind_min:self.zind_max+1])
@@ -113,8 +116,20 @@ class DiagFrequencyGrowthRate(Diagnostic):
             raise NotImplementedError("Frequency calculation not implemented")
 
         self.phi.append(phi_)
+        
+    def dict_to_mgkdb(self):
+        Diag_dict = {}
+        Diag_dict['opts']=self.opts
+        Diag_dict['ky'] = self.ky
+        Diag_dict['kyind_min'] = self.kyind_min
+        Diag_dict['kyind_max'] = self.kyind_max
+        Diag_dict['phi'] = self.phi
+        
+        return Diag_dict
+        
+        
 
-    def plot(self, times_req, output=None, out_folder=None):
+    def plot(self, time_requested, output=None, out_folder=None, terminal=None, suffix = None):
 
         Freq_arr = []
         Grate_arr = []
@@ -178,7 +193,12 @@ class DiagFrequencyGrowthRate(Diagnostic):
                 ax_3.set_xlabel(r"$t  c_{ref} / L_{ref}$")
                 ax_3.set_yscale("log")
                 ax_3.legend()
-                fig.show()
+                
+                if out_folder is not None:
+                    fig.savefig(os.path.join(out_folder, 'FreqGrowthRate_phi{}.png'.format(suffix)), bbox_inches='tight')                  
+                    plt.close(fig)
+                else:
+                    fig.show()
 
                 fig_t = plt.figure()
                 a_1 = fig_t.add_subplot(2, 1, 1)
@@ -191,17 +211,22 @@ class DiagFrequencyGrowthRate(Diagnostic):
                 a_2.plot(times_req[:-1], gamma_trace, ls="-", color='b')
                 a_2.set_xlabel(r"$t c_{ref}/L_{ref}$")
                 a_2.set_ylabel(r"$\gamma c_{ref}/L_{ref}$")
-                fig_t.show()
+                
+                if out_folder is not None:
+                    fig_t.savefig(os.path.join(out_folder, 'FreqGrowthRate_OmegaGamma{}.png'.format(suffix)), bbox_inches='tight') 
+                    plt.close(fig_t)
+                else:
+                    fig_t.show()
 
         self.plotbase = Plotting()
         plot_all = 1 if self.opts['show']['value'] else 0
         for ky in range(0, len(self.phi[0][:])):
-            if (np.absolute(self.run_data.spatialgrid.ky[ky]) <= np.absolute(self.run_data.spatialgrid.ky[self.kyind_max])
-                and np.absolute(self.run_data.spatialgrid.ky[ky]) >= np.absolute(self.run_data.spatialgrid.ky[self.kyind_min])):
+            if (np.absolute(self.ky[ky]) <= np.absolute(self.ky[self.kyind_max])
+                and np.absolute(self.ky[ky]) >= np.absolute(self.ky[self.kyind_min])):
 
                 phi_trace = np.array([x[ky] for x in self.phi])
-                act_ky = self.run_data.spatialgrid.ky[ky]
-                extract_freq(phi_trace, times_req, act_ky, plot_all, output=None)
+                act_ky = self.ky[ky]
+                extract_freq(phi_trace, time_requested, act_ky, plot_all, output=None)
                 ky_arr.append(act_ky)
 
         fig_f = plt.figure()
@@ -213,11 +238,22 @@ class DiagFrequencyGrowthRate(Diagnostic):
         a_2.plot(ky_arr, Freq_arr, 'bo')
         a_2.set_xlabel(r"$k_y$")
         a_2.set_ylabel(r"$\omega c_{ref}/L_{ref}$")
-        fig_f.show()
+        
+        if out_folder is not None:
+            fig_f.savefig( os.path.join(out_folder, 'FreqGrowthRate_OmegaGamma_arr{}.png'.format(suffix)), bbox_inches='tight') 
+            plt.close(fig_f)
+        else:   
+            fig_f.show()
 
-        if self.opts['save_h5']['value']:
-            file = h5py.File(out_folder / 'frequency_growth_rate.h5', 'w')
-            file["/ky"] = ky_arr
-            file["/gamma"] = Grate_arr
-            file["/omega"] = Freq_arr
-            file.close()
+#        if self.opts['save_h5']['value']:
+#            file = h5py.File(out_folder / 'frequency_growth_rate.h5', 'w')
+#            file["/ky"] = ky_arr
+#            file["/gamma"] = Grate_arr
+#            file["/omega"] = Freq_arr
+#            file.close()
+            
+    def save(time_requested, output=None, out_folder=None):
+        pass
+
+    def finalize():
+        pass

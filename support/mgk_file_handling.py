@@ -341,7 +341,7 @@ def get_file_list(out_dir, begin):
 #     return suffixes
 
 
-def gridfs_put(db, filepath):
+def gridfs_put(db, filepath,sim_type):
     #set directory and filepath
     file = open(filepath, 'rb')
 
@@ -354,6 +354,7 @@ def gridfs_put(db, filepath):
     dbfile = fs.put(file, encoding='UTF-8', 
                     filepath = filepath,
                     filename = filepath.split('/')[-1],
+                    simulation_type = sim_type,
                     metadata = None)  # may also consider using upload_from_stream ?
     file.close()
     
@@ -1118,7 +1119,7 @@ def remove_from_mongo(out_dir, db, runs_coll):
 #     return object_ids
 # =============================================================================
         
-def upload_file_chunks(db, out_dir, large_files=False, extra_files=False, suffix = None, run_shared=None):
+def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=False, suffix = None, run_shared=None):
     '''
     This function does the actual uploading of grifs chunks and
     returns object_ids for the chunk.
@@ -1191,14 +1192,14 @@ def upload_file_chunks(db, out_dir, large_files=False, extra_files=False, suffix
     object_ids = {}
     for file in output_files:
         if os.path.isfile(file):
-            _id = gridfs_put(db, file)
+            _id = gridfs_put(db, file, sim_type)
             object_ids[_id] = file
             
 #    reset_docs_keys()
 #    print(object_ids)
     return object_ids
 
-def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
+def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
                   img_dir = './mgk_diagplots', suffixes = None, run_shared = None,
                   large_files=False, extra=False, verbose=True, manual_time_flag = True):
     #connect to linear collection
@@ -1242,9 +1243,9 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
             print('Working on files with suffix: {} in folder {}.......'.format(suffix, out_dir))           
             print('Uploading files ....')
             if count == 0:
-                object_ids = upload_file_chunks(db, out_dir, large_files, extra, suffix, run_shared)
+                object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, run_shared)
             else:
-                object_ids = upload_file_chunks(db, out_dir, large_files, extra, suffix, None)
+                object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, None)
             id_copy = object_ids.copy() # make a copy to delete from database if following routine causes exceptions
             
             '''
@@ -1311,6 +1312,7 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                          "run_collection_name": out_dir,
                          "run_suffix": '' + suffix,
                          "keywords": keywords,
+                         "simulation_type": sim_type,
                          "confidence": confidence,
                          "comments": comments,
                          "time_uploaded": time_upload,
@@ -1358,6 +1360,7 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                 if '.' in line:
                     line = '_'.join(line.split('.'))  # if . appears in the key such as nrg_001.h5 -> nrg_001_h5
                 ex_dict[line] = _id
+            ex_dict['simulation_type']=sim_type
             if ex_dict: 
                 db.ex.Lin.insert_one(ex_dict)
             
@@ -1381,7 +1384,7 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
 #    print('Run collection \'' + out_dir + '\' uploaded succesfully.')
         
         
-def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
+def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
                   img_dir = './mgk_diagplots', suffixes = None, run_shared=None,
                   large_files=False, extra=False, verbose=True, manual_time_flag = True ):
     #connect to nonlinear collection
@@ -1418,9 +1421,9 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
             print('Working on files with suffix: {} in folder {}.......'.format(suffix, out_dir))
             print('Uploading files ....')
             if count == 0:
-                object_ids = upload_file_chunks(db, out_dir, large_files, extra, suffix, run_shared)
+                object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, run_shared)
             else:
-                object_ids = upload_file_chunks(db, out_dir, large_files, extra, suffix, None)
+                object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, None)
             id_copy = object_ids.copy() # make a copy to delete from database if following routine causes exceptions
             '''
             managing attributes
@@ -1491,6 +1494,7 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
                          "run_collection_name": out_dir,
                          "run_suffix": '' + suffix,
                          "keywords": keywords,
+                         "simulation_type": sim_type,
                          "confidence": confidence,
                          "comments": comments,
                          "time uploaded": time_upload,
@@ -1539,6 +1543,7 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
                 if '.' in line:
                     line = '_'.join(line.split('.'))
                 ex_dict[line] = _id
+            ex_dict['simulation_type']=sim_type
             if ex_dict:
         #        print(ex_dict.values())
                 db.ex.Nonlin.insert_one(ex_dict) 
@@ -1561,7 +1566,7 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
     
     reset_docs_keys()
             
-def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords, comments,
+def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords, comments, sim_type, 
                     img_dir= './mgk_diagplots', suffixes = None, run_shared=None,
                     large_files = False, extra=False, verbose=True, manual_time_flag = True):
     #print(linear)
@@ -1576,7 +1581,7 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
             if update == '0':
                 #for now, delete and reupload instead of update - function under construction
                 remove_from_mongo(out_dir, db, runs_coll)   
-                upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
+                upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
                               img_dir, suffixes, run_shared,
                               large_files, extra, verbose, manual_time_flag)
             elif update == '1':
@@ -1585,7 +1590,7 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
                 print('Run collection \'' + out_dir + '\' skipped.')
         else:
             print('Folder tag:\n{}\n not detected, creating new.\n'.format(out_dir))
-            upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
+            upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
                           img_dir, suffixes, run_shared,
                           large_files, extra, verbose, manual_time_flag)
                 
@@ -1600,7 +1605,7 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
             if update == '0':
                 #for now, delete and reupload instead of update - function under construction
                 remove_from_mongo(out_dir, db, runs_coll)   
-                upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments, 
+                upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type, 
                               img_dir, suffixes, run_shared,
                               large_files, extra, verbose,manual_time_flag)
             elif update == '1':
@@ -1610,7 +1615,7 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
                 print('Run collection \'' + out_dir + '\' skipped.')
         else:
             print('Folder tag:\n{}\n not detected, creating new.\n'.format(out_dir))
-            upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
+            upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
                           img_dir, suffixes, run_shared,
                           large_files, extra, verbose,manual_time_flag)
     else:

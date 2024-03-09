@@ -65,6 +65,7 @@ parser.add_argument('-V', '--verbose', default = False, help='output verbose')
 #parser.add_argument('-M', '--multiple_runs', default = 'F', help='output verbose')
 #parser.add_argument('-C', '--confidence', default = '5', help='confidence of simulation')
 parser.add_argument('-K', '--keywords', default = 'GENE', help='relevant keywords for future references, separated by comma')
+parser.add_argument('-SIM', '--sim_type', choices=['GENE','CGYRO'], type=str, help='Type of simulation', required=True)
 parser.add_argument('-A', '--authenticate', default = None, help='locally saved login info, a .pkl file')
 parser.add_argument('-X', '--exclude', default = None, help='folders to exclude')
 parser.add_argument('-Img', '--image_dir', default = './mgk_diagplots', help='folders to save temporal image files.')
@@ -120,6 +121,8 @@ else:
     default = False
     manual_time_flag = True
     
+sim_type = args.sim_type
+print(sim_type)
 
 #confidence = args.confidence
 info = args.authenticate
@@ -350,7 +353,7 @@ for dirpath, dirnames, files in os.walk(output_folder):
             run_shared = None
         #send run to upload_to_mongo to be uploaded
         upload_to_mongo(database, dirpath, user, linear, confidence, input_heat, 
-                        keywords_lin, comments, img_dir, suffixes, run_shared,
+                        keywords_lin, comments, sim_type, img_dir, suffixes, run_shared,
                         large_files, extra, verbose, manual_time_flag)
 #            except Exception as ex:
 #                print('Exception encountered.\n')

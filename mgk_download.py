@@ -7,9 +7,12 @@ Created on Tue Jan  7 14:39:26 2020
 For downloading files from mgk_fusion in shell
 """
 
+import sys
+sys.path.append('support')
+
 from mgk_file_handling import get_oid_from_query, Str2Query, download_dir_by_name, download_file_by_path, download_file_by_id, download_runs_by_id
 import gridfs
-from mgk_login import mgk_login
+from support.mgk_login import mgk_login
 import argparse
 import os
 from pymongo import MongoClient

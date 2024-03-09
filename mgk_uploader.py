@@ -11,6 +11,10 @@ Optional fields:    confidence
                     
 @author: Austin Blackmon, Dongyang Kuang
 """
+
+import sys
+sys.path.append('support')
+
 #from mgk_file_handling import *
 from mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Docs_ex, Keys_ex, _troubled_runs
 #from ParIO import *

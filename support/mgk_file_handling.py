@@ -27,6 +27,9 @@ ToDO:
 #from global_var import *
 #from global_var import _troubled_runs
 
+import sys
+sys.path.append('support')
+
 from mgk_post_processing import *
 from ParIO import * 
 import numpy as np

@@ -5,6 +5,10 @@
 @author: Austin Blackmon, Dongyang Kuang
 """
 
+
+import sys
+sys.path.append('support')
+
 #from mgk_file_handling import *
 import numpy as np
 import optparse as op

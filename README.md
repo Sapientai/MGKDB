@@ -28,7 +28,7 @@ Command line tools can be used to download data from the database and upload dat
 ##### Supplying Credentials
 When using these command line scripts, users will need to provide credentials to access the database in one of two ways:  
 * Provide a .pkl file with credentials \
-or \
+or  \
 * Enter the credentials manually
 Here is a sample string : (server location,port,database name,username,password)
 `mongodb03.nersc.gov,27017,mgk_fusion,<db_username>,<db_password> `

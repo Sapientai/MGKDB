@@ -43,9 +43,9 @@ For downloads, users need to execute the script `mgk_download.py`.
 The directory will be created if it does not exist.
 
 #### Upload to database : 
-For uploads, users need to execute the script `mgk_upload.py`. 
+For uploads, users need to execute the script `mgk_uploader.py`. 
 
-Run the uploader by `python3 mgk-dev/mgk_uploader.py -T /global/homes/d/dykuang/mgk-dev/data_linear_multi`.  Option -T is for specifying your target folder. Use option --help for display other options information.  
+Run the uploader by `python3 mgk-dev/mgk_uploader.py -T /global/homes/d/dykuang/mgk-dev/data_linear_multi`.  Option -T is for specifying your target folder. Use option --help to display other options.  
 
 ### Directly using the terminal
 Another method to interact with the database is directly from the terminal
@@ -57,8 +57,6 @@ mongo -u <db_username> -p <db_password> mongodb03.nersc.gov/mgk_fusion
 ```
 3. Now, one can use `db` commands.
 
-Please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/MGKDB-at-NERSC) for step-by-step instructions for these
-
 ### GUI : Using MongoDB Compass
 * On your laptop terminal, forward the ssh tunnel port to a local port : ssh -i .ssh/nersc -f <nersc_username>@perlmutter.nersc.gov -L 2222:mongodb03.nersc.gov:27017 -N . You can use any other port instead of 2222 above. You will be asked to provide login credentials on perlmutter for this.
 * Now in the MongoDB Compass application, paste the following connection string (add your database username and password appropriately) in the URL block:
@@ -66,6 +64,8 @@ Please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/MGKDB-at-NER
   ```mongodb://<db_username>:<db_password>@localhost:2222/?authSource=mgk_fusion&readPreference=primary&directConnection=true&ssl=false```
 * Click connect
 * Once you're logged in, you can click on mgk_fusion on the left side panel to view the database
+
+Please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/MGKDB-at-NERSC) for step-by-step instructions for these
 
 ### Caution:
 * If you have Read/Write access to the database, be careful while using mongodb compass, you may accidently modify the database.  

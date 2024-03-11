@@ -48,6 +48,8 @@ For uploads, users need to execute the script `mgk_uploader.py`.
 Run the uploader as \
 ```python3 MGKDB/mgk_uploader.py -A <user_credentials.pkl> -T /global/homes/d/dykuang/mgk-dev/data_linear_multi```.  Option -T is for specifying your target folder. Use option --help to display other options.  
 
+Please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/MGKDB-at-NERSC) for step-by-step instructions and further options.
+
 ### Directly using the terminal
 Another method to interact with the database is directly from the terminal
 1. From a terminal, `ssh` to Perlmutter using `ssh -l <nersc_username> perlmutter.nersc.gov`.
@@ -65,8 +67,6 @@ mongo -u <db_username> -p <db_password> mongodb03.nersc.gov/mgk_fusion
   ```mongodb://<db_username>:<db_password>@localhost:2222/?authSource=mgk_fusion&readPreference=primary&directConnection=true&ssl=false```
 * Click connect
 * Once you're logged in, you can click on mgk_fusion on the left side panel to view the database
-
-Please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/MGKDB-at-NERSC) for step-by-step instructions for these
 
 ### Caution:
 * If you have Read/Write access to the database, be careful while using mongodb compass, you may accidently modify the database.  

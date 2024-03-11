@@ -3,9 +3,9 @@
 
 On this page:  
 
-* [Test it locally](#markdown-test-it-locally)  
+* [Test it locally](#markdown-test-db-locally)  
 
-* [Test it on Cori](#markdown-header-test-it-on-cori)  
+* [Test it on NERSC](#markdown-test-db-on-nersc)  
 
 ---
 ## Test DB  locally
@@ -16,7 +16,7 @@ You can build and interact with the database via at least 3 methods:
 
 Please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/MGKDB-at-NERSC) for step-by-step instructions on building MGKDB locally
 
-## Connecting to MGKDB on NERSC
+## Test on NERSC
 Users can interact with the database in 3 ways: 
 
 ### Using Command Line tools

@@ -508,10 +508,11 @@ def _binary2npArray(binary):
     """
     return pickle.loads(binary)
 
-def gridfs_put_npArray(db, value, filepath, filename):
+def gridfs_put_npArray(db, value, filepath, filename, sim_type):
     fs = gridfs.GridFS(db)
     obj_id=fs.put(_npArray2Binary(value),encoding='UTF-8',
                   filename = filename,
+                  simulation_type = sim_type,
                   filepath = filepath)
     return obj_id  
     
@@ -849,7 +850,7 @@ def update_Meta(out_dir, runs_coll, suffix):
     
 
 
-def update_mongo(out_dir, db, runs_coll, user, linear, img_dir = './mgk_diagplots', suffixes=None):
+def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mgk_diagplots', suffixes=None):
     '''
     only update file related entries, no comparison made before update
 
@@ -908,7 +909,7 @@ def update_mongo(out_dir, db, runs_coll, user, linear, img_dir = './mgk_diagplot
 #                            print('deleted!')
 
                     for key, val in Diag_dict.items():
-                        Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key)
+                        Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
 
                     runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, 
                             { "$set": {'gyrokinetics': GK_dict, 'Diagnostics':Diag_dict, 'Plots': imag_dict}} 
@@ -958,7 +959,7 @@ def update_mongo(out_dir, db, runs_coll, user, linear, img_dir = './mgk_diagplot
 #                            print('deleted!')
 
                     for key, val in Diag_dict.items():
-                        Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key)
+                        Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
 
                     runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix },
                             { "$set": {'gyrokinetics': GK_dict, 'Diagnostics':Diag_dict, 'Plots': imag_dict}}
@@ -1330,7 +1331,7 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
             GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear=True)
             
             for key, val in Diag_dict.items():
-                Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key)
+                Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
             
             '''
             Adding omega info to Diag_dict for linear runs
@@ -1360,8 +1361,9 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                 if '.' in line:
                     line = '_'.join(line.split('.'))  # if . appears in the key such as nrg_001.h5 -> nrg_001_h5
                 ex_dict[line] = _id
-            ex_dict['simulation_type']=sim_type
+                
             if ex_dict: 
+                ex_dict['simulation_type']=sim_type
                 db.ex.Lin.insert_one(ex_dict)
             
         except Exception as exception:
@@ -1515,7 +1517,7 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
             GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear=False)
             
             for key, val in Diag_dict.items():
-                Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key)
+                Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
     
     #        Qes = get_Qes(out_dir, suffix)
     #        QoI_dict = {"Qes" : Qes, **QoI                        
@@ -1543,9 +1545,10 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
                 if '.' in line:
                     line = '_'.join(line.split('.'))
                 ex_dict[line] = _id
-            ex_dict['simulation_type']=sim_type
+                
             if ex_dict:
         #        print(ex_dict.values())
+                ex_dict['simulation_type']=sim_type
                 db.ex.Nonlin.insert_one(ex_dict) 
                 
         except Exception as exception:
@@ -1585,7 +1588,7 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
                               img_dir, suffixes, run_shared,
                               large_files, extra, verbose, manual_time_flag)
             elif update == '1':
-                update_mongo(out_dir, db, runs_coll, user, linear, img_dir)
+                update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir)
             else:
                 print('Run collection \'' + out_dir + '\' skipped.')
         else:
@@ -1609,7 +1612,7 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
                               img_dir, suffixes, run_shared,
                               large_files, extra, verbose,manual_time_flag)
             elif update == '1':
-                update_mongo(out_dir, db, runs_coll, user, linear, img_dir)
+                update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir)
 
             else:
                 print('Run collection \'' + out_dir + '\' skipped.')

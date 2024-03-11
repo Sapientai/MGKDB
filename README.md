@@ -52,8 +52,9 @@ Please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/MGKDB-at-NER
 
 ### Directly using the terminal
 Another method to interact with the database is directly from the terminal
-1. From a terminal, `ssh` to Perlmutter using `ssh -l <nersc_username> perlmutter.nersc.gov`.
-2. Connect to the database using : 
+1. From a terminal, `ssh` to Perlmutter using
+   ```ssh -l <nersc_username> perlmutter.nersc.gov```
+3. Connect to the database using : 
 ```
 module load mongodb/4.0.28
 mongo -u <db_username> -p <db_password> mongodb03.nersc.gov/mgk_fusion

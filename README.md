@@ -45,7 +45,7 @@ The directory will be created if it does not exist.
 #### Upload to database : 
 For uploads, users need to execute the script `mgk_uploader.py`. 
 
-Run the uploader as
+Run the uploader as \
 ```python3 MGKDB/mgk_uploader.py -A <user_credentials.pkl> -T /global/homes/d/dykuang/mgk-dev/data_linear_multi```.  Option -T is for specifying your target folder. Use option --help to display other options.  
 
 ### Directly using the terminal

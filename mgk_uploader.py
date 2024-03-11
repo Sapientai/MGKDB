@@ -64,7 +64,7 @@ parser.add_argument('-Ex','--extra', default = False, help='whether or not to in
 parser.add_argument('-V', '--verbose', default = False, help='output verbose')
 #parser.add_argument('-M', '--multiple_runs', default = 'F', help='output verbose')
 #parser.add_argument('-C', '--confidence', default = '5', help='confidence of simulation')
-parser.add_argument('-K', '--keywords', default = 'GENE', help='relevant keywords for future references, separated by comma')
+parser.add_argument('-K', '--keywords', default = '-', help='relevant keywords for future references, separated by comma')
 parser.add_argument('-SIM', '--sim_type', choices=['GENE','CGYRO'], type=str, help='Type of simulation', required=True)
 parser.add_argument('-A', '--authenticate', default = None, help='locally saved login info, a .pkl file')
 parser.add_argument('-X', '--exclude', default = None, help='folders to exclude')

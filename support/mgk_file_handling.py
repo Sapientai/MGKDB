@@ -345,10 +345,6 @@ def gridfs_put(db, filepath,sim_type):
     #set directory and filepath
     file = open(filepath, 'rb')
 
-    #connect to 'ETG' database
-#    db = mgkdb_client.mgk_fusion
-#    db = database
-
     #upload file to 'fs.files' collection
     fs = gridfs.GridFS(db)
     dbfile = fs.put(file, encoding='UTF-8', 
@@ -986,10 +982,6 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
     
 def remove_from_mongo(out_dir, db, runs_coll):
     #find all documents containing collection name
-#    if linear:
-#        runs_coll = db.LinearRuns
-#    else:
-#        runs_coll = db.NonlinRuns
         
     inDb = runs_coll.find({ "Meta.run_collection_name": out_dir })        
     fs = gridfs.GridFS(db)
@@ -1027,98 +1019,6 @@ def remove_from_mongo(out_dir, db, runs_coll):
                 
 #        delete the header file
         runs_coll.delete_one(run)
-        
-
-# =============================================================================
-# def upload_file_chunks(db, out_dir, large_files=False, extra_files=False, suffixes = None):
-#     '''
-#     This function does the actual uploading of grifs chunks and
-#     returns object_ids for the chunk.
-#     '''
-# #    suffixes = get_suffixes(out_dir)
-# #    
-# #    '''
-# #    If there is a shared parameter file or these is only one parameter file
-# #    '''
-# #    if os.path.isfile(os.path.join(out_dir, 'parameters')):
-# #        par_file = os.path.join(out_dir, 'parameters')
-# #    elif len(suffixes)==1 and os.path.isfile(os.path.join(out_dir, 'parameters'+suffixes[0])):
-# #        par_file = os.path.join(out_dir, 'parameters'+suffixes[0])
-# #    else:
-# #        os.exit('Cannot locate or decide the parameter file!')
-#     
-# #    print(out_dir)
-# #    if suffixes is None:
-# #        par_list = get_file_list(out_dir, 'parameters') # assuming parameter files start with 'parameters' 
-# #    else:
-# #        par_list = []
-# #        par_list = par_list + [get_file_list(out_dir, 'parameters'+s) for s in suffixes]
-#     par_list = get_file_list(out_dir, 'parameters') # assuming parameter files start with 'parameters' 
-#     if suffixes is not None:
-#         for par in par_list:
-#             for s in suffixes:
-#                 if 'parameters'+ s not in par:
-#                     try:
-#                         par_list.remove(par) # remove parameter file if no suffix corresponds to it
-#                     except:
-#                         continue
-#         
-# #    print(par_list)
-#     if len(par_list) == 0:
-#         exit('Cannot locate parameter files in folder {}.'.format(out_dir))
-#     elif len(par_list) == 1:
-#         par_file = par_list[0]
-#     elif os.path.join(out_dir, 'parameters') in par_list:
-#         par_file = os.path.join(out_dir, 'parameters')
-#     else: # assuming all these files share the same 'magn_geometry' and 'mom' info.
-#         print('There seems to be multiple parameter files detected:\n')
-#         count=0
-#         for par in par_list:
-#             print('{} : {}\n'.format(count, par.split('/')[-1]))
-#             count+=1
-#         choice = input('Which one do you want to scan for information.\n')
-#         choice = int(choice)
-#         par_file = os.path.join(out_dir, par_list[choice])
-#         print('File {} selected for scanning [magn_geometry] and [mom] information.'.format(par_list[choice]))
-# 
-#     par = Parameters()
-#     par.Read_Pars(par_file)
-#     pars = par.pardict
-#     n_spec = pars['n_spec']
-#     
-#     if 'magn_geometry' in pars:
-#         Docs.append(pars['magn_geometry'][1:-1])
-#         Keys.append('magn_geometry')
-#     if large_files:
-#         if 'name1' in pars and 'mom' in Docs_L:
-#             Docs_L.pop(Docs_L.index('mom'))
-#             Keys_L.pop(Keys_L.index('mom'))
-#             for i in range(n_spec): # adding all particle species
-#                 Docs_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
-#                 Keys_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
-#     
-#     output_files = [get_file_list(out_dir, Qname) for Qname in Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
-#     
-#         
-#     if large_files:
-#         output_files += [get_file_list(out_dir, Qname) for Qname in Docs_L if Qname]
-#     if extra_files:
-#         output_files += [get_file_list(out_dir, Qname) for Qname in Docs_ex if Qname]
-#         
-#     
-#     
-#     output_files = set([item for sublist in output_files for item in sublist]) # flat the list and remove possible duplicates
-#     
-# #    print(output_files)
-#       
-#     object_ids = {}
-#     for file in output_files:
-#         _id = gridfs_put(db, file)
-#         object_ids[_id] = file
-# 
-# #    print(object_ids)
-#     return object_ids
-# =============================================================================
         
 def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=False, suffix = None, run_shared=None):
     '''
@@ -1204,32 +1104,11 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                   img_dir = './mgk_diagplots', suffixes = None, run_shared = None,
                   large_files=False, extra=False, verbose=True, manual_time_flag = True):
     #connect to linear collection
-#    runs_coll = mgkdb_client.mgk_fusion.LinearRuns
     runs_coll = db.LinearRuns
        
     #update files dictionary
-#    print(out_dir)
-#    print(object_ids)
     if suffixes is None:         
         suffixes = get_suffixes(out_dir)
-        
-#    object_ids = upload_file_chunks(db, out_dir, large_files, extra, suffixes)  # it changes Docs and Keys globally 
-
-
-#    print(suffixes)
-#    _docs = Docs.copy()
-#    _keys = Keys.copy()
-#    
-#    if large_files:
-#        _docs = _docs + Docs_L
-#        _keys = _keys + Keys_L
-#    if extra:
-#        _docs = _docs + Docs_ex
-#        _keys = _keys + Keys_ex
-#        
-#    files_dict = dict.fromkeys(_keys, 'None')
-    
-#    manual_time_flag = True
         
     if isinstance(run_shared, list):
         shared_not_uploaded = [True for _ in run_shared]
@@ -1263,8 +1142,6 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                 _keys = _keys + Keys_ex
                 
             files_dict = dict.fromkeys(_keys, 'None') # this removes duplicated keys           
-            # _docs = set(_docs)
-            # _keys = set(_keys)
             
             print('='*60)
             print('Following files are uploaded.')
@@ -1395,21 +1272,7 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
     #update files dictionary
     if suffixes is None:
         suffixes = get_suffixes(out_dir)
-#    object_ids = upload_file_chunks(db, out_dir, large_files, extra, suffixes)   
 
-#    print(suffixes)
-#    print(object_ids)
-#    _docs = Docs.copy()
-#    _keys = Keys.copy()
-#    
-#    if large_files:
-#        _docs = _docs + Docs_L
-#        _keys = _keys + Keys_L
-#    if extra:
-#        _docs = _docs + Docs_ex
-#        _keys = _keys + Keys_ex
-#        
-#    files_dict = dict.fromkeys(_keys, 'None')
     if isinstance(run_shared, list):
         shared_not_uploaded = [True for _ in run_shared]
     else:
@@ -1440,11 +1303,7 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
                 _docs = _docs + Docs_ex
                 _keys = _keys + Keys_ex
                 
-            files_dict = dict.fromkeys(_keys, 'None')            
-            # _docs = sorted(set(_docs))
-            # _keys = sorted(set(_keys))
-            # print(_docs)
-            # print(_keys)
+            files_dict = dict.fromkeys(_keys, 'None')          
             
             print('='*60)
             print('Following files are uploaded.')

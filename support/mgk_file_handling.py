@@ -39,26 +39,10 @@ from bson.objectid import ObjectId
 import os
 from pathlib import Path
 import gridfs
-#import re
-#from sshtunnel import SSHTunnelForwarder
+
 import json
 from time import strftime
 import pickle
-#=======================================================
-# database specification. Local test
-#=====================================================
-
-# =============================================================================
-# mgkdb_server = 'localhost'
-# mgkdb_port = '27017'
-# mgkdb_dbname = 'mgk_fusion'
-# mgkdb_user = 'dykuang'
-# mgkdb_pass = '1234'
-# 
-# mgkdb_connect = MongoClient(mgkdb_server)
-# database = mgkdb_connect[mgkdb_dbname]
-# mgkdb_client = database.authenticate(mgkdb_user, mgkdb_pass)	
-# =============================================================================
 
 # Default_Keys for summary files, keys should not contain '.' #
 #Default_Keys = ['scan_id',  'submit_id',  'eqdisk_id' ]
@@ -66,6 +50,7 @@ import pickle
 #==============================================================================
 #standard files#
 # Q: is geneerr with suffix? 
+
 __version__ = '0.0.4'
 print('Current version is {}.'.format(__version__))
 
@@ -81,10 +66,8 @@ Keys_L = ['field', 'mom', 'vsp']
 Docs_ex = [] 
 Keys_ex = []
 
-       
 file_related_keys = Keys + Keys_L + Keys_ex
 file_related_docs = Docs + Docs_L + Docs_ex
-
 
 _troubled_runs = [] # a global list to collection runs where exception happens
 

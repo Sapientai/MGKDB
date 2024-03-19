@@ -612,25 +612,15 @@ def isUploaded(out_dir,runs_coll):
     Assuming out_dir will appear no more than once in the database
     '''
     inDb = runs_coll.find({ "Meta.run_collection_name": out_dir })
-#    print(inDb)
-#    for run in inDb:
-#        runIn = run["run_collection_name"]
-##        print(runIn)
-#        return(runIn == out_dir)
+
     uploaded = False
     for run in inDb:
         if run["Meta"]["run_collection_name"] == out_dir: # seems redundent?
-#            print(run["Meta"]["run_collection_name"])
             uploaded = True
             break
-#    if inDb is not None:
-#        uploaded=True
-#        for run in inDb:
-#            print(run["Meta"]["run_collection_name"])
-#    else:
-#        uploaded = False
     
     return uploaded
+
 
 def not_uploaded_list(out_dir, runs_coll, write_to = None):
     '''

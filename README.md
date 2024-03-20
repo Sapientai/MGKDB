@@ -3,16 +3,16 @@
 
 On this page:  
 
-* [Test it locally](#markdown-test-db-locally)  
+* [Test DB locally](#markdown-test-db-locally)  
 
-* [Test it on NERSC](#markdown-test-db-on-nersc)  
+* [Test DB on NERSC](#markdown-test-db-on-nersc)  
 
 ---
 ## Test DB  locally
 You can build and interact with the database via at least 3 methods:  
    * [Mongo Shell](https://docs.mongodb.com/manual/mongo/)  
    * [Pymongo](https://api.mongodb.com/python/current/api/index.html)  
-   * The GUI, such as MongoDB Compass.  
+   * GUI such as MongoDB Compass
 
 Please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/Local-MGKDB) for step-by-step instructions on building MGKDB locally
 

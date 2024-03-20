@@ -759,6 +759,7 @@ def download_runs_by_id(db, runs_coll, _id, destination):
         dir_name = record['Meta']['run_collection_name']
     except TypeError:
         print("Entry not found in database, please double check the id")
+        raise SystemExit
         
     path = os.path.join(destination, dir_name.split('/')[-1])
 #    path = destination

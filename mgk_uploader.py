@@ -156,7 +156,6 @@ if __name__=="__main__":
     #scan through a directory for more than one run
     for dirpath, dirnames, files in os.walk(output_folder):
         print(dirnames)
-        continue
         if str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1 and str(dirpath) not in exclude_folders:    
             print('Scanning in {} *******************\n'.format( str(dirpath)) )
             #check if run is linear or nonlinear
@@ -219,9 +218,9 @@ if __name__=="__main__":
                 run_shared = None
             
             # Send run to upload_to_mongo to be uploaded
-            # upload_to_mongo(database, dirpath, user, linear, confidence, args.input_heat, 
-            #                 keywords_lin, comments, args.sim_type, img_dir, suffixes, run_shared,
-            #                 args.large_files, args.extra, args.verbose, manual_time_flag)
+            upload_to_mongo(database, dirpath, user, linear, confidence, args.input_heat, 
+                             keywords_lin, comments, args.sim_type, img_dir, suffixes, run_shared,
+                             args.large_files, args.extra, args.verbose, manual_time_flag)
 
     if len(_troubled_runs):
         print("The following runs are skipped due to exceptions.")

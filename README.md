@@ -8,6 +8,11 @@ On this page:
 * [Test it on NERSC](#markdown-test-db-on-nersc)  
 
 ---
+
+## Building the environment
+The conveninent method to access the database tools is using conda environments.
+You can find the instructions to build the conda environment in the wiki [here](https://github.com/Sapientai/MGKDB/wiki/Setting-up-the-environment).
+
 ## Test DB  locally
 You can build and interact with the database via at least 3 methods:  
    * [Mongo Shell](https://docs.mongodb.com/manual/mongo/)  

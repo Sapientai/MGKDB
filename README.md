@@ -21,7 +21,7 @@ You can build and interact with the database via at least 3 methods:
 
 Please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/Local-MGKDB) for step-by-step instructions on building MGKDB locally
 
-## Test on NERSC
+## Test DB on NERSC
 Users can interact with the database in 3 ways: 
 
 ### Using Command Line tools

@@ -3,11 +3,16 @@
 
 On this page:  
 
-* [Test it locally](#markdown-test-db-locally)  
+* [Test DB locally](#markdown-test-db-locally)  
 
-* [Test it on NERSC](#markdown-test-db-on-nersc)  
+* [Test DB on NERSC](#markdown-test-db-on-nersc)  
 
 ---
+
+## Setting up the environment
+A conveninent method to access the database tools is using conda environments.
+You can find the instructions to build the conda environment in the wiki [here](https://github.com/Sapientai/MGKDB/wiki/Setting-up-the-environment).
+
 ## Test DB  locally
 You can build and interact with the database via at least 3 methods:  
    * [Mongo Shell](https://docs.mongodb.com/manual/mongo/)  
@@ -16,7 +21,7 @@ You can build and interact with the database via at least 3 methods:
 
 Please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/Local-MGKDB) for step-by-step instructions on building MGKDB locally
 
-## Test on NERSC
+## Test DB on NERSC
 Users can interact with the database in 3 ways: 
 
 ### Using Command Line tools

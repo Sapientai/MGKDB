@@ -3,14 +3,14 @@
 
 On this page:  
 
-* [Test it locally](#markdown-test-db-locally)  
+* [Test DB locally](#markdown-test-db-locally)  
 
-* [Test it on NERSC](#markdown-test-db-on-nersc)  
+* [Test DB on NERSC](#markdown-test-db-on-nersc)  
 
 ---
 
-## Building the environment
-The conveninent method to access the database tools is using conda environments.
+## Setting up the environment
+A conveninent method to access the database tools is using conda environments.
 You can find the instructions to build the conda environment in the wiki [here](https://github.com/Sapientai/MGKDB/wiki/Setting-up-the-environment).
 
 ## Test DB  locally

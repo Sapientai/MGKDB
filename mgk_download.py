@@ -12,46 +12,11 @@ sys.path.append('support')
 
 from mgk_file_handling import get_oid_from_query, Str2Query, download_dir_by_name, download_file_by_path, download_file_by_id, download_runs_by_id
 import gridfs
-from support.mgk_login import mgk_login
+from mgk_login import mgk_login,f_login_dbase
 import argparse
 import os
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-
-
-def f_login_dbase(authenticate):
-
-    info = authenticate
-
-    if info is None:
-        O1 = input("You did not enter credentials for accessing the database.\n You can \n 0: Enter it manually. \n 1: Enter the full path of the saved .pkl file\n")
-        if O1 == '0':
-            O2 = input("Please enter the server location, port, database name, username, password in order and separated by comma.\n").split(',')
-            login = mgk_login(server= O2[0], port= O2[1], dbname=O2[2], user=O2[3], pwd = O2[4])
-            O2_1 = input("You can save it by entering a target path, press ENTER if you choose not to save it\n")
-            if len(O2_1)>1:
-                login.save(os.path.abspath(O2_1) )
-            else:
-                print('Info not saved!')
-                pass
-        elif O1 == '1':
-            O2= input("Please enter the target path\n")
-            login = mgk_login()
-            login.from_saved(os.path.abspath(O2))
-        
-        else:
-            exit("Invalid input. Abort")
-        
-                
-    else:
-        login = mgk_login()
-        try:
-            login.from_saved(os.path.abspath(info))
-        except OSError:
-            exit("The specified credential file is not found!")
-
-
-    return login
 
 def f_parse_args():
     #==========================================================

@@ -677,7 +677,7 @@ def download_file_by_id(db, _id, destination, fname=None, session = None):
     '''
     db: database name
     _id: object_id
-    destionation: local path to put the file
+    destination: local path to put the file
     fname: name you want to call for the downloaded file
     '''
 
@@ -706,10 +706,11 @@ def download_dir_by_name(db, runs_coll, dir_name, destination):
     #else:
     fs = gridfs.GridFSBucket(db)
     inDb = runs_coll.find({ "Meta.run_collection_name": dir_name })
-   
-    if inDb[0]['Files']['geneerr'] != 'None':    
-        with open(os.path.join(path, 'geneerr.log'),'wb+') as f:
-            fs.download_to_stream(inDb[0]['Files']['geneerr'], f, session=None)
+
+    if 'generr' in inDb[0]['Files'].keys(): ## Fix for when 'generr' doesn't exist
+        if inDb[0]['Files']['geneerr'] != 'None':    
+            with open(os.path.join(path, 'geneerr.log'),'wb+') as f:
+                fs.download_to_stream(inDb[0]['Files']['geneerr'], f, session=None)
 
     for record in inDb:
         '''
@@ -722,7 +723,8 @@ def download_dir_by_name(db, runs_coll, dir_name, destination):
 #                    fs.download_to_stream_by_name(filename, f, revision=-1, session=None)
                     fs.download_to_stream(val, f, session=None)
                 record['Files'][key] = str(val)
-        record['Files']['geneerr'] = str(record['Files']['geneerr'])
+        if 'generr' in record['Files'].keys():  ## Fix for when 'generr' doesn't exist 
+            record['Files']['geneerr'] = str(record['Files']['geneerr'])
         
         '''
         Deal with diagnostic data

@@ -18,3 +18,7 @@ This logs you in to the HPSS command shell
 - ```cd <location_on_file_system>```
 - ```hsi get -R <hpss_backup_folder>```
 
+## Restoring the database (if required)
+
+- ```mongorestore --archive="<backup_location_folder>" --nsFrom="mgk_fusion.*" --nsTo="<new_db_name>.*"```
+

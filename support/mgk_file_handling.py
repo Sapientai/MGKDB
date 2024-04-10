@@ -613,13 +613,18 @@ def isUploaded(out_dir,runs_coll):
     '''
     inDb = runs_coll.find({ "Meta.run_collection_name": out_dir })
 
-    uploaded = False
-    for run in inDb:
-        if run["Meta"]["run_collection_name"] == out_dir: # seems redundent?
-            uploaded = True
-            break
+    entries = list(inDb)
+    uploaded = True if len(entries)>0 else False 
+    
+    # uploaded = False
+    # for run in inDb:
+    #     if run["Meta"]["run_collection_name"] == out_dir: # seems redundent?
+    #         uploaded = True
+    #         break
     
     return uploaded
+
+
 
 
 def not_uploaded_list(out_dir, runs_coll, write_to = None):

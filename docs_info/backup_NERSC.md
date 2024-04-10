@@ -3,9 +3,9 @@ Note: the following info is only intended for people managing MGKDB on NERSC. Re
 
 
 ## Step 1 : Creating backup  of the database 
-- ssh to perlmutter
-- module load mongodb/4.0.28
-- mongodump --host "mongodb03.nersc.gov" -u <db_username> -p <db_password> --archive="<backup_location_folder>" --db=mgk_fusion
+- ```ssh to perlmutter```
+- ```module load mongodb/4.0.28```
+- ```mongodump --host "mongodb03.nersc.gov" -u <db_username> -p <db_password> --archive="<backup_location_folder>" --db=mgk_fusion```
 
 ## Step 2: Writing to HPSS tape at NERSC
 Further information (here)[https://docs.nersc.gov/filesystems/archive/#hsi]

@@ -9,9 +9,10 @@ Note: the following info is only intended for people managing MGKDB on NERSC. Re
 
 ## Step 2: Writing to HPSS tape at NERSC
 Further information (here)[https://docs.nersc.gov/filesystems/archive/#hsi]
-- hsi
+- ```hsi```
+
 This logs you in to the HPSS command shell
-- hsi put -R <backup_location_folder>
+- ```hsi put -R <backup_location_folder>```
 
 ## Retriving data from HPSS 
 - cd <location_on_file_system>

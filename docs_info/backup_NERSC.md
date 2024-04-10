@@ -15,6 +15,6 @@ This logs you in to the HPSS command shell
 - ```hsi put -R <backup_location_folder>```
 
 ## Retriving data from HPSS 
-- cd <location_on_file_system>
-- hsi get -R <hpss_backup_folder> 
+- ```cd <location_on_file_system>```
+- ```hsi get -R <hpss_backup_folder>```
 

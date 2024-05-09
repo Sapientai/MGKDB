@@ -119,7 +119,7 @@ if __name__=="__main__":
     #scan through a directory for more than one run
     for dirpath, dirnames, files in os.walk(output_folder):
         print(dirnames)
-        if str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1 and str(dirpath) not in exclude_folders:    
+        if True:#str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1 and str(dirpath) not in exclude_folders:    
             print('Scanning in {} *******************\n'.format( str(dirpath)) )
             #check if run is linear or nonlinear
             #print(str(dirpath))
@@ -144,7 +144,7 @@ if __name__=="__main__":
             #add linear/nonlin to keywords
             keywords_lin = keywords.split('#') + lin
             #print(keywords_lin)
-            #print(linear)                                        
+            print("linear=", linear)                                        
 
             if not default:
                 suffixes = get_suffixes(dirpath)

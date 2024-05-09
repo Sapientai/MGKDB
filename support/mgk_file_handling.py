@@ -69,8 +69,21 @@ import pickle
 __version__ = '0.0.4'
 print('Current version is {}.'.format(__version__))
 
-Docs = ['autopar', 'codemods', 'nrg', 'omega','parameters']
-Keys = ['autopar', 'codemods', 'nrg', 'omega','parameters']
+
+if False:#sim_type == 'GENE':
+    Docs = ['autopar', 'codemods', 'nrg', 'omega','parameters']
+    Keys = ['autopar', 'codemods', 'nrg', 'omega','parameters']
+
+#elif sim_type == 'CGYRO':
+else:
+    Docs = ['out.cgyro.equilibrium',  'out.cgyro.memory', 'out.cgyro.tag', 'out.cgyro.freq',
+     'out.cgyro.mpi', 'out.cgyro.time', 'input.cgyro', 'out.cgyro.grids','out.cgyro.prec', 
+     'out.cgyro.timing','input.cgyro.gen','out.cgyro.hosts','out.cgyro.rotation' ,'out.cgyro.version',
+     'out.cgyro.egrid' , 'out.cgyro.info', 'out.cgyro.startups' ]    
+    Keys = ['equilibrium',  'memory', 'tag', 'freq',
+     'mpi', 'time', 'input_cgyro', 'grids','prec', 
+     'timing','gen','hosts','rotation' ,'version',
+     'egrid' , 'info', 'startups' ]  
 
 #Large files#
 Docs_L = ['field', 'mom', 'vsp']
@@ -1105,118 +1118,155 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
     runs_coll = db.LinearRuns
        
     #update files dictionary
-    if suffixes is None:         
-        suffixes = get_suffixes(out_dir)
-        
+    if sim_type == 'CGYRO':
+        suffixes = ['']
+    else:
+        if suffixes is None:         
+            suffixes = get_suffixes(out_dir)
+            
     if isinstance(run_shared, list):
         shared_not_uploaded = [True for _ in run_shared]
     else:
         shared_not_uploaded = [False]
     shared_file_dict = {}
 
+
+    print('hey', suffixes)
         
     for count, suffix in enumerate(suffixes):
-        try:
-            print('='*40)
-            print('Working on files with suffix: {} in folder {}.......'.format(suffix, out_dir))           
-            print('Uploading files ....')
-            if count == 0:
-                object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, run_shared)
-            else:
-                object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, None)
-            id_copy = object_ids.copy() # make a copy to delete from database if following routine causes exceptions
-            
-            '''
-            managing attributes
-            '''
-            _docs = Docs.copy()
-            _keys = Keys.copy()
-            
-            if large_files:
-                _docs = _docs + Docs_L
-                _keys = _keys + Keys_L
-            if extra:
-                _docs = _docs + Docs_ex
-                _keys = _keys + Keys_ex
+        #try:
+            if sim_type == 'GENE':
+                print('='*40)
+                print('Working on files with suffix: {} in folder {}.......'.format(suffix, out_dir))           
+                print('Uploading files ....')
+                if count == 0:
+                    object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, run_shared)
+                else:
+                    object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, None)
+                id_copy = object_ids.copy() # make a copy to delete from database if following routine causes exceptions
                 
-            files_dict = dict.fromkeys(_keys, 'None') # this removes duplicated keys           
-            
-            print('='*60)
-            print('Following files are uploaded.')
-            # print(object_ids)
-            for _id, line in list(object_ids.items()):  # it is necessary because the dict changes size during loop.
-                for Q_name, Key in zip(_docs, _keys):
-                    if os.path.join(out_dir,Q_name+suffix) == line:
-                        print(Q_name+suffix)
-                        if '.' in Key:
-                            Key = '_'.join(Key.split('.'))
-    
-                        files_dict[Key] = _id
-                        print("{} file uploaded with id {}".format(Key, _id))
-                        try:
-                            object_ids.pop(_id)
-                        except KeyError:
-                            continue
-                        break
+                '''
+                managing attributes
+                '''
+                _docs = Docs.copy()
+                _keys = Keys.copy()
                 
-                    if True in shared_not_uploaded and count==0:
-                        for S_ind, S_name in enumerate(run_shared):
-                            if os.path.join(out_dir,S_name) == line and shared_not_uploaded[S_ind]:
-                                print(S_name)
-                                if '.' in S_name:
-                                    S_name = '_'.join(S_name.split('.'))
-                                shared_file_dict[S_name] = _id
-                                shared_not_uploaded[S_ind] = False
+                if large_files:
+                    _docs = _docs + Docs_L
+                    _keys = _keys + Keys_L
+                if extra:
+                    _docs = _docs + Docs_ex
+                    _keys = _keys + Keys_ex
+                    
+                files_dict = dict.fromkeys(_keys, 'None') # this removes duplicated keys           
+                
+                print('='*60)
+                print('Following files are uploaded.')
+                # print(object_ids)
+                for _id, line in list(object_ids.items()):  # it is necessary because the dict changes size during loop.
+                    for Q_name, Key in zip(_docs, _keys):
+                        if os.path.join(out_dir,Q_name+suffix) == line:
+                            print(Q_name+suffix)
+                            if '.' in Key and sim_type =='GENE':
+                                Key = '_'.join(Key.split('.'))
+        
+                            files_dict[Key] = _id
+                            print("{} file uploaded with id {}".format(Key, _id))
                             try:
                                 object_ids.pop(_id)
                             except KeyError:
                                 continue
-                    elif count>0 and run_shared is not None:
-                        for S_ind, S_name in enumerate(run_shared):
-                            print(S_name)
-                                           
-            files_dict = {**files_dict, **shared_file_dict}
-#                if os.path.join(out_dir,'geneerr.log') == line and count==0:
-#                    files_dict['geneerr'] = _id
-#                    object_ids.pop(_id)
-            print('='*60)
+                            break
+                    
+                        if True in shared_not_uploaded and count==0:
+                            for S_ind, S_name in enumerate(run_shared):
+                                if os.path.join(out_dir,S_name) == line and shared_not_uploaded[S_ind]:
+                                    print(S_name)
+                                    if '.' in S_name:
+                                        S_name = '_'.join(S_name.split('.'))
+                                    shared_file_dict[S_name] = _id
+                                    shared_not_uploaded[S_ind] = False
+                                try:
+                                    object_ids.pop(_id)
+                                except KeyError:
+                                    continue
+                        elif count>0 and run_shared is not None:
+                            for S_ind, S_name in enumerate(run_shared):
+                                print(S_name)
+                                            
+                files_dict = {**files_dict, **shared_file_dict}
+    #                if os.path.join(out_dir,'geneerr.log') == line and count==0:
+    #                    files_dict['geneerr'] = _id
+    #                    object_ids.pop(_id)
+                print('='*60)
+                
             
-          
-            #metadata dictonary
-            time_upload = strftime("%y%m%d-%H%M%S")
-            meta_dict = {"user": user,
-                         "run_collection_name": out_dir,
-                         "run_suffix": '' + suffix,
-                         "keywords": keywords,
-                         "simulation_type": sim_type,
-                         "confidence": confidence,
-                         "comments": comments,
-                         "time_uploaded": time_upload,
-                         "last_updated": time_upload
-                        }  
-                   
-#            try:
-            print('='*60)
-            print('\n Working on diagnostics with user specified tspan .....\n')
-            Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
-            print('='*60)
+                #metadata dictonary
+                time_upload = strftime("%y%m%d-%H%M%S")
+                meta_dict = {"user": user,
+                            "run_collection_name": out_dir,
+                            "run_suffix": '' + suffix,
+                            "keywords": keywords,
+                            "simulation_type": sim_type,
+                            "confidence": confidence,
+                            "comments": comments,
+                            "time_uploaded": time_upload,
+                            "last_updated": time_upload
+                            }  
+                    
+    #            try:
+                print('='*60)
+                print('\n Working on diagnostics with user specified tspan .....\n')
+                Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
+                print('='*60)
+                
+                print('='*60)
+                print('\n Working on OMAS gyrokinetics dictionary using tspan detected from nrg file......\n')
+                GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear=True)
+                
+                for key, val in Diag_dict.items():
+                    Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
+                
+                '''
+                Adding omega info to Diag_dict for linear runs
+                '''
+                omega_val = get_omega(out_dir, suffix)
+                Diag_dict['omega'] = {}
+                Diag_dict['omega']['ky'] = omega_val[0]
+                Diag_dict['omega']['gamma'] = omega_val[1]
+                Diag_dict['omega']['omega'] = omega_val[2]
             
-            print('='*60)
-            print('\n Working on OMAS gyrokinetics dictionary using tspan detected from nrg file......\n')
-            GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear=True)
-            
-            for key, val in Diag_dict.items():
-                Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
-            
-            '''
-            Adding omega info to Diag_dict for linear runs
-            '''
-            omega_val = get_omega(out_dir, suffix)
-            Diag_dict['omega'] = {}
-            Diag_dict['omega']['ky'] = omega_val[0]
-            Diag_dict['omega']['gamma'] = omega_val[1]
-            Diag_dict['omega']['omega'] = omega_val[2]
-            
+            else:
+                _docs = Docs.copy()
+                _keys = Keys.copy()
+                
+                if large_files:
+                    _docs = _docs + Docs_L
+                    _keys = _keys + Keys_L
+                if extra:
+                    _docs = _docs + Docs_ex
+                    _keys = _keys + Keys_ex
+                    
+                files_dict = dict.fromkeys(_keys, 'None') # this removes duplicated keys  
+                time_upload = strftime("%y%m%d-%H%M%S")
+
+                meta_dict = {"user": user,
+                            "run_collection_name": out_dir,
+                            "run_suffix": '',
+                            "keywords": keywords,
+                            "simulation_type": sim_type,
+                            "confidence": confidence,
+                            "comments": comments,
+                            "time_uploaded": time_upload,
+                            "last_updated": time_upload
+                            }              
+                with open(out_dir+'/gyrokinetics.json', 'r') as j:
+                    GK_dict = json.loads(j.read())
+
+                Diag_dict = {}
+                imag_dict = {}
+
+                    
     #        param_dict = get_parsed_params(os.path.join(out_dir, 'parameters' + suffix) )
             #combine dictionaries and upload
     #        run_data =  {'Meta': meta_dict, 'Files': files_dict, 'QoI': QoI_dict, 'Diagnostics': Diag_dict, 'Parameters': param_dict}
@@ -1231,31 +1281,33 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
             '''
             Get a dictionary of what's left in object_ids for possible delayed delete
             '''
+            """
             ex_dict = dict()
             for _id, line in object_ids.items():
                 if '.' in line:
                     line = '_'.join(line.split('.'))  # if . appears in the key such as nrg_001.h5 -> nrg_001_h5
                 ex_dict[line] = _id
+            """
+            #if ex_dict: 
+            #    ex_dict['simulation_type']=sim_type
+            #    db.ex.Lin.insert_one(ex_dict)
+            """    
+            except Exception as exception:
+                print(exception)
+                print("Skip suffix {} in \n {}. \n".format(suffix, out_dir))
+                _troubled_runs.append(out_dir + '##' + suffix)
+                print('cleaning ......')
+                fs = gridfs.GridFS(db)
+                try:
+                    for _id, _ in id_copy.items():
+                        fs.delete(_id)
+                        print('{} deleted.'.format(_id))
+                except Exception as eee:
+                    print(eee)
+                    pass
                 
-            if ex_dict: 
-                ex_dict['simulation_type']=sim_type
-                db.ex.Lin.insert_one(ex_dict)
-            
-        except Exception as exception:
-            print(exception)
-            print("Skip suffix {} in \n {}. \n".format(suffix, out_dir))
-            _troubled_runs.append(out_dir + '##' + suffix)
-            print('cleaning ......')
-            fs = gridfs.GridFS(db)
-            try:
-                for _id, _ in id_copy.items():
-                    fs.delete(_id)
-                    print('{} deleted.'.format(_id))
-            except Exception as eee:
-                print(eee)
-                pass
-            
-            continue
+                continue
+            """
                 
     reset_docs_keys()
 #    print('Run collection \'' + out_dir + '\' uploaded succesfully.')

@@ -154,11 +154,13 @@ def get_gyrokinetics_from_run(out_dir, suffix, user, linear, tspan = None):
     os.chdir(out_dir) # change dir or make it as an argument
     common = comm.CommonData(suffix, starttime, endtime)
     rundatafiles = datafiles.RunDataFiles(common)
-    if linear:
-        tst = GKDB_linear(common, rundatafiles, user)
-    else:
-        tst = GKDB_nonlin(common, rundatafiles, user)
-    
+    if sim_type == 'GENE':
+        if linear:
+            tst = GKDB_linear(common, rundatafiles, user)
+        else:
+            tst = GKDB_nonlin(common, rundatafiles, user)
+    elif sim_type == 'CGYRO':
+        tst = json.load(output_folder+'/gyrokinetics.json')
     os.chdir(current_pwd) # get back to original dir
     
     return tst.gkdict

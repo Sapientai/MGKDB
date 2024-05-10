@@ -45,9 +45,6 @@ import json
 from time import strftime
 import pickle
 #=======================================================
-# database specification. Local test
-#=====================================================
-
 # =============================================================================
 # mgkdb_server = 'localhost'
 # mgkdb_port = '27017'
@@ -65,55 +62,51 @@ import pickle
 
 #==============================================================================
 #standard files#
-# Q: is geneerr with suffix? 
-__version__ = '0.0.4'
-print('Current version is {}.'.format(__version__))
+# Docs = ['autopar', 'codemods', 'nrg', 'omega','parameters']
+# Keys = ['autopar', 'codemods', 'nrg', 'omega','parameters']
 
-Docs = ['autopar', 'codemods', 'nrg', 'omega','parameters']
-Keys = ['autopar', 'codemods', 'nrg', 'omega','parameters']
-
-#Large files#
-Docs_L = ['field', 'mom', 'vsp']
-Keys_L = ['field', 'mom', 'vsp']
+# #Large files#
+# Docs_L = ['field', 'mom', 'vsp']
+# Keys_L = ['field', 'mom', 'vsp']
 
 
-#User specified files#
-Docs_ex = [] 
-Keys_ex = []
+# #User specified files#
+# Docs_ex = [] 
+# Keys_ex = []
 
        
-file_related_keys = Keys + Keys_L + Keys_ex
-file_related_docs = Docs + Docs_L + Docs_ex
+# file_related_keys = Keys + Keys_L + Keys_ex
+# file_related_docs = Docs + Docs_L + Docs_ex
 
 
-_troubled_runs = [] # a global list to collection runs where exception happens
+# _troubled_runs = [] # a global list to collection runs where exception happens
 
 
-def reset_docs_keys():
-    global  Docs, Keys, Docs_L, Keys_L, Docs_ex, Keys_ex, file_related_keys,\
-           file_related_docs
+# def reset_docs_keys():
+#     global  Docs, Keys, Docs_L, Keys_L, Docs_ex, Keys_ex, file_related_keys,\
+#            file_related_docs
     
-#    Default_Keys = ['scan_id',  'submit_id',  'eqdisk_id' ]
+# #    Default_Keys = ['scan_id',  'submit_id',  'eqdisk_id' ]
 
-    Docs = ['autopar', 'codemods', 'nrg',  'omega', 'parameters']
-    Keys = ['autopar', 'codemods', 'nrg',  'omega', 'parameters']
+#     Docs = ['autopar', 'codemods', 'nrg',  'omega', 'parameters']
+#     Keys = ['autopar', 'codemods', 'nrg',  'omega', 'parameters']
     
-    #Large files#
-    Docs_L = ['field', 'mom', 'vsp']
-    Keys_L = ['field', 'mom', 'vsp']
+#     #Large files#
+#     Docs_L = ['field', 'mom', 'vsp']
+#     Keys_L = ['field', 'mom', 'vsp']
     
     
-    #User specified files#
-    Docs_ex = [] 
-    Keys_ex = []
+#     #User specified files#
+#     Docs_ex = [] 
+#     Keys_ex = []
     
         
-#    meta = ["user", "run_collection_name" ,"run_suffix" ,"keywords", "confidence"]
+# #    meta = ["user", "run_collection_name" ,"run_suffix" ,"keywords", "confidence"]
         
-    file_related_keys = Keys + Keys_L + Keys_ex
-    file_related_docs = Docs + Docs_L + Docs_ex
+#     file_related_keys = Keys + Keys_L + Keys_ex
+#     file_related_docs = Docs + Docs_L + Docs_ex
         
-    print("File names and their key names are reset to default!")
+#     print("File names and their key names are reset to default!")
     
 
 def get_omega(out_dir, suffix):
@@ -1018,7 +1011,7 @@ def remove_from_mongo(out_dir, db, runs_coll):
 #        delete the header file
         runs_coll.delete_one(run)
         
-def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=False, suffix = None, run_shared=None):
+def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=False, suffix = None, run_shared=None, global_vars=None):
     '''
     This function does the actual uploading of grifs chunks and
     returns object_ids for the chunk.
@@ -1058,23 +1051,23 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
     
     
     if 'magn_geometry' in pars:
-        Docs.append(pars['magn_geometry'][1:-1])
-        Keys.append('magn_geometry')
+        global_vars.Docs.append(pars['magn_geometry'][1:-1])
+        global_vars.Keys.append('magn_geometry')
     if large_files:
-        if 'name1' in pars and 'mom' in Docs_L:
-            Docs_L.pop(Docs_L.index('mom'))
-            Keys_L.pop(Keys_L.index('mom'))
+        if 'name1' in pars and 'mom' in global_vars.Docs_L:
+            global_vars.Docs_L.pop(global_vars.Docs_L.index('mom'))
+            global_vars.Keys_L.pop(global_vars.Keys_L.index('mom'))
             for i in range(n_spec): # adding all particle species
-                Docs_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
-                Keys_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
+                global_vars.Docs_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
+                global_vars.Keys_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
     
-    output_files = [get_file_list(out_dir, Qname+suffix) for Qname in Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
+    output_files = [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
     
         
     if large_files:
-        output_files += [get_file_list(out_dir, Qname+suffix) for Qname in Docs_L if Qname]
+        output_files += [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs_L if Qname]
     if extra_files:
-        output_files += [get_file_list(out_dir, Qname+suffix) for Qname in Docs_ex if Qname]
+        output_files += [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs_ex if Qname]
         
     '''
     Adding files not subject to suffixes, non_suffix should be a list 
@@ -1094,13 +1087,11 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
             _id = gridfs_put(db, file, sim_type)
             object_ids[_id] = file
             
-#    reset_docs_keys()
-#    print(object_ids)
     return object_ids
 
 def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
                   img_dir = './mgk_diagplots', suffixes = None, run_shared = None,
-                  large_files=False, extra=False, verbose=True, manual_time_flag = True):
+                  large_files=False, extra=False, verbose=True, manual_time_flag = True, global_vars=None):
     #connect to linear collection
     runs_coll = db.LinearRuns
        
@@ -1121,23 +1112,23 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
             print('Working on files with suffix: {} in folder {}.......'.format(suffix, out_dir))           
             print('Uploading files ....')
             if count == 0:
-                object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, run_shared)
+                object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, run_shared, global_vars)
             else:
-                object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, None)
+                object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, None,global_vars)
             id_copy = object_ids.copy() # make a copy to delete from database if following routine causes exceptions
             
             '''
             managing attributes
             '''
-            _docs = Docs.copy()
-            _keys = Keys.copy()
+            _docs = global_vars.Docs.copy()
+            _keys = global_vars.Keys.copy()
             
             if large_files:
-                _docs = _docs + Docs_L
-                _keys = _keys + Keys_L
+                _docs = _docs + global_vars.Docs_L
+                _keys = _keys + global_vars.Keys_L
             if extra:
-                _docs = _docs + Docs_ex
-                _keys = _keys + Keys_ex
+                _docs = _docs + global_vars.Docs_ex
+                _keys = _keys + global_vars.Keys_ex
                 
             files_dict = dict.fromkeys(_keys, 'None') # this removes duplicated keys           
             
@@ -1244,7 +1235,7 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
         except Exception as exception:
             print(exception)
             print("Skip suffix {} in \n {}. \n".format(suffix, out_dir))
-            _troubled_runs.append(out_dir + '##' + suffix)
+            global_vars.troubled_runs.append(out_dir + '##' + suffix)
             print('cleaning ......')
             fs = gridfs.GridFS(db)
             try:
@@ -1257,13 +1248,13 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
             
             continue
                 
-    reset_docs_keys()
+    global_vars.reset_docs_keys(sim_type)
 #    print('Run collection \'' + out_dir + '\' uploaded succesfully.')
         
         
 def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
                   img_dir = './mgk_diagplots', suffixes = None, run_shared=None,
-                  large_files=False, extra=False, verbose=True, manual_time_flag = True ):
+                  large_files=False, extra=False, verbose=True, manual_time_flag = True , global_vars=None):
     #connect to nonlinear collection
     runs_coll = db.NonlinRuns
         
@@ -1284,22 +1275,22 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
             print('Working on files with suffix: {} in folder {}.......'.format(suffix, out_dir))
             print('Uploading files ....')
             if count == 0:
-                object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, run_shared)
+                object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, run_shared, global_vars)
             else:
-                object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, None)
+                object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, None, global_vars)
             id_copy = object_ids.copy() # make a copy to delete from database if following routine causes exceptions
             '''
             managing attributes
             '''
-            _docs = Docs.copy()
-            _keys = Keys.copy()
+            _docs = global_vars.Docs.copy()
+            _keys = global_vars.Keys.copy()
             
             if large_files:
-                _docs = _docs + Docs_L
-                _keys = _keys + Keys_L
+                _docs = _docs + global_vars.Docs_L
+                _keys = _keys + global_vars.Keys_L
             if extra:
-                _docs = _docs + Docs_ex
-                _keys = _keys + Keys_ex
+                _docs = _docs + global_vars.Docs_ex
+                _keys = _keys + global_vars.Keys_ex
                 
             files_dict = dict.fromkeys(_keys, 'None')          
             
@@ -1411,7 +1402,7 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
         except Exception as exception:
             print(exception)
             print("Skip suffix {} in \n {}. \n".format(suffix, out_dir))
-            _troubled_runs.append(out_dir + '##' + suffix)
+            global_vars.troubled_runs.append(out_dir + '##' + suffix)
             print('cleaning ......')
             fs = gridfs.GridFS(db)
             try:
@@ -1424,11 +1415,11 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
                 
             continue
     
-    reset_docs_keys()
+    global_vars.reset_docs_keys(sim_type)
             
 def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords, comments, sim_type, 
                     img_dir= './mgk_diagplots', suffixes = None, run_shared=None,
-                    large_files = False, extra=False, verbose=True, manual_time_flag = True):
+                    large_files = False, extra=False, verbose=True, manual_time_flag = True, global_vars=None):
     #print(linear)
     #for linear runs
     if linear:
@@ -1443,7 +1434,7 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
                 remove_from_mongo(out_dir, db, runs_coll)   
                 upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
                               img_dir, suffixes, run_shared,
-                              large_files, extra, verbose, manual_time_flag)
+                              large_files, extra, verbose, manual_time_flag, global_vars)
             elif update == '1':
                 update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir)
             else:
@@ -1452,7 +1443,7 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
             print('Folder tag:\n{}\n not detected, creating new.\n'.format(out_dir))
             upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
                           img_dir, suffixes, run_shared,
-                          large_files, extra, verbose, manual_time_flag)
+                          large_files, extra, verbose, manual_time_flag, global_vars)
                 
     #for nonlinear runs
     elif not linear:
@@ -1467,7 +1458,7 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
                 remove_from_mongo(out_dir, db, runs_coll)   
                 upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type, 
                               img_dir, suffixes, run_shared,
-                              large_files, extra, verbose,manual_time_flag)
+                              large_files, extra, verbose,manual_time_flag, global_vars)
             elif update == '1':
                 update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir)
 
@@ -1477,7 +1468,7 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
             print('Folder tag:\n{}\n not detected, creating new.\n'.format(out_dir))
             upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
                           img_dir, suffixes, run_shared,
-                          large_files, extra, verbose,manual_time_flag)
+                          large_files, extra, verbose,manual_time_flag, global_vars)
     else:
         exit('Cannot decide if the folder is subject to linear or nonlinear runs.')
 

@@ -15,7 +15,7 @@ Optional fields:    confidence
 import sys
 sys.path.append('support')
 
-from mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Docs_ex, Keys_ex, _troubled_runs
+from mgk_file_handling import get_suffixes, upload_to_mongo, isLinear 
 #from ParIO import *
 import os
 from mgk_login import mgk_login,f_login_dbase
@@ -27,25 +27,28 @@ class Global_vars():
     '''
     Object to store global variables
     '''
-    def __init__(self):
-        self.Docs = ['autopar', 'codemods', 'nrg', 'omega','parameters']
-        self.Keys = ['autopar', 'codemods', 'nrg', 'omega','parameters']
+    def __init__(self, sim_type='GENE'):
 
-        #Large files#
-        self.Docs_L = ['field', 'mom', 'vsp']
-        self.Keys_L = ['field', 'mom', 'vsp']
+        if sim_type=="GENE":
+            self.Docs = ['autopar', 'codemods', 'nrg', 'omega','parameters']
+            self.Keys = ['autopar', 'codemods', 'nrg', 'omega','parameters']
 
-        #User specified files#
-        self.Docs_ex = [] 
-        self.Keys_ex = []
+            #Large files#
+            self.Docs_L = ['field', 'mom', 'vsp']
+            self.Keys_L = ['field', 'mom', 'vsp']
 
-        self.file_related_keys = Keys + Keys_L + Keys_ex
-        self.file_related_docs = Docs + Docs_L + Docs_ex
-        self.troubled_runs = [] # a global list to collection runs where exception happens
+            #User specified files#
+            self.Docs_ex = [] 
+            self.Keys_ex = []
 
-    def reset_docs_keys(self):
+            self.file_related_keys = self.Keys + self.Keys_L + self.Keys_ex
+            self.file_related_docs = self.Docs + self.Docs_L + self.Docs_ex
+            self.troubled_runs = [] # a global list to collection runs where exception happens
+
+    def reset_docs_keys(self,sim_type):
         ## Reset values 
-        self.__init__()
+        self.__init__(sim_type)
+        print("File names and their key names are reset to default!")
 
 def f_parse_args():
     #==========================================================
@@ -99,7 +102,7 @@ if __name__=="__main__":
         manual_time_flag = True
     
     ### Update global variables 
-    # global_vars = Global_vars()    
+    global_vars = Global_vars(args.sim_type)    
     
     if args.extra: # this will change the global variable
         exfiles = input('Please type FULL file names to update, separated by comma.\n').split(',')
@@ -108,6 +111,10 @@ if __name__=="__main__":
         Docs_ex += exfiles
         Keys_ex += exkeys
 
+        global_vars.Docs_ex +=exfiles
+        global_vars.Keys_ex +=exkeys
+
+    
     ### Connect to database 
     login = f_login_dbase(args.authenticate)
     database = login.connect()
@@ -183,9 +190,9 @@ if __name__=="__main__":
             # Send run to upload_to_mongo to be uploaded
             upload_to_mongo(database, dirpath, user, linear, confidence, args.input_heat, 
                              keywords_lin, comments, args.sim_type, img_dir, suffixes, run_shared,
-                             args.large_files, args.extra, args.verbose, manual_time_flag)
+                             args.large_files, args.extra, args.verbose, manual_time_flag,global_vars)
 
-    if len(_troubled_runs):
+    if len(global_vars.troubled_runs):
         print("The following runs are skipped due to exceptions.")
-        for r in _troubled_runs:
+        for r in global_vars.troubled_runs:
             print(r)

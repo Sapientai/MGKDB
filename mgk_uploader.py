@@ -15,40 +15,13 @@ Optional fields:    confidence
 import sys
 sys.path.append('support')
 
-from mgk_file_handling import get_suffixes, upload_to_mongo, isLinear 
+from mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars 
 #from ParIO import *
 import os
 from mgk_login import mgk_login,f_login_dbase
 
 import argparse
 from sys import exit
-
-class Global_vars():
-    '''
-    Object to store global variables
-    '''
-    def __init__(self, sim_type='GENE'):
-
-        if sim_type=="GENE":
-            self.Docs = ['autopar', 'codemods', 'nrg', 'omega','parameters']
-            self.Keys = ['autopar', 'codemods', 'nrg', 'omega','parameters']
-
-            #Large files#
-            self.Docs_L = ['field', 'mom', 'vsp']
-            self.Keys_L = ['field', 'mom', 'vsp']
-
-            #User specified files#
-            self.Docs_ex = [] 
-            self.Keys_ex = []
-
-            self.file_related_keys = self.Keys + self.Keys_L + self.Keys_ex
-            self.file_related_docs = self.Docs + self.Docs_L + self.Docs_ex
-            self.troubled_runs = [] # a global list to collection runs where exception happens
-
-    def reset_docs_keys(self,sim_type):
-        ## Reset values 
-        self.__init__(sim_type)
-        print("File names and their key names are reset to default!")
 
 def f_parse_args():
     #==========================================================

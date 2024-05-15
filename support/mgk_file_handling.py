@@ -108,6 +108,51 @@ import pickle
         
 #     print("File names and their key names are reset to default!")
     
+class Global_vars():
+    '''
+    Object to store global variables
+    '''
+    def __init__(self, sim_type='GENE'):
+
+        if sim_type=="GENE":
+            self.Docs = ['autopar', 'codemods', 'nrg', 'omega','parameters']
+            self.Keys = ['autopar', 'codemods', 'nrg', 'omega','parameters']
+
+            #Large files#
+            self.Docs_L = ['field', 'mom', 'vsp']
+            self.Keys_L = ['field', 'mom', 'vsp']
+
+            #User specified files#
+            self.Docs_ex = [] 
+            self.Keys_ex = []
+
+            self.file_related_keys = self.Keys + self.Keys_L + self.Keys_ex
+            self.file_related_docs = self.Docs + self.Docs_L + self.Docs_ex
+            self.troubled_runs = [] # a global list to collection runs where exception happens
+
+        elif sim_type=='CGYRO':
+
+            self.Docs = ['autopar', 'codemods', 'nrg', 'omega','parameters','input_a','input_b']
+            self.Keys = ['autopar', 'codemods', 'nrg', 'omega','parameters','input_a','input_b']
+            # self.Docs = ['input_a','input_b']
+            # self.Keys = ['input_a','input_b']
+
+            #Large files#
+            self.Docs_L = []
+            self.Keys_L = []
+
+            #User specified files#
+            self.Docs_ex = [] 
+            self.Keys_ex = []
+
+            self.file_related_keys = self.Keys + self.Keys_L + self.Keys_ex
+            self.file_related_docs = self.Docs + self.Docs_L + self.Docs_ex
+            self.troubled_runs = [] # a global list to collection runs where exception happens
+
+    def reset_docs_keys(self,sim_type):
+        ## Reset values 
+        self.__init__(sim_type)
+        print("File names and their key names are reset to default!")
 
 def get_omega(out_dir, suffix):
     try:
@@ -1016,54 +1061,56 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
     This function does the actual uploading of grifs chunks and
     returns object_ids for the chunk.
     '''
-    
-    if suffix is not None:
-        par_list = get_file_list(out_dir, 'parameters' + suffix) # assuming parameter files start with 'parameters' 
-    else:
-        print("Suffix is not provided!")
-        
-#    print(par_list)
-    if len(par_list) == 0:
-        exit('Cannot locate parameter files in folder {}.'.format(out_dir))
-    elif len(par_list) == 1:
-        par_file = par_list[0]
-    elif os.path.join(out_dir, 'parameters') in par_list:
-        par_file = os.path.join(out_dir, 'parameters')
-    else: 
-        print('There seems to be multiple files detected starting with parameters{}:\n'.format(suffix))
-        count=0
-        for par in par_list:
-            print('{} : {}\n'.format(count, par.split('/')[-1]))
-            count+=1
-#        choice = input('Which one do you want to scan for information.\n')
-#        choice = int(choice)
-#        par_file = os.path.join(out_dir, par_list[choice])
-#        print('File {} selected for scanning [magn_geometry] and [mom] information.'.format(par_list[choice]))
-            
-        par_list.sort()
-        par_file = par_list[0]
-        print('File {} selected for scanning [magn_geometry] and [mom] information.'.format(par_file))
 
-    par = Parameters()
-    par.Read_Pars(par_file)
-    pars = par.pardict
-    n_spec = pars['n_spec']
+    if sim_type=='GENE': 
+        if suffix is not None:
+            par_list = get_file_list(out_dir, 'parameters' + suffix) # assuming parameter files start with 'parameters' 
+        else:
+            print("Suffix is not provided!")
+            
+    #    print(par_list)
+        if len(par_list) == 0:
+            exit('Cannot locate parameter files in folder {}.'.format(out_dir))
+        elif len(par_list) == 1:
+            par_file = par_list[0]
+        elif os.path.join(out_dir, 'parameters') in par_list:
+            par_file = os.path.join(out_dir, 'parameters')
+        else: 
+            print('There seems to be multiple files detected starting with parameters{}:\n'.format(suffix))
+            count=0
+            for par in par_list:
+                print('{} : {}\n'.format(count, par.split('/')[-1]))
+                count+=1
+    #        choice = input('Which one do you want to scan for information.\n')
+    #        choice = int(choice)
+    #        par_file = os.path.join(out_dir, par_list[choice])
+    #        print('File {} selected for scanning [magn_geometry] and [mom] information.'.format(par_list[choice]))
+                
+            par_list.sort()
+            par_file = par_list[0]
+            print('File {} selected for scanning [magn_geometry] and [mom] information.'.format(par_file))
+
+        par = Parameters()
+        par.Read_Pars(par_file)
+        pars = par.pardict
+        n_spec = pars['n_spec']
+        
+        
+        if 'magn_geometry' in pars:
+            global_vars.Docs.append(pars['magn_geometry'][1:-1])
+            global_vars.Keys.append('magn_geometry')
+        if large_files:
+            if 'name1' in pars and 'mom' in global_vars.Docs_L:
+                global_vars.Docs_L.pop(global_vars.Docs_L.index('mom'))
+                global_vars.Keys_L.pop(global_vars.Keys_L.index('mom'))
+                for i in range(n_spec): # adding all particle species
+                    global_vars.Docs_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
+                    global_vars.Keys_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
     
-    
-    if 'magn_geometry' in pars:
-        global_vars.Docs.append(pars['magn_geometry'][1:-1])
-        global_vars.Keys.append('magn_geometry')
-    if large_files:
-        if 'name1' in pars and 'mom' in global_vars.Docs_L:
-            global_vars.Docs_L.pop(global_vars.Docs_L.index('mom'))
-            global_vars.Keys_L.pop(global_vars.Keys_L.index('mom'))
-            for i in range(n_spec): # adding all particle species
-                global_vars.Docs_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
-                global_vars.Keys_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
-    
+
+
     output_files = [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
     
-        
     if large_files:
         output_files += [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs_L if Qname]
     if extra_files:

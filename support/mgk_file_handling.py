@@ -353,7 +353,7 @@ def gridfs_put(db, filepath,sim_type):
     fs = gridfs.GridFS(db)
     dbfile = fs.put(file, encoding='UTF-8', 
                     filepath = filepath,
-                    filename = filepath.split('/')[-1],
+                    filename = os.path.basename(filepath),
                     simulation_type = sim_type,
                     metadata = None)  # may also consider using upload_from_stream ?
     file.close()

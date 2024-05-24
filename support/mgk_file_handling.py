@@ -132,18 +132,8 @@ class Global_vars():
 
         elif sim_type=='CGYRO':
 
-            self.Docs = ['autopar', 'codemods', 'nrg', 'omega','parameters','input_a','input_b']
-            self.Keys = ['autopar', 'codemods', 'nrg', 'omega','parameters','input_a','input_b']
-            # self.Docs = ['input_a','input_b']
-            # self.Keys = ['input_a','input_b']
-            self.Docs = ['out.cgyro.equilibrium',  'out.cgyro.memory', 'out.cgyro.tag', 'out.cgyro.freq',
-     'out.cgyro.mpi', 'out.cgyro.time', 'input.cgyro', 'out.cgyro.grids','out.cgyro.prec', 
-     'out.cgyro.timing','input.cgyro.gen','out.cgyro.hosts','out.cgyro.rotation' ,'out.cgyro.version',
-     'out.cgyro.egrid' , 'out.cgyro.info', 'out.cgyro.startups' ]    
-            self.Keys = ['equilibrium',  'memory', 'tag', 'freq',
-     'mpi', 'time', 'input_cgyro', 'grids','prec', 
-     'timing','gen','hosts','rotation' ,'version',
-     'egrid' , 'info', 'startups' ]  
+            self.Docs = ['input.cgyro', 'input.cgyro.gen', 'input.gacode', 'out.cgyro.info']    
+            self.Keys = ['input_cgyro', 'input_cgyro_gen', 'input_gacode', 'out_cgyro_info']  
 
             #Large files#
             self.Docs_L = []

@@ -132,10 +132,8 @@ class Global_vars():
 
         elif sim_type=='CGYRO':
 
-            self.Docs = ['autopar', 'codemods', 'nrg', 'omega','parameters','input_a','input_b']
-            self.Keys = ['autopar', 'codemods', 'nrg', 'omega','parameters','input_a','input_b']
-            # self.Docs = ['input_a','input_b']
-            # self.Keys = ['input_a','input_b']
+            self.Docs = ['input.cgyro', 'input.cgyro.gen', 'input.gacode', 'out.cgyro.info']    
+            self.Keys = ['input_cgyro', 'input_cgyro_gen', 'input_gacode', 'out_cgyro_info']  
 
             #Large files#
             self.Docs_L = []
@@ -923,9 +921,13 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
             manual_time_flag = True
             for suffix in suffixes:
                 if affect_QoI in ['Y', 'y']:
-                    GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear) 
+                    if self.sim_type=='CGYRO':
+                        with open(out_dir+'/gyrokinetics.json', 'r') as j:
+                            GK_dict = json.loads(j.read())
+                    else:
+                        GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear) 
                     
-                    Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix,  manual_time_flag, img_dir)
+                        Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix,  manual_time_flag, img_dir)
                         
                     run = runs_coll.find_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix})
                     for key, val in run['Diagnostics'].items():
@@ -1145,14 +1147,14 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
     #update files dictionary
     if suffixes is None:         
         suffixes = get_suffixes(out_dir)
-        
+    if sim_type =='CGYRO':
+        suffixes = ['']
     if isinstance(run_shared, list):
         shared_not_uploaded = [True for _ in run_shared]
     else:
         shared_not_uploaded = [False]
     shared_file_dict = {}
 
-        
     for count, suffix in enumerate(suffixes):
         try:
             print('='*40)
@@ -1219,7 +1221,7 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
 #                    object_ids.pop(_id)
             print('='*60)
             
-          
+
             #metadata dictonary
             time_upload = strftime("%y%m%d-%H%M%S")
             meta_dict = {"user": user,
@@ -1234,26 +1236,33 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                         }  
                    
 #            try:
-            print('='*60)
-            print('\n Working on diagnostics with user specified tspan .....\n')
-            Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
-            print('='*60)
-            
-            print('='*60)
-            print('\n Working on OMAS gyrokinetics dictionary using tspan detected from nrg file......\n')
-            GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear=True)
-            
-            for key, val in Diag_dict.items():
-                Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
-            
-            '''
-            Adding omega info to Diag_dict for linear runs
-            '''
-            omega_val = get_omega(out_dir, suffix)
-            Diag_dict['omega'] = {}
-            Diag_dict['omega']['ky'] = omega_val[0]
-            Diag_dict['omega']['gamma'] = omega_val[1]
-            Diag_dict['omega']['omega'] = omega_val[2]
+            if sim_type == 'CGYRO':
+                with open(out_dir+'/gyrokinetics.json', 'r') as j:
+                    GK_dict = json.loads(j.read())
+
+                Diag_dict = {}
+                imag_dict = {}
+            else:
+                print('='*60)
+                print('\n Working on diagnostics with user specified tspan .....\n')
+                Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
+                print('='*60)
+                
+                print('='*60)
+                print('\n Working on OMAS gyrokinetics dictionary using tspan detected from nrg file......\n')
+                GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear=True)
+                
+                for key, val in Diag_dict.items():
+                    Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
+                
+                '''
+                Adding omega info to Diag_dict for linear runs
+                '''
+                omega_val = get_omega(out_dir, suffix)
+                Diag_dict['omega'] = {}
+                Diag_dict['omega']['ky'] = omega_val[0]
+                Diag_dict['omega']['gamma'] = omega_val[1]
+                Diag_dict['omega']['omega'] = omega_val[2]
             
     #        param_dict = get_parsed_params(os.path.join(out_dir, 'parameters' + suffix) )
             #combine dictionaries and upload
@@ -1278,7 +1287,7 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
             if ex_dict: 
                 ex_dict['simulation_type']=sim_type
                 db.ex.Lin.insert_one(ex_dict)
-            
+              
         except Exception as exception:
             print(exception)
             print("Skip suffix {} in \n {}. \n".format(suffix, out_dir))
@@ -1308,7 +1317,6 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
     #update files dictionary
     if suffixes is None:
         suffixes = get_suffixes(out_dir)
-
     if isinstance(run_shared, list):
         shared_not_uploaded = [True for _ in run_shared]
     else:
@@ -1402,17 +1410,26 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
     
     #        tspan = get_time_for_diag(suffix)
     #        Diag_dict = get_diag_from_run(out_dir, suffix, tspan) 
-            print('='*60)
-            print('\n Working on diagnostics with user specified tspan......\n')
-            
-            Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
-            
-            print('='*60)
-            print('\n Working on OMAS gyrokinetics dictionary using tspan detected from nrg file......\n')
-            GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear=False)
-            
-            for key, val in Diag_dict.items():
-                Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
+            if sim_type == 'GENE':
+                print('='*60)
+                print('\n Working on diagnostics with user specified tspan......\n')
+                
+                Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
+                
+                print('='*60)
+                print('\n Working on OMAS gyrokinetics dictionary using tspan detected from nrg file......\n')
+                GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear=False)
+                
+                for key, val in Diag_dict.items():
+                    Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
+            else:        
+                with open(out_dir+'/gyrokinetics.json', 'r') as j:
+                    GK_dict = json.loads(j.read())
+
+                Diag_dict = {}
+                imag_dict = {}
+
+               
     
     #        Qes = get_Qes(out_dir, suffix)
     #        QoI_dict = {"Qes" : Qes, **QoI                        

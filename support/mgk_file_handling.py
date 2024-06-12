@@ -1235,13 +1235,34 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                          "last_updated": time_upload
                         }  
                    
-#            try:
-            if sim_type == 'CGYRO':
+            
+            use_pyrokinetics=True ## Whether to use pyrokinetics for cGYRO
+            if use_pyrokinetics:
+                assert os.path.isfile(out_dir+'/gyrokinetics.json'), "File %s doesn't exist"%(out_dir+'/gyrokinetics.json')
                 with open(out_dir+'/gyrokinetics.json', 'r') as j:
                     GK_dict = json.loads(j.read())
 
-                Diag_dict = {}
-                imag_dict = {}
+                if sim_type == 'CGYRO':
+                    Diag_dict = {}
+                    imag_dict = {}
+                else: 
+                    print('='*60)
+                    print('\n Working on diagnostics with user specified tspan .....\n')
+                    Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
+                    print('='*60)
+                    
+                    for key, val in Diag_dict.items():
+                        Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
+                    
+                    '''
+                    Adding omega info to Diag_dict for linear runs
+                    '''
+                    omega_val = get_omega(out_dir, suffix)
+                    Diag_dict['omega'] = {}
+                    Diag_dict['omega']['ky'] = omega_val[0]
+                    Diag_dict['omega']['gamma'] = omega_val[1]
+                    Diag_dict['omega']['omega'] = omega_val[2]
+
             else:
                 print('='*60)
                 print('\n Working on diagnostics with user specified tspan .....\n')

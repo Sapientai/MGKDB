@@ -185,8 +185,7 @@ def get_diag_from_run(out_dir, suffix, t_span = None, img_dir='./mgk_diagplots')
     par0 = Parameters()
     par0.Read_Pars(os.path.join(out_dir , 'parameters' + suffix))
     pars0 = par0.pardict 
-    #print('pars0[nonlinear]',pars0['nonlinear'])
-    #dummy = input('press key')
+
     if pars0['nonlinear'] == 'T' or pars0['nonlinear'] == True:
         nonlinear = True
     else:
@@ -237,13 +236,6 @@ def get_diag_from_run(out_dir, suffix, t_span = None, img_dir='./mgk_diagplots')
     '''
     Creat a folder for saving plots if it does not exist
     '''
-#    img_dir = os.path.join(out_dir, 'mgk_diagplots')
-    #if not os.path.exists(img_dir):
-    #    try:
-    #        Path(img_dir).mkdir(parents=True)
-    #    except OSError:
-    #        print ("Creation of the directory %s failed" % img_dir)
-
     if nonlinear:   #Only calculate spectra for nonlinear
         selected_diags = []
         diag_keys = []

@@ -921,12 +921,20 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
             manual_time_flag = True
             for suffix in suffixes:
                 if affect_QoI in ['Y', 'y']:
-                    if self.sim_type=='CGYRO':
+                    use_pyrokinetics=True ## Whether to use pyrokinetics for cGYRO
+                    if use_pyrokinetics:
+                        assert os.path.isfile(out_dir+'/gyrokinetics.json'), "File %s doesn't exist"%(out_dir+'/gyrokinetics.json')
                         with open(out_dir+'/gyrokinetics.json', 'r') as j:
                             GK_dict = json.loads(j.read())
+
+                        if sim_type == 'CGYRO':
+                            Diag_dict = {}
+                            imag_dict = {}
+                        elif sim_type=='GENE': 
+                            Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
+
                     else:
                         GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear) 
-                    
                         Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix,  manual_time_flag, img_dir)
                         
                     run = runs_coll.find_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix})
@@ -974,11 +982,23 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
             manual_time_flag = True
             for suffix in run_suffixes:
                 if affect_QoI in ['Y', 'y']:
-                    GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear)  
+
+                    use_pyrokinetics=True ## Whether to use pyrokinetics for cGYRO
+                    if use_pyrokinetics:
+                        assert os.path.isfile(out_dir+'/gyrokinetics.json'), "File %s doesn't exist"%(out_dir+'/gyrokinetics.json')
+                        with open(out_dir+'/gyrokinetics.json', 'r') as j:
+                            GK_dict = json.loads(j.read())
+
+                        if sim_type == 'CGYRO':
+                            Diag_dict = {}
+                            imag_dict = {}
+                        elif sim_type=='GENE': 
+                            Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
+
+                    else: 
+                        GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear)  
+                        Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
                     
-#                    tspan = get_time_for_diag(suffix)
-#                    Diag_dict = get_diag_from_run(out_dir, suffix, tspan) 
-                    Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
                     run = runs_coll.find_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix})
                     for key, val in run['Diagnostics'].items():
                         if val != 'None':
@@ -1236,7 +1256,7 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                         }  
                    
             
-            use_pyrokinetics=True ## Whether to use pyrokinetics for cGYRO
+            use_pyrokinetics=False ## Whether to use pyrokinetics for cGYRO
             if use_pyrokinetics:
                 assert os.path.isfile(out_dir+'/gyrokinetics.json'), "File %s doesn't exist"%(out_dir+'/gyrokinetics.json')
                 with open(out_dir+'/gyrokinetics.json', 'r') as j:
@@ -1245,7 +1265,7 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                 if sim_type == 'CGYRO':
                     Diag_dict = {}
                     imag_dict = {}
-                else: 
+                elif sim_type=='GENE': 
                     print('='*60)
                     print('\n Working on diagnostics with user specified tspan .....\n')
                     Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
@@ -1264,6 +1284,7 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                     Diag_dict['omega']['omega'] = omega_val[2]
 
             else:
+                assert sim_type=='GENE',"Need to use pyrokinetics for cGYRO"
                 print('='*60)
                 print('\n Working on diagnostics with user specified tspan .....\n')
                 Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
@@ -1427,10 +1448,6 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
                          "last_updated": time_upload
                         }
             #data dictionary format for nonlinear runs
-    #        QoI_dict, Diag_dict = get_QoI_from_run(out_dir, suffix)
-    
-    #        tspan = get_time_for_diag(suffix)
-    #        Diag_dict = get_diag_from_run(out_dir, suffix, tspan) 
             if sim_type == 'GENE':
                 print('='*60)
                 print('\n Working on diagnostics with user specified tspan......\n')
@@ -1443,7 +1460,7 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
                 
                 for key, val in Diag_dict.items():
                     Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
-            else:        
+            else:
                 with open(out_dir+'/gyrokinetics.json', 'r') as j:
                     GK_dict = json.loads(j.read())
 

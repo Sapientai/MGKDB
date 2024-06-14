@@ -81,9 +81,6 @@ if __name__=="__main__":
         exfiles = input('Please type FULL file names to update, separated by comma.\n').split(',')
         exkeys  = input('Please type key names for each file you typed, separated by comma.\n').split(',')
         
-        Docs_ex += exfiles
-        Keys_ex += exkeys
-
         global_vars.Docs_ex +=exfiles
         global_vars.Keys_ex +=exkeys
 

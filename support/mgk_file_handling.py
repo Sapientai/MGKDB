@@ -838,14 +838,14 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
             manual_time_flag = True
             for suffix in suffixes:
                 if affect_QoI in ['Y', 'y']:
-                    assert os.path.isfile(out_dir+'/gyrokinetics.json'), "File %s doesn't exist"%(out_dir+'/gyrokinetics.json')
-                    with open(out_dir+'/gyrokinetics.json', 'r') as j:
-                        GK_dict = json.loads(j.read())
-
                     if sim_type == 'CGYRO':
+                        fname=out_dir+'/input.cgyro{0}'.format(suffix)
+                        GK_dict = create_gk_dict_with_pyro(fname,'CGYRO')
                         Diag_dict = {}
                         imag_dict = {}
                     elif sim_type=='GENE': 
+                        fname=out_dir+'/parameters{0}'.format(suffix)
+                        GK_dict = create_gk_dict_with_pyro(fname,'GENE')
                         Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
 
                     run = runs_coll.find_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix})
@@ -893,14 +893,14 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
             manual_time_flag = True
             for suffix in run_suffixes:
                 if affect_QoI in ['Y', 'y']:
-                    assert os.path.isfile(out_dir+'/gyrokinetics.json'), "File %s doesn't exist"%(out_dir+'/gyrokinetics.json')
-                    with open(out_dir+'/gyrokinetics.json', 'r') as j:
-                        GK_dict = json.loads(j.read())
-
                     if sim_type == 'CGYRO':
+                        fname=out_dir+'/input.cgyro{0}'.format(suffix)
+                        GK_dict = create_gk_dict_with_pyro(fname,'CGYRO')
                         Diag_dict = {}
                         imag_dict = {}
                     elif sim_type=='GENE': 
+                        fname=out_dir+'/parameters{0}'.format(suffix)
+                        GK_dict = create_gk_dict_with_pyro(fname,'GENE')
                         Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
 
                     run = runs_coll.find_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix})
@@ -1333,21 +1333,21 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
                          "last_updated": time_upload
                         }
             #data dictionary format for nonlinear runs
-            assert os.path.isfile(out_dir+'/gyrokinetics.json'), "File %s doesn't exist"%(out_dir+'/gyrokinetics.json')
-            with open(out_dir+'/gyrokinetics.json', 'r') as j:
-                GK_dict = json.loads(j.read())
+            if sim_type == 'CGYRO':
+                fname=out_dir+'/input.cgyro{0}'.format(suffix)
+                GK_dict = create_gk_dict_with_pyro(fname,'CGYRO')
+                Diag_dict = {}
+                imag_dict = {}
+            elif sim_type=='GENE': 
+                fname=out_dir+'/parameters{0}'.format(suffix)
+                GK_dict = create_gk_dict_with_pyro(fname,'GENE')
 
-                if sim_type == 'CGYRO':
-                    Diag_dict = {}
-                    imag_dict = {}
-                elif sim_type=='GENE': 
-                    # GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear=True)
-                    print('='*60)
-                    print('\n Working on diagnostics with user specified tspan .....\n')
-                    Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
-                    print('='*60)
-                    for key, val in Diag_dict.items():
-                        Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
+                print('='*60)
+                print('\n Working on diagnostics with user specified tspan .....\n')
+                Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
+                print('='*60)
+                for key, val in Diag_dict.items():
+                    Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
 
             #combine dictionaries and upload
             run_data =  {'Meta': meta_dict, 'Files': files_dict, 'gyrokinetics': GK_dict, 'Diagnostics': Diag_dict, 'Plots': imag_dict}

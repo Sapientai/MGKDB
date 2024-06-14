@@ -19,6 +19,7 @@ from mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_va
 #from ParIO import *
 import os
 from mgk_login import mgk_login,f_login_dbase
+from pyro_create_combined import * 
 
 import argparse
 from sys import exit
@@ -101,7 +102,7 @@ if __name__=="__main__":
             #check if run is linear or nonlinear
             #print(str(dirpath))
     #            try:
-            linear = isLinear(dirpath)
+            linear = isLinear(dirpath, args.sim_type)
             if linear == None:
                 linear_input = input('Cannot decide if this folder is a linear run or not. Please make the selection manually by typing:\n 1: Linear\n 2: Nonlinear \n 3: Skip this folder \n')
                 if linear_input.strip() == '1':
@@ -124,7 +125,7 @@ if __name__=="__main__":
             #print(linear)                                        
 
             if not default:
-                suffixes = get_suffixes(dirpath)
+                suffixes = get_suffixes(dirpath, args.sim_type)
                 print("Found in {} these suffixes:\n {}".format(dirpath, suffixes))
                 
                 suffixes = input('Which run do you want to upload? Separate them by comma. \n Press q to skip. Press ENTER to upload ALL.\n')

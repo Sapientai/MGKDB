@@ -109,20 +109,27 @@ def get_parsed_params(filepath):
     pars = par.pardict 
     
     return pars
-def get_suffixes(out_dir):
+def get_suffixes(out_dir, sim_type):
     suffixes = []
     
-    #scan files in GENE output directory, find all run suffixes, return as list
-#    print(out_dir)
+    #scan files in output directory, find all run suffixes, return as list
     files = next(os.walk(out_dir))[2]
-#    print(files)
-    for count, name in enumerate(files, start=0):
-        if name.startswith('parameters_'):
-            suffix = name.split('_',1)[1]
-            suffix = '_' + suffix
-            suffixes.append(suffix)
-        elif name.lower().startswith('parameters.dat'):
-            suffixes = ['.dat']                
+
+    if sim_type=='GENE':
+        for count, name in enumerate(files, start=0):
+            if name.startswith('parameters_'):
+                suffix = name.split('_',1)[1]
+                suffix = '_' + suffix
+                suffixes.append(suffix)
+            elif name.lower().startswith('parameters.dat'):
+                suffixes = ['.dat']    
+    elif sim_type=='CGYRO':
+        for count, name in enumerate(files, start=0):
+            if name.startswith('input.cgyro_'):
+                suffix = name.split('_',1)[1]
+                suffix = '_' + suffix
+                suffixes.append(suffix)
+
     return suffixes
 
 

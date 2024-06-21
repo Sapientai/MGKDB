@@ -54,12 +54,15 @@ def convert_to_json(obj,separate_real_imag = False):
     else:
         return obj
 
-# data_dir = "pyro_tests/test_cgyro/"
-data_dir = "pyro_tests/test_gene/"
+# data_dir = "pyro_tests/test_gene/"
+data_dir = "pyro_tests/test_gene2_miller/"
+data_dir = "pyro_tests/copy_test_gene2_miller/"
+# data_dir = "pyro_tests/test_gene3_miller_templates/"
 
-pyro = Pyro(gk_file=data_dir+"parameters_0002", gk_code="GENE")
+pyro = Pyro(gk_file=data_dir+"parameters_0001", gk_code="GENE")
 # Load in GENE output data
 pyro.load_gk_output()
+# pyro.load_gk_output(output_convention="gene")
 
 gkdict = gkids.GyrokineticsLocal()
 idspy.fill_default_values_ids(gkdict)

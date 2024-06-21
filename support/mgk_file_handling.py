@@ -52,6 +52,19 @@ class Global_vars():
     def __init__(self, sim_type='GENE'):
 
         if sim_type=="GENE":
+
+            gene_ip_file_dict={
+                'tracer_efit': {'regular':[ 'nrg', 'omega','parameters','energy'],
+                                'large'  : ['field','mom_c','mom_e','mom_i','vsp'] },
+                'miller_general':{'regular':['autopar','nrg','omega','parameters'] ,
+                                  'large': ['field','mom_C','mom_e','mom_i','vsp']}
+            }
+
+
+
+
+
+
             self.Docs = ['autopar', 'codemods', 'nrg', 'omega','parameters']
             self.Keys = ['autopar', 'codemods', 'nrg', 'omega','parameters']
 
@@ -1021,7 +1034,7 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
         pars = par.pardict
         n_spec = pars['n_spec']
         
-        
+        ## Get geometry from parameters file and add that to list of files to save
         if 'magn_geometry' in pars:
             global_vars.Docs.append(pars['magn_geometry'][1:-1])
             global_vars.Keys.append('magn_geometry')

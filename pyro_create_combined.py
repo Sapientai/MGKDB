@@ -79,15 +79,16 @@ def create_gk_dict_with_pyro(fname,gkcode):
 
 if __name__=="__main__":
 
-    # data_dir = "pyro_tests/test_gene/"
+    data_dir = "pyro_tests/test_gene/"
     data_dir = "pyro_tests/test_gene2_miller/"
+    data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/gene_new_2_miller/scanfiles0049/"
     suffix='_0002'
     fname = data_dir+'parameters{0}'.format(suffix)
     gkcode="GENE"
 
-    # data_dir = "pyro_tests/test_cgyro/"
+    # data_dir = "pyro_tests/test_cgyro_multi_runs/"
     # suffix=''
-    # fname = data_dir+'input{0}.cgyro'.format(suffix)
+    # fname = data_dir+'input{0}.cgyro_0001'.format(suffix)
     # gkcode="CGYRO"
 
     json_data = create_gk_dict_with_pyro(fname,gkcode)

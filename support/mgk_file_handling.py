@@ -53,20 +53,8 @@ class Global_vars():
 
         if sim_type=="GENE":
 
-            gene_ip_file_dict={
-                'tracer_efit': {'regular':[ 'nrg', 'omega','parameters','energy'],
-                                'large'  : ['field','mom_c','mom_e','mom_i','vsp'] },
-                'miller_general':{'regular':['autopar','nrg','omega','parameters'] ,
-                                  'large': ['field','mom_C','mom_e','mom_i','vsp']}
-            }
-
-
-
-
-
-
-            self.Docs = ['autopar', 'codemods', 'nrg', 'omega','parameters']
-            self.Keys = ['autopar', 'codemods', 'nrg', 'omega','parameters']
+            self.Docs = ['autopar', 'nrg', 'omega','parameters']
+            self.Keys = ['autopar', 'nrg', 'omega','parameters']
 
             #Large files#
             self.Docs_L = ['field', 'mom', 'vsp']
@@ -997,7 +985,7 @@ def remove_from_mongo(out_dir, db, runs_coll):
         
 def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=False, suffix = None, run_shared=None, global_vars=None):
     '''
-    This function does the actual uploading of grifs chunks and
+    This function does the actual uploading of gridfs chunks and
     returns object_ids for the chunk.
     '''
 
@@ -1020,11 +1008,7 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
             for par in par_list:
                 print('{} : {}\n'.format(count, par.split('/')[-1]))
                 count+=1
-    #        choice = input('Which one do you want to scan for information.\n')
-    #        choice = int(choice)
-    #        par_file = os.path.join(out_dir, par_list[choice])
-    #        print('File {} selected for scanning [magn_geometry] and [mom] information.'.format(par_list[choice]))
-                
+             
             par_list.sort()
             par_file = par_list[0]
             print('File {} selected for scanning [magn_geometry] and [mom] information.'.format(par_file))

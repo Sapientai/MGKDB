@@ -1,0 +1,176 @@
+&parallelization
+n_procs_s =   3
+n_procs_v =   2
+n_procs_w =   4
+n_procs_x =   1
+n_procs_y =   1
+n_procs_z =  16
+n_procs_sim =    384
+n_parallel_sims =      2
+/
+
+&box
+n_spec =    3
+nx0    =     3
+nky0   =    1
+nz0    =   64
+nv0    =   36
+nw0    =   16
+
+kymin =    25.000000    
+lv    =   3.00000    
+lw    =   9.00000    
+adapt_lx = T
+x0    =   0.64618518    
+n0_global =   1615
+ky0_ind =   1
+/
+
+&in_out
+diagdir = '/pscratch/sd/l/luke0818/NSTXM/l_m/scanfiles0049/'
+
+read_checkpoint  = F
+write_checkpoint = T
+
+istep_field  =     100
+istep_mom    =     100
+istep_nrg    =     100
+istep_omega  =      20
+istep_vsp    =     400
+istep_schpt  =    5000
+istep_energy =     100
+
+write_std = T
+/
+
+&general
+nonlinear =   F
+comp_type = 'IV'
+perf_vec  =  1 1 1 1 1 1 1 1 1
+nblocks   =      12
+arakawa_zv =   F
+
+timescheme = 'RK4'
+dt_max     =   0.6430E-04
+dt_vlasov  =   0.6430E-04
+ev_coll    =    6879.6    
+
+timelim    =      86000
+ntimesteps =     750000
+simtimelim =    15.00    
+
+beta       =   0.32857138E-01
+debye2     =   0.85702663E-05
+bpar   =   T
+collision_op = 'landau'
+coll         =   0.23109197E-01
+coll_cons_model  = 'xu_rosenbluth'
+
+init_cond = 'alm'
+
+hyp_z_with_dz_prefactor = F
+hyp_z =   -8.000    
+hyp_v_with_dv_prefactor = F
+hyp_v =   0.2000    
+
+perf_tsteps =  -1
+
+/
+
+&geometry
+magn_geometry = 'miller_general'
+q0       =    6.3006713    
+shat     =    5.7382748    
+amhd     =    26.843396    
+major_R  =    1.0000000    
+major_Z  =  -0.14320458    
+minor_r  =   0.70065553    
+trpeps   =   0.64618518    
+cN_m      =   0.87244564, -0.45602265E-01, -0.28093960,  0.71933802E-01,  0.62768299E-01, -0.41097716E-01, -0.74332695E-02,  0.20001771E-01, -0.45683164E-02, -0.81284233E-02,  0.54076317E-02,  0.24044864E-02, -0.37439748E-02,  0.54556327E-05,  0.20411882E-02, -0.75836585E-03, -0.85097019E-03,  0.79002976E-03,  0.19399138E-03, -0.55694636E-03,  0.89705435E-04,  0.28486846E-03, -0.16869120E-03, -0.85931694E-04,  0.15420498E-03, -0.68942630E-05, -0.85050553E-04,  0.53886009E-04,  0.37703198E-04, -0.49407595E-04
+sN_m      =   -0.0000000,  0.12816460E-01,  0.86576579E-02,  0.19258348E-03, -0.39627505E-02,  0.16745685E-02,  0.44436597E-02, -0.14015319E-02, -0.26866555E-02,  0.16286693E-02,  0.11715162E-02, -0.14638310E-02, -0.17993204E-03,  0.10246935E-02, -0.27018692E-03, -0.48147739E-03,  0.45548069E-03,  0.15575618E-03, -0.37127651E-03,  0.51008820E-04,  0.23730219E-03, -0.11097452E-03, -0.97197922E-04,  0.10493976E-03, -0.27548994E-05, -0.81506759E-04,  0.36672834E-04,  0.41375303E-04, -0.40337564E-04, -0.10202604E-04
+cNdr_m    =    1.4897630, -0.98516171, -0.58599097,  0.62994393,  0.59697353E-01, -0.34810819,  0.98743760E-01,  0.17024408, -0.12138719, -0.61183196E-01,  0.98356498E-01,  0.17697577E-02, -0.62780215E-01,  0.23860949E-01,  0.30280285E-01, -0.28411254E-01, -0.75002946E-02,  0.22288802E-01, -0.46710518E-02, -0.12743594E-01,  0.86800479E-02,  0.41389882E-02, -0.80524740E-02,  0.10457799E-02,  0.51598344E-02, -0.31979303E-02, -0.20699888E-02,  0.33729697E-02, -0.18090040E-04, -0.23698666E-02
+sNdr_m    =   -0.0000000, -0.99887975E-01,  0.54010194E-01,  0.56320045E-01, -0.75209004E-01, -0.53856098E-02,  0.71726579E-01, -0.24776862E-01, -0.43817145E-01,  0.38325899E-01,  0.14948886E-01, -0.35168636E-01,  0.50539663E-02,  0.22760206E-01, -0.14172489E-01, -0.89269757E-02,  0.15512081E-01, -0.53410242E-04, -0.10861850E-01,  0.50302381E-02,  0.54446740E-02, -0.55475383E-02, -0.46936113E-03,  0.46270842E-02, -0.19331054E-02, -0.25594499E-02,  0.25968515E-02,  0.74368249E-03, -0.20020891E-02,  0.59245909E-03
+edge_opt =    24.000000    
+rhostar  =   0.88660560E-02
+dpdx_term= 'full_drift'
+dpdx_pm  =   0.67618233    
+norm_flux_projection  = F
+sign_Ip_CW =       1
+sign_Bt_CW =       1
+/
+
+&species
+name   = 'i'
+omn    =    1.0510015    
+omt    =    5.8372856    
+
+mass   =    1.0000000    
+temp   =   0.86736631    
+dens   =   0.61895652    
+charge =    1.0000000    
+/
+
+&species
+name   = 'C'
+omn    =    2.3215843    
+omt    =    5.8372856    
+
+mass   =    6.0000000    
+temp   =   0.86736631    
+dens   =   0.63507247E-01
+charge =    6.0000000    
+/
+
+&species
+name   = 'e'
+omn    =    1.5351488    
+omt    =    14.896833    
+
+mass   =   0.27240000E-03
+temp   =    1.0000000    
+dens   =    1.0000000    
+charge =   -1.0000000    
+/
+
+&info
+probdir = '/global/u1/l/luke0818/gene_3.0_cpu/NSTXM_1'
+step_time  =     0.0036
+number of computed time steps =   13499
+time for initial value solver =     49.246
+calc_dt = T
+nltdt_off = F
+ev_coll_est  =    0.0000000    
+axpy_ij_use_blas = F
+init_time =     0.1873
+n_fields = 3
+n_moms   =  9
+nrgcols  = 10
+lx =  0.178180E-02
+ly =  0.251327    
+nu_ei =  16.271213
+nustar_i =   2.303130
+nustar_e =   2.450409
+Zeff_species =   2.905217
+PRECISION  = DOUBLE
+ENDIANNESS = LITTLE
+OMP_NUM_THREADS =   1
+GIT_BRANCH = b0bc37921f1d2721e4ab8b25849ef06778c88130                    
+RELEASE = 3.0 - patch 0
+MACHINE = perlmutter
+FCVERSION = GNU Fortran (SUSE Linux) 12.3.0
+FFTLIB = fftw
+DATETIME = 20240523 130054.547
+/
+
+&units
+Bref =   4.3740302322573882E-01
+Tref =   2.6399632450326777E-01
+nref =   5.9086786091146566E+00
+Lref =   8.6256966645766364E-01
+mref =   2.0000000000000000E+00
+/
+
+&bsgrid
+is_bsg = F
+/
+

@@ -55,55 +55,39 @@ def convert_to_json(obj,separate_real_imag = False):
         return obj
 
 
-def create_gk_dict_with_pyro(fname,gkcode):
-    '''
-    Create gyrokinetics dictionary to be upload to database
-    '''
 
-    assert gkcode in ['GENE','CGYRO'], "invalid gkcode type %s"%(gkcode)
 
-    pyro = Pyro(gk_file=fname, gk_code=gkcode)
-    pyro.load_gk_output()
+cgyro_dir = "test_data/data_cgyro_single/"
+pyro = Pyro(gk_file=cgyro_dir+"input.cgyro", gk_code="CGYRO")
+cgyro_dir = "pyro_tests/test_cgyro_3/"
+pyro = Pyro(gk_file=cgyro_dir+"input.cgyro", gk_code="CGYRO")
 
-    gkdict = gkids.GyrokineticsLocal()
-    idspy.fill_default_values_ids(gkdict)
-    gkdict = pyro_to_imas_mapping(
-            pyro,
-            comment=f"Testing IMAS %s"%(gkcode),
-            ids=gkdict
-        )
+# Load in CGYRO output data
+
+pyro.load_gk_output()
+
+
+gkdict = gkids.GyrokineticsLocal()
+idspy.fill_default_values_ids(gkdict)
+gkdict = pyro_to_imas_mapping(
+        pyro,
+        comment=f"Testing IMAS CGYRO",
+        ids=gkdict
+    )
+
+json_data = convert_to_json(gkdict)
+
+with open(cgyro_dir+"gyrokinetics.json", "w") as json_file:
+    json.dump(json_data, json_file, indent=4)
     
-    json_data = convert_to_json(gkdict)
+# with open(cgyro_dir+"gyrokinetics.json", 'r') as j:
+#      contents = json.loads(j.read())
 
-    return json_data
 
-if __name__=="__main__":
+# for key in json_data.keys():
+#     a,b=json_data[key],contents[key]
+#     print(key,a==b)
+#     if (a!=b):
+#         print("Unequal", key,a,b)
 
-    data_dir = "pyro_tests/test_gene/"
-    data_dir = "pyro_tests/test_gene2_miller/"
-    data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/gene_new_2_miller/scanfiles0049/"
-    suffix='_0002'
-    fname = data_dir+'parameters{0}'.format(suffix)
-    gkcode="GENE"
-
-    # data_dir = "pyro_tests/test_cgyro_multi_runs/"
-    # suffix=''
-    # fname = data_dir+'input{0}.cgyro_0001'.format(suffix)
-    # gkcode="CGYRO"
-
-    json_data = create_gk_dict_with_pyro(fname,gkcode)
-
-    with open(data_dir+"gyrokinetics.json", "w") as json_file:
-        json.dump(json_data, json_file, indent=4)
-        
-    ## Testing read from code 
-    # with open(data_dir+"gyrokinetics.json", 'r') as j:
-    #      contents = json.loads(j.read())
-
-    # for key in json_data.keys():
-    #     a,b=json_data[key],contents[key]
-    #     print(key,a==b)
-    #     if (a!=b):
-    #         print("Unequal", key,a,b)
-
-    # print("done")
+#     print("done")

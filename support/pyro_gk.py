@@ -76,33 +76,3 @@ def create_gk_dict_with_pyro(fname,gkcode):
     json_data = convert_to_json(gkdict)
 
     return json_data
-
-if __name__=="__main__":
-
-    # data_dir = "pyro_tests/test_gene/"
-    data_dir = "pyro_tests/test_gene2_miller/"
-    suffix='_0002'
-    fname = data_dir+'parameters{0}'.format(suffix)
-    gkcode="GENE"
-
-    # data_dir = "pyro_tests/test_cgyro/"
-    # suffix=''
-    # fname = data_dir+'input{0}.cgyro'.format(suffix)
-    # gkcode="CGYRO"
-
-    json_data = create_gk_dict_with_pyro(fname,gkcode)
-
-    with open(data_dir+"gyrokinetics.json", "w") as json_file:
-        json.dump(json_data, json_file, indent=4)
-        
-    ## Testing read from code 
-    # with open(data_dir+"gyrokinetics.json", 'r') as j:
-    #      contents = json.loads(j.read())
-
-    # for key in json_data.keys():
-    #     a,b=json_data[key],contents[key]
-    #     print(key,a==b)
-    #     if (a!=b):
-    #         print("Unequal", key,a,b)
-
-    # print("done")

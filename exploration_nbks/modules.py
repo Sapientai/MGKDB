@@ -11,8 +11,6 @@ import json
 import xmltodict
 
 
-
-
 def f_collisions(old_gk_dict,new_gk_dict):
     ''' conversion for key: collisions '''
 

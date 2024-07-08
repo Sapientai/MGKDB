@@ -527,38 +527,43 @@ def query_plot(db, collection, query, projection = {'Meta':1, 'Diagnostics':1}):
     
 def isLinear(folder_name, sim_type):
     linear = None
-    #check parameters file for 'nonlinear' value
-    suffixes = get_suffixes(folder_name, sim_type)
-    
-    if len(suffixes):
-        suffixes.sort()
-        suffix = suffixes[0] #assuming all parameters files are of the same linear/nonlinear type
-        print('Scanning parameters{} for deciding linear/Nonlinar.')
-    else:
-        suffix = ''
-    
-#    print(folder_name) 
-    fname = os.path.join(folder_name, 'parameters' + suffix)
-    if os.path.isfile( fname ):
-        par = Parameters()
-        par.Read_Pars( fname )
-        pars = par.pardict
-        linear = not pars['nonlinear']
-        return(linear)
-        
-    #check folder name for nonlin
-    elif folder_name.find('nonlin') != -1:
-        linear = False
-        return(linear)
-    
-    #check folder name for linear
-    elif folder_name.find('linear') != -1:
-        linear = True 
-        return(linear)
 
-    else:
-        assert linear is None, "Can not decide, please include linear/nonlin as the suffix of your data folder!"
+    if sim_type=='GENE':
+        #check parameters file for 'nonlinear' value
+        suffixes = get_suffixes(folder_name, sim_type)
         
+        if len(suffixes):
+            suffixes.sort()
+            suffix = suffixes[0] #assuming all parameters files are of the same linear/nonlinear type
+            print('Scanning parameters{} for deciding linear/Nonlinar.')
+        else:
+            suffix = ''
+        
+    #    print(folder_name) 
+        fname = os.path.join(folder_name, 'parameters' + suffix)
+        if os.path.isfile( fname ):
+            par = Parameters()
+            par.Read_Pars( fname )
+            pars = par.pardict
+            linear = not pars['nonlinear']
+            return(linear)
+            
+        #check folder name for nonlin
+        elif folder_name.find('nonlin') != -1:
+            linear = False
+            return(linear)
+        
+        #check folder name for linear
+        elif folder_name.find('linear') != -1:
+            linear = True 
+            return(linear)
+
+        else:
+            assert linear is None, "Can not decide, please include linear/nonlin as the suffix of your data folder!"
+        
+    elif sim_type=='CGYRO':
+        linear = True
+        return linear
         
 def isUploaded(out_dir,runs_coll):
     '''
@@ -1069,9 +1074,6 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
     if suffixes is None:         
         suffixes = get_suffixes(out_dir, sim_type)
 
-    if sim_type =='CGYRO':
-        suffixes = ['']
-
     if isinstance(run_shared, list):
         shared_not_uploaded = [True for _ in run_shared]
     else:
@@ -1163,7 +1165,7 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
             #     GK_dict = json.loads(j.read())
             
             if sim_type == 'CGYRO':
-                fname=out_dir+'/input.cgyro{0}'.format(suffix)
+                fname=out_dir+'/{0}/input.cgyro'.format(suffix)
                 GK_dict = create_gk_dict_with_pyro(fname,'CGYRO')
 
                 Diag_dict = {}

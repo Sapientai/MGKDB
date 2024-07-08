@@ -2,14 +2,14 @@
 	 commit 	 <class 'NoneType'>
 	 description 	 <class 'str'>
 	 library 	 <class 'list'>
-	 library [0]:
-		 commit 	 <class 'str'>
-		 description 	 <class 'str'>
-		 max_repr_length 	 <class 'int'>
-		 name 	 <class 'str'>
-		 parameters 	 <class 'str'>
-		 repository 	 <class 'str'>
-		 version 	 <class 'str'>
+		 library [0]:
+			 commit 	 <class 'str'>
+			 description 	 <class 'str'>
+			 max_repr_length 	 <class 'int'>
+			 name 	 <class 'str'>
+			 parameters 	 <class 'str'>
+			 repository 	 <class 'str'>
+			 version 	 <class 'str'>
 	 max_repr_length 	 <class 'int'>
 	 name 	 <class 'str'>
 	 output_flag 	 <class 'list'>
@@ -67,100 +67,100 @@
 		 imas_dd_git_commit 	 <class 'str'>
 		 imas_dd_version 	 <class 'str'>
 	 wavevector 	 <class 'list'>
-	 wavevector [0]:
-		 binormal_wavevector_norm 	 <class 'float'>
-		 eigenmode 	 <class 'list'>
-		 eigenmode [0]:
-			 angle_pol 	 <class 'list'>
-			 code :
-				 max_repr_length 	 <class 'int'>
-				 output_flag 	 <class 'int'>
-				 parameters 	 <class 'str'>
-				 version :
-					 idspy_internal_version 	 <class 'str'>
-					 idspy_version 	 <class 'str'>
-					 imas_dd_git_commit 	 <class 'str'>
-					 imas_dd_version 	 <class 'str'>
-			 fields :
-				 a_field_parallel_perturbed_norm :
-					 __ndarray_tolist_imag__ 	 <class 'list'>
-					 __ndarray_tolist_real__ 	 <class 'list'>
-					 dtype 	 <class 'str'>
-					 shape 	 <class 'list'>
-				 a_field_parallel_perturbed_parity 	 <class 'list'>
-				 a_field_parallel_perturbed_weight 	 <class 'list'>
-				 b_field_parallel_perturbed_norm 	 <class 'list'>
-				 b_field_parallel_perturbed_parity 	 <class 'list'>
-				 b_field_parallel_perturbed_weight 	 <class 'list'>
-				 max_repr_length 	 <class 'int'>
-				 phi_potential_perturbed_norm :
-					 __ndarray_tolist_imag__ 	 <class 'list'>
-					 __ndarray_tolist_real__ 	 <class 'list'>
-					 dtype 	 <class 'str'>
-					 shape 	 <class 'list'>
-				 phi_potential_perturbed_parity 	 <class 'list'>
-				 phi_potential_perturbed_weight 	 <class 'list'>
-				 version :
-					 idspy_internal_version 	 <class 'str'>
-					 idspy_version 	 <class 'str'>
-					 imas_dd_git_commit 	 <class 'str'>
-					 imas_dd_version 	 <class 'str'>
-			 frequency_norm 	 <class 'float'>
-			 growth_rate_norm 	 <class 'float'>
-			 growth_rate_tolerance 	 <class 'float'>
-			 initial_value_run 	 <class 'int'>
-			 linear_weights :
-				 energy_a_field_parallel 	 <class 'list'>
-				 energy_b_field_parallel 	 <class 'list'>
-				 energy_phi_potential 	 <class 'list'>
-				 max_repr_length 	 <class 'int'>
-				 momentum_tor_parallel_a_field_parallel 	 <class 'float'>
-				 momentum_tor_parallel_b_field_parallel 	 <class 'list'>
-				 momentum_tor_parallel_phi_potential 	 <class 'list'>
-				 momentum_tor_perpendicular_a_field_parallel 	 <class 'list'>
-				 momentum_tor_perpendicular_b_field_parallel 	 <class 'list'>
-				 momentum_tor_perpendicular_phi_potential 	 <class 'list'>
-				 particles_a_field_parallel 	 <class 'list'>
-				 particles_b_field_parallel 	 <class 'list'>
-				 particles_phi_potential 	 <class 'list'>
-				 version :
-					 idspy_internal_version 	 <class 'str'>
-					 idspy_version 	 <class 'str'>
-					 imas_dd_git_commit 	 <class 'str'>
-					 imas_dd_version 	 <class 'str'>
-			 linear_weights_rotating_frame 	 <class 'NoneType'>
+		 wavevector [0]:
+			 binormal_wavevector_norm 	 <class 'float'>
+			 eigenmode 	 <class 'list'>
+						 eigenmode [0]:
+					 angle_pol 	 <class 'list'>
+					 code :
+						 max_repr_length 	 <class 'int'>
+						 output_flag 	 <class 'int'>
+						 parameters 	 <class 'str'>
+						 version :
+							 idspy_internal_version 	 <class 'str'>
+							 idspy_version 	 <class 'str'>
+							 imas_dd_git_commit 	 <class 'str'>
+							 imas_dd_version 	 <class 'str'>
+					 fields :
+						 a_field_parallel_perturbed_norm :
+							 __ndarray_tolist_imag__ 	 <class 'list'>
+							 __ndarray_tolist_real__ 	 <class 'list'>
+							 dtype 	 <class 'str'>
+							 shape 	 <class 'list'>
+						 a_field_parallel_perturbed_parity 	 <class 'list'>
+						 a_field_parallel_perturbed_weight 	 <class 'list'>
+						 b_field_parallel_perturbed_norm 	 <class 'list'>
+						 b_field_parallel_perturbed_parity 	 <class 'list'>
+						 b_field_parallel_perturbed_weight 	 <class 'list'>
+						 max_repr_length 	 <class 'int'>
+						 phi_potential_perturbed_norm :
+							 __ndarray_tolist_imag__ 	 <class 'list'>
+							 __ndarray_tolist_real__ 	 <class 'list'>
+							 dtype 	 <class 'str'>
+							 shape 	 <class 'list'>
+						 phi_potential_perturbed_parity 	 <class 'list'>
+						 phi_potential_perturbed_weight 	 <class 'list'>
+						 version :
+							 idspy_internal_version 	 <class 'str'>
+							 idspy_version 	 <class 'str'>
+							 imas_dd_git_commit 	 <class 'str'>
+							 imas_dd_version 	 <class 'str'>
+					 frequency_norm 	 <class 'float'>
+					 growth_rate_norm 	 <class 'float'>
+					 growth_rate_tolerance 	 <class 'float'>
+					 initial_value_run 	 <class 'int'>
+					 linear_weights :
+						 energy_a_field_parallel 	 <class 'list'>
+						 energy_b_field_parallel 	 <class 'list'>
+						 energy_phi_potential 	 <class 'list'>
+						 max_repr_length 	 <class 'int'>
+						 momentum_tor_parallel_a_field_parallel 	 <class 'float'>
+						 momentum_tor_parallel_b_field_parallel 	 <class 'list'>
+						 momentum_tor_parallel_phi_potential 	 <class 'list'>
+						 momentum_tor_perpendicular_a_field_parallel 	 <class 'list'>
+						 momentum_tor_perpendicular_b_field_parallel 	 <class 'list'>
+						 momentum_tor_perpendicular_phi_potential 	 <class 'list'>
+						 particles_a_field_parallel 	 <class 'list'>
+						 particles_b_field_parallel 	 <class 'list'>
+						 particles_phi_potential 	 <class 'list'>
+						 version :
+							 idspy_internal_version 	 <class 'str'>
+							 idspy_version 	 <class 'str'>
+							 imas_dd_git_commit 	 <class 'str'>
+							 imas_dd_version 	 <class 'str'>
+					 linear_weights_rotating_frame 	 <class 'NoneType'>
+					 max_repr_length 	 <class 'int'>
+					 moments_norm_gyrocenter 	 <class 'NoneType'>
+					 moments_norm_gyrocenter_bessel_0 	 <class 'NoneType'>
+					 moments_norm_gyrocenter_bessel_1 	 <class 'NoneType'>
+					 moments_norm_particle :
+						 density 	 <class 'list'>
+						 heat_flux_parallel 	 <class 'list'>
+						 j_parallel 	 <class 'list'>
+						 max_repr_length 	 <class 'int'>
+						 pressure_parallel 	 <class 'list'>
+						 pressure_perpendicular 	 <class 'list'>
+						 v_parallel_energy_perpendicular 	 <class 'list'>
+						 v_perpendicular_square_energy 	 <class 'list'>
+						 version :
+							 idspy_internal_version 	 <class 'str'>
+							 idspy_version 	 <class 'str'>
+							 imas_dd_git_commit 	 <class 'str'>
+							 imas_dd_version 	 <class 'str'>
+					 poloidal_turns 	 <class 'int'>
+					 time_norm 	 <class 'list'>
+					 version :
+						 idspy_internal_version 	 <class 'str'>
+						 idspy_version 	 <class 'str'>
+						 imas_dd_git_commit 	 <class 'str'>
+						 imas_dd_version 	 <class 'str'>
 			 max_repr_length 	 <class 'int'>
-			 moments_norm_gyrocenter 	 <class 'NoneType'>
-			 moments_norm_gyrocenter_bessel_0 	 <class 'NoneType'>
-			 moments_norm_gyrocenter_bessel_1 	 <class 'NoneType'>
-			 moments_norm_particle :
-				 density 	 <class 'list'>
-				 heat_flux_parallel 	 <class 'list'>
-				 j_parallel 	 <class 'list'>
-				 max_repr_length 	 <class 'int'>
-				 pressure_parallel 	 <class 'list'>
-				 pressure_perpendicular 	 <class 'list'>
-				 v_parallel_energy_perpendicular 	 <class 'list'>
-				 v_perpendicular_square_energy 	 <class 'list'>
-				 version :
-					 idspy_internal_version 	 <class 'str'>
-					 idspy_version 	 <class 'str'>
-					 imas_dd_git_commit 	 <class 'str'>
-					 imas_dd_version 	 <class 'str'>
-			 poloidal_turns 	 <class 'int'>
-			 time_norm 	 <class 'list'>
+			 radial_wavevector_norm 	 <class 'float'>
 			 version :
 				 idspy_internal_version 	 <class 'str'>
 				 idspy_version 	 <class 'str'>
 				 imas_dd_git_commit 	 <class 'str'>
 				 imas_dd_version 	 <class 'str'>
-		 max_repr_length 	 <class 'int'>
-		 radial_wavevector_norm 	 <class 'float'>
-		 version :
-			 idspy_internal_version 	 <class 'str'>
-			 idspy_version 	 <class 'str'>
-			 imas_dd_git_commit 	 <class 'str'>
-			 imas_dd_version 	 <class 'str'>
  max_repr_length 	 <class 'int'>
  model :
 	 adiabatic_electrons 	 <class 'NoneType'>
@@ -492,21 +492,21 @@
 		 imas_dd_version 	 <class 'str'>
  species 	 <class 'list'>
  species [0]:
-	 charge_norm 	 <class 'float'>
-	 density_log_gradient_norm 	 <class 'float'>
-	 density_norm 	 <class 'float'>
-	 mass_norm 	 <class 'float'>
-	 max_repr_length 	 <class 'int'>
-	 potential_energy_gradient_norm 	 <class 'NoneType'>
-	 potential_energy_norm 	 <class 'NoneType'>
-	 temperature_log_gradient_norm 	 <class 'float'>
-	 temperature_norm 	 <class 'float'>
-	 velocity_tor_gradient_norm 	 <class 'float'>
-	 version :
-		 idspy_internal_version 	 <class 'str'>
-		 idspy_version 	 <class 'str'>
-		 imas_dd_git_commit 	 <class 'str'>
-		 imas_dd_version 	 <class 'str'>
+		 charge_norm 	 <class 'float'>
+		 density_log_gradient_norm 	 <class 'float'>
+		 density_norm 	 <class 'float'>
+		 mass_norm 	 <class 'float'>
+		 max_repr_length 	 <class 'int'>
+		 potential_energy_gradient_norm 	 <class 'NoneType'>
+		 potential_energy_norm 	 <class 'NoneType'>
+		 temperature_log_gradient_norm 	 <class 'float'>
+		 temperature_norm 	 <class 'float'>
+		 velocity_tor_gradient_norm 	 <class 'float'>
+		 version :
+			 idspy_internal_version 	 <class 'str'>
+			 idspy_version 	 <class 'str'>
+			 imas_dd_git_commit 	 <class 'str'>
+			 imas_dd_version 	 <class 'str'>
  species_all :
 	 angle_pol 	 <class 'list'>
 	 beta_reference 	 <class 'float'>

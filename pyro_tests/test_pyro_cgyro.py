@@ -57,14 +57,16 @@ def convert_to_json(obj,separate_real_imag = False):
 
 
 
-cgyro_dir = "test_data/data_cgyro_single/"
-pyro = Pyro(gk_file=cgyro_dir+"input.cgyro", gk_code="CGYRO")
-# cgyro_dir = "pyro_tests/test_cgyro_3/"
-# pyro = Pyro(gk_file=cgyro_dir+"input_0001.cgyro", gk_code="CGYRO")
+# cgyro_dir = "test_data/data_cgyro_single/"
+# pyro = Pyro(gk_file=cgyro_dir+"input.cgyro", gk_code="CGYRO")
+
+cgyro_dir = "pyro_tests/data/test_cgyro2/"
+pyro = Pyro(gk_file=cgyro_dir+"input.cgyro_0001", gk_code="CGYRO")
 
 # Load in CGYRO output data
 
-pyro.load_gk_output()
+# pyro.load_gk_output()
+pyro.load_gk_output(gk_code='CGYRO')
 
 
 gkdict = gkids.GyrokineticsLocal()

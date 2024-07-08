@@ -163,14 +163,14 @@
 	 time_interval_norm 	 <class 'list'>
  species 	 <class 'list'>
  species [0]:
-	 charge_norm 	 <class 'int'>
-	 density_log_gradient_norm 	 <class 'float'>
-	 density_norm 	 <class 'float'>
-	 mass_norm 	 <class 'float'>
-	 name 	 <class 'str'>
-	 temperature_log_gradient_norm 	 <class 'float'>
-	 temperature_norm 	 <class 'float'>
-	 velocity_tor_gradient_norm 	 <class 'float'>
+		 charge_norm 	 <class 'int'>
+		 density_log_gradient_norm 	 <class 'float'>
+		 density_norm 	 <class 'float'>
+		 mass_norm 	 <class 'float'>
+		 name 	 <class 'str'>
+		 temperature_log_gradient_norm 	 <class 'float'>
+		 temperature_norm 	 <class 'float'>
+		 velocity_tor_gradient_norm 	 <class 'float'>
  species_all :
 	 beta_reference 	 <class 'float'>
 	 debye_length_reference 	 <class 'float'>
@@ -179,40 +179,40 @@
 	 zeff 	 <class 'NoneType'>
  wavevector 	 <class 'list'>
  wavevector [0]:
-	 binormal_component_norm 	 <class 'float'>
-	 eigenmode 	 <class 'list'>
-	 eigenmode [0]:
-		 a_field_parallel_perturbed_norm_imaginary 	 <class 'list'>
-		 a_field_parallel_perturbed_norm_real 	 <class 'list'>
-		 fluxes_norm 	 <class 'list'>
-		 fluxes_norm [0]:
-			 energy_a_field_parallel 	 <class 'float'>
-			 energy_b_field_parallel 	 <class 'float'>
-			 energy_phi_potential 	 <class 'float'>
-			 momentum_tor_parallel_a_field_parallel 	 <class 'float'>
-			 momentum_tor_parallel_b_field_parallel 	 <class 'float'>
-			 momentum_tor_parallel_phi_potential 	 <class 'float'>
-			 momentum_tor_perpendicular_a_field_parallel 	 <class 'NoneType'>
-			 momentum_tor_perpendicular_b_field_parallel 	 <class 'NoneType'>
-			 momentum_tor_perpendicular_phi_potential 	 <class 'NoneType'>
-			 particles_a_field_parallel 	 <class 'float'>
-			 particles_b_field_parallel 	 <class 'float'>
-			 particles_phi_potential 	 <class 'float'>
-		 frequency_norm 	 <class 'float'>
-		 growth_rate_norm 	 <class 'float'>
-		 growth_rate_tolerance 	 <class 'float'>
-		 moments_norm_rotating_frame 	 <class 'list'>
-		 moments_norm_rotating_frame [0]:
-			 density_imaginary 	 <class 'list'>
-			 density_real 	 <class 'list'>
-			 temperature_parallel_imaginary 	 <class 'list'>
-			 temperature_parallel_real 	 <class 'list'>
-			 temperature_perpendicular_imaginary 	 <class 'list'>
-			 temperature_perpendicular_real 	 <class 'list'>
-			 velocity_parallel_imaginary 	 <class 'list'>
-			 velocity_parallel_real 	 <class 'list'>
-		 phi_potential_perturbed_norm_imaginary 	 <class 'list'>
-		 phi_potential_perturbed_norm_real 	 <class 'list'>
-		 poloidal_angle 	 <class 'list'>
-	 poloidal_turns 	 <class 'int'>
-	 radial_component_norm 	 <class 'float'>
+		 binormal_component_norm 	 <class 'float'>
+		 eigenmode 	 <class 'list'>
+				 eigenmode [0]:
+				 a_field_parallel_perturbed_norm_imaginary 	 <class 'list'>
+				 a_field_parallel_perturbed_norm_real 	 <class 'list'>
+				 fluxes_norm 	 <class 'list'>
+								 fluxes_norm [0]:
+						 energy_a_field_parallel 	 <class 'float'>
+						 energy_b_field_parallel 	 <class 'float'>
+						 energy_phi_potential 	 <class 'float'>
+						 momentum_tor_parallel_a_field_parallel 	 <class 'float'>
+						 momentum_tor_parallel_b_field_parallel 	 <class 'float'>
+						 momentum_tor_parallel_phi_potential 	 <class 'float'>
+						 momentum_tor_perpendicular_a_field_parallel 	 <class 'NoneType'>
+						 momentum_tor_perpendicular_b_field_parallel 	 <class 'NoneType'>
+						 momentum_tor_perpendicular_phi_potential 	 <class 'NoneType'>
+						 particles_a_field_parallel 	 <class 'float'>
+						 particles_b_field_parallel 	 <class 'float'>
+						 particles_phi_potential 	 <class 'float'>
+				 frequency_norm 	 <class 'float'>
+				 growth_rate_norm 	 <class 'float'>
+				 growth_rate_tolerance 	 <class 'float'>
+				 moments_norm_rotating_frame 	 <class 'list'>
+								 moments_norm_rotating_frame [0]:
+						 density_imaginary 	 <class 'list'>
+						 density_real 	 <class 'list'>
+						 temperature_parallel_imaginary 	 <class 'list'>
+						 temperature_parallel_real 	 <class 'list'>
+						 temperature_perpendicular_imaginary 	 <class 'list'>
+						 temperature_perpendicular_real 	 <class 'list'>
+						 velocity_parallel_imaginary 	 <class 'list'>
+						 velocity_parallel_real 	 <class 'list'>
+				 phi_potential_perturbed_norm_imaginary 	 <class 'list'>
+				 phi_potential_perturbed_norm_real 	 <class 'list'>
+				 poloidal_angle 	 <class 'list'>
+		 poloidal_turns 	 <class 'int'>
+		 radial_component_norm 	 <class 'float'>

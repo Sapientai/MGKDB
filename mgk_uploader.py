@@ -13,18 +13,18 @@ Optional fields:    confidence
 """
 
 import sys
-sys.path.append('support')
-
-from mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars 
-#from ParIO import *
 import os
-from mgk_login import mgk_login,f_login_dbase
+import argparse
+from sys import exit
+# sys.path.append('support')
 
+from support.mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars 
+#from ParIO import *
+from support.mgk_login import mgk_login,f_login_dbase
 sys.path.append('../pyro_tests/')
 from pyro_tests.pyro_create_combined import * 
 
-import argparse
-from sys import exit
+
 
 def f_parse_args():
     #==========================================================
@@ -97,74 +97,72 @@ if __name__=="__main__":
     #######################################################################
     print("Processing files for uploading ........")
     #scan through a directory for more than one run
-    for dirpath, dirnames, files in os.walk(output_folder):
-        if dirnames: 
-            print(dirnames)
-            if args.sim_type =='CGYRO' or str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1 and str(dirpath) not in exclude_folders:    
-                print('Scanning in {} *******************\n'.format( str(dirpath)) )
-                #check if run is linear or nonlinear
-                #print(str(dirpath))
-        #            try:
-                linear = isLinear(dirpath, args.sim_type)
-                if linear == None:
-                    linear_input = input('Cannot decide if this folder is a linear run or not. Please make the selection manually by typing:\n 1: Linear\n 2: Nonlinear \n 3: Skip this folder \n')
-                    if linear_input.strip() == '1':
-                        linear = True
-                    elif linear_input.strip() == '2':
-                        linear = False
-                    elif linear_input.strip() == '3':
-                        print('Folder skipped.')
-                        continue
-                    else:
-                        exit('Invalid input encountered!')            
-                if linear:
-                    lin = ['linear']
+    for count, (dirpath, dirnames, files) in enumerate(os.walk(output_folder)):
+        if ( ( args.sim_type =='CGYRO' and count==0)  or (args.sim_type=='GENE' and str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1 and str(dirpath) not in exclude_folders) ):    
+            print('Scanning in {} *******************\n'.format( str(dirpath)) )
+            #check if run is linear or nonlinear
+            #print(str(dirpath))
+    #            try:
+            linear = isLinear(dirpath, args.sim_type)
+            if linear == None:
+                linear_input = input('Cannot decide if this folder is a linear run or not. Please make the selection manually by typing:\n 1: Linear\n 2: Nonlinear \n 3: Skip this folder \n')
+                if linear_input.strip() == '1':
+                    linear = True
+                elif linear_input.strip() == '2':
+                    linear = False
+                elif linear_input.strip() == '3':
+                    print('Folder skipped.')
+                    continue
                 else:
-                    lin = ['nonlin']
+                    exit('Invalid input encountered!')            
+            if linear:
+                lin = ['linear']
+            else:
+                lin = ['nonlin']
 
-                #add linear/nonlin to keywords
-                keywords_lin = keywords.split('#') + lin
-                #print(keywords_lin)
-                #print(linear)                                        
+            #add linear/nonlin to keywords
+            keywords_lin = keywords.split('#') + lin
+            #print(keywords_lin)
+            #print(linear)                                        
 
-                if not default:
-                    suffixes = get_suffixes(dirpath, args.sim_type)
-                    print("Found in {} these suffixes:\n {}".format(dirpath, suffixes))
-                    
-                    suffixes = input('Which run do you want to upload? Separate them by comma. \n Press q to skip. Press ENTER to upload ALL.\n')
-                    if suffixes == 'q':
-                        print("Skipping the folder {}.".format(dirpath))
-                        continue
-                    elif len(suffixes):
-                        suffixes = suffixes.split(',')
-                    else:
-                        suffixes = None                              
-                                                
-                    confidence = input('What is your confidence (1-10) for the run? Press ENTER to use default value -1.0\n')
-                    if len(confidence):
-                        confidence = float(confidence)
-                    else:
-                        confidence = -1.0
-                        print("Using default confidence -1.\n")
-
-                    
-                    comments = input('Any comments for data in this folder?Press Enter to skip.\n')
-                    run_shared = input('Any other files to upload than the default? Separate them by comma. Press Enter to skip.\n')
-                    if len(run_shared):
-                        run_shared = run_shared.split(',')
-                    else:
-                        run_shared = None
+            if not default:
+                suffixes = get_suffixes(dirpath, args.sim_type)
+                print("Found in {} these suffixes:\n {}".format(dirpath, suffixes))
                 
+                suffixes = input('Which run do you want to upload? Separate them by comma. \n Press q to skip. Press ENTER to upload ALL.\n')
+                if suffixes == 'q':
+                    print("Skipping the folder {}.".format(dirpath))
+                    continue
+                elif len(suffixes):
+                    suffixes = suffixes.split(',')
                 else:
-                    suffixes = None
-                    confidence = -1
-                    comments = 'Uploaded with default settings.'
+                    suffixes = None                              
+                                            
+                confidence = input('What is your confidence (1-10) for the run? Press ENTER to use default value -1.0\n')
+                if len(confidence):
+                    confidence = float(confidence)
+                else:
+                    confidence = -1.0
+                    print("Using default confidence -1.\n")
+
+                
+                comments = input('Any comments for data in this folder?Press Enter to skip.\n')
+                run_shared = input('Any other files to upload than the default? Separate them by comma. Press Enter to skip.\n')
+                if len(run_shared):
+                    run_shared = run_shared.split(',')
+                else:
                     run_shared = None
-                
-                # Send run to upload_to_mongo to be uploaded
-                upload_to_mongo(database, dirpath, user, linear, confidence, args.input_heat, 
-                                keywords_lin, comments, args.sim_type, img_dir, suffixes, run_shared,
-                                args.large_files, args.extra, args.verbose, manual_time_flag,global_vars)
+            
+            else:
+                suffixes = None
+                confidence = -1
+                comments = 'Uploaded with default settings.'
+                run_shared = None
+            
+            # Send run to upload_to_mongo to be uploaded
+            upload_to_mongo(database, dirpath, user, linear, confidence, args.input_heat, 
+                            keywords_lin, comments, args.sim_type, img_dir, suffixes, run_shared,
+                            args.large_files, args.extra, args.verbose, manual_time_flag,global_vars)
 
     if len(global_vars.troubled_runs):
         print("The following runs are skipped due to exceptions.")

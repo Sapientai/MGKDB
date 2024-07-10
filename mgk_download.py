@@ -8,15 +8,14 @@ For downloading files from mgk_fusion in shell
 """
 
 import sys
-sys.path.append('support')
-
-from mgk_file_handling import get_oid_from_query, Str2Query, download_dir_by_name, download_file_by_path, download_file_by_id, download_runs_by_id
-import gridfs
-from mgk_login import mgk_login,f_login_dbase
-import argparse
 import os
+import argparse
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+
+from support.mgk_file_handling import get_oid_from_query, Str2Query, download_dir_by_name, download_file_by_path, download_file_by_id, download_runs_by_id
+import gridfs
+from support.mgk_login import mgk_login,f_login_dbase
 
 def f_parse_args():
     #==========================================================

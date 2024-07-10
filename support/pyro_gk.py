@@ -62,17 +62,23 @@ def create_gk_dict_with_pyro(fname,gkcode):
 
     assert gkcode in ['GENE','CGYRO'], "invalid gkcode type %s"%(gkcode)
 
-    pyro = Pyro(gk_file=fname, gk_code=gkcode)
-    pyro.load_gk_output()
+    try: 
 
-    gkdict = gkids.GyrokineticsLocal()
-    idspy.fill_default_values_ids(gkdict)
-    gkdict = pyro_to_imas_mapping(
-            pyro,
-            comment=f"Testing IMAS %s"%(gkcode),
-            ids=gkdict
-        )
+        pyro = Pyro(gk_file=fname, gk_code=gkcode)
+        pyro.load_gk_output()
+
+        gkdict = gkids.GyrokineticsLocal()
+        idspy.fill_default_values_ids(gkdict)
+        gkdict = pyro_to_imas_mapping(
+                pyro,
+                comment=f"Testing IMAS %s"%(gkcode),
+                ids=gkdict
+            )
+        
+        json_data = convert_to_json(gkdict)
+
+    except Exception as e: 
+        print(e)
+        raise SystemError
     
-    json_data = convert_to_json(gkdict)
-
     return json_data

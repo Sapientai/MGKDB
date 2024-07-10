@@ -823,7 +823,11 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
         # update the storage chunk
         for doc, field in zip(files_to_update, keys_to_update):
             files = []
-            files = files + [get_file_list(out_dir, doc+s) for s in suffixes] # get file with path
+            if sim_type=='GENE':
+                files = files + [get_file_list(out_dir, doc+s) for s in suffixes] # get file with path
+            elif sim_type=='CGYRO':
+                files = files + [get_file_list(out_dir+'/%s/'%(s), doc) for s in suffixes] # get file with path
+
             assert len(files), "Files specified not found!"
             # delete ALL history
             for file in files:
@@ -1026,7 +1030,7 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
         ## Get geometry from parameters file and add that to list of files to save
         if 'magn_geometry' in pars:
             global_vars.Docs.append(pars['magn_geometry'][1:-1])
-            global_vars.Keys.append('magn_geometry')
+            global_vars.Keys.append(pars['magn_geometry'][1:-1])
         if large_files:
             if 'name1' in pars and 'mom' in global_vars.Docs_L:
                 global_vars.Docs_L.pop(global_vars.Docs_L.index('mom'))
@@ -1036,26 +1040,37 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
                     global_vars.Keys_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
     
 
+    if sim_type=='GENE':
+        output_files = [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
+        
+        if large_files:
+            output_files += [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs_L if Qname]
+        if extra_files:
+            output_files += [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs_ex if Qname]
+            
+        '''
+        Adding files not subject to suffixes, non_suffix should be a list 
+        '''
+        if isinstance(run_shared,list):
+            output_files += [get_file_list(out_dir, ns) for ns in run_shared]
+            
+    elif sim_type=='CGYRO':
 
-    output_files = [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
-    
-    if large_files:
-        output_files += [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs_L if Qname]
-    if extra_files:
-        output_files += [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs_ex if Qname]
+        output_files = [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
         
-    '''
-    Adding files not subject to suffixes, non_suffix should be a list 
-    '''
-    if isinstance(run_shared,list):
-        output_files += [get_file_list(out_dir, ns) for ns in run_shared]
-        
-#    if 'omega.dat~' in output_files and suffix != '.dat~':
-#        output_files.remove('omega.dat~')
-    
+        if large_files:
+            output_files += [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs_L if Qname]
+        if extra_files:
+            output_files += [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs_ex if Qname]
+            
+        '''
+        Adding files not subject to suffixes, non_suffix should be a list 
+        '''
+        if isinstance(run_shared,list):
+            output_files += [get_file_list(out_dir, ns) for ns in run_shared]
+ 
     output_files = set([item for sublist in output_files for item in sublist]) # flat the list and remove possible duplicates
     
-#    print(output_files)
     object_ids = {}
     for file in output_files:
         if os.path.isfile(file):
@@ -1111,8 +1126,10 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
             # print(object_ids)
             for _id, line in list(object_ids.items()):  # it is necessary because the dict changes size during loop.
                 for Q_name, Key in zip(_docs, _keys):
-                    if os.path.join(out_dir,Q_name+suffix) == line:
-                        print(Q_name+suffix)
+                    if sim_type=='GENE' :     fname = os.path.join(out_dir,Q_name+suffix)
+                    elif sim_type=='CGYRO' :  fname = os.path.join(out_dir+'/%s/'%(suffix),Q_name)
+                    
+                    if fname == line:
                         if '.' in Key:
                             Key = '_'.join(Key.split('.'))
     
@@ -1141,9 +1158,6 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                             print(S_name)
                                            
             files_dict = {**files_dict, **shared_file_dict}
-#                if os.path.join(out_dir,'geneerr.log') == line and count==0:
-#                    files_dict['geneerr'] = _id
-#                    object_ids.pop(_id)
             print('='*60)
             
 
@@ -1231,7 +1245,6 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
             continue
                 
     global_vars.reset_docs_keys(sim_type)
-#    print('Run collection \'' + out_dir + '\' uploaded succesfully.')
         
         
 def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
@@ -1280,11 +1293,10 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
             # print(object_ids)
             for _id, line in list(object_ids.items()):  
                 for Q_name, Key in zip(_docs, _keys):
-    #                if line.find(os.path.join(out_dir, Q_name + suffix)) != -1:
-                    if os.path.join(out_dir,Q_name+suffix) == line:
-    #                if (Q_name + suffix) == line.split('/')[-1]:    
-    #                    files_dict[Key] = line.split()[0]
-                        print(Q_name+suffix)
+                    if sim_type=='GENE' :  fname = os.path.join(out_dir,Q_name+suffix)
+                    elif sim_type=='CGYRO' :  fname = os.path.join(out_dir+'/%s/'%(suffix),Q_name)
+                    
+                    if fname == line:
                         if '.' in Key:
                             Key = '_'.join(Key.split('.'))
     
@@ -1314,10 +1326,6 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
                                            
             files_dict = {**files_dict, **shared_file_dict}
             print('='*60)
-            #find relevant quantities from in/output
-    #        print(suffix)
-            
-    #        param_dict = get_parsed_params( os.path.join(out_dir, 'parameters' + suffix) )
     
            #metadata dictonary
             time_upload = strftime("%y%m%d-%H%M%S")

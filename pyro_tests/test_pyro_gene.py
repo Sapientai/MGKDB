@@ -55,7 +55,9 @@ def convert_to_json(obj,separate_real_imag = False):
         return obj
 
 data_dir = "test_data/test_gene1_tracer_efit/"
+# data_dir = "pyro_tests/data/test_gene1_tracer_efit/"
 # data_dir = "test_data/test_gene2_miller_general/"
+# data_dir = "pyro_tests/data/test_gene2_miller_general/"
 
 pyro = Pyro(gk_file=data_dir+"parameters_0001", gk_code="GENE")
 # Load in GENE output data

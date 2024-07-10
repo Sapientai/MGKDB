@@ -10,7 +10,6 @@ import yaml
 import json
 import xmltodict
 
-
 def f_collisions(old_gk_dict,new_gk_dict):
     ''' conversion for key: collisions '''
 
@@ -162,6 +161,154 @@ def f_model(old_gk_dict,new_gk_dict):
     return dict1
 
 
+def f_code(old_gk_dict,new_gk_dict):
+    ''' conversion for key: code '''
+
+    main_key='code'
+    old_gk,new_gk = old_gk_dict[main_key],new_gk_dict[main_key]
+
+    dict1={}
+
+    ## Keys present in old IMAS 
+    for key in ['name','version']:
+        dict1[key] = old_gk[key]
+        
+    ### parameters 
+    ### Create xml string from dictionary.
+    dict1['parameters'] = xmltodict.unparse({'root':old_gk['parameters']},pretty=True)
+    # Alternative : json.dumps(old_gk['parameters'])
+    
+    ## Not present in old IMAS
+    keys = ['commit', 'description', 'library', 'output_flag', 'repository']
+    for key in keys: 
+        dict1[key] = None
+    
+    ## Note version doesn't need to be added here. it is the GENE version
+    dict1['max_repr_length'] = new_gk['max_repr_length']
+
+    return dict1 
+
+## In progress ## 
+
+def f_linear(old_gk_dict,new_gk_dict): 
+    
+    def f_get_wavevector(old_gk_dict,new_gk_dict):
+        ''' conversion for key: wavevector '''
+        
+        main_key = 'wavevector'
+        old_gk,new_gk = old_gk_dict[main_key][0], new_gk_dict['linear'][main_key][0]
+        
+        dict1={}
+        ## Old keys not present 
+        # poloidal_turns is inside eigenmodes for new 
+        
+        ## New keys not present in old 
+        keys = ['max_repr_length', 'version']
+        for key in keys:
+            dict1[key] = new_gk[key]
+        
+        ## Common keys 
+        key_map = {'binormal_component_norm':'binormal_wavevector_norm', 
+                   'radial_component_norm':'radial_wavevector_norm' }
+        for key,val in key_map.items():
+            dict1[val] = old_gk[key]
+    
+        ## Map subdict eigenmode 
+        
+        def f_get_eigenmode_dict(old_gk,new_gk):
+    
+            dict2={}
+    
+            ## Common keys
+            keys = ['frequency_norm','growth_rate_norm','growth_rate_tolerance']
+            for key in keys: 
+                dict2[key]= old_gk['eigenmode'][0][key]
+    
+            ## Poloidal angle has different key name
+            dict2['angle_pol'] = old_gk['eigenmode'][0]['poloidal_angle']
+    
+            ## poloidal_turns is outside eigenmodes in old 
+            dict2['poloidal_turns'] = old_gk['poloidal_turns']
+            
+            #### linear weights obtained from fluxes_norm
+            dict2['linear_weights']={}
+    
+            ## Common keys 
+            keys = ['energy_a_field_parallel', 'energy_b_field_parallel', 'energy_phi_potential', 'momentum_tor_parallel_a_field_parallel', 'momentum_tor_parallel_b_field_parallel', 
+                    'momentum_tor_parallel_phi_potential', 'momentum_tor_perpendicular_a_field_parallel', 'momentum_tor_perpendicular_b_field_parallel', 'momentum_tor_perpendicular_phi_potential', 
+                    'particles_a_field_parallel', 'particles_b_field_parallel', 'particles_phi_potential']
+    
+            num_list = 3 ## size of list : corresponds to 3 types of particles
+            for key in keys: 
+                dict2['linear_weights'][key]= [old_gk['eigenmode'][0]['fluxes_norm'][i][key] for i in range(num_list)]
+            
+            ## Keys not in old for linear weights
+            keys = ['max_repr_length', 'version']
+            for key in keys:
+                dict2['linear_weights'][key] = new_gk[key]
+    
+            ##### moments_norm_rotating_frame
+            ## Not present in new IMAS 
+            keys = ['density_imaginary', 'density_real', 'temperature_parallel_imaginary', \
+                    'temperature_parallel_real', 'temperature_perpendicular_imaginary', \
+                    'temperature_perpendicular_real', 'velocity_parallel_imaginary', 'velocity_parallel_real']
+    
+            ##### phi_potential_perturbed_norm 
+            keys = ['phi_potential_perturbed_norm_imaginary','phi_potential_perturbed_norm_imaginary']
+            
+            ##### a_field_parallel_perturbed_norm
+            keys = ['a_field_parallel_perturbed_norm_imaginary','a_field_parallel_perturbed_norm_real']
+            
+            ### fields
+            keys = ['a_field_parallel_perturbed_norm', 'a_field_parallel_perturbed_parity', 'a_field_parallel_perturbed_weight', 'b_field_parallel_perturbed_norm', 'b_field_parallel_perturbed_parity', 'b_field_parallel_perturbed_weight', 'max_repr_length', 'phi_potential_perturbed_norm', 'phi_potential_perturbed_parity', 'phi_potential_perturbed_weight', 'version']
+            fields=dict.fromkeys(keys,None)
+            dict2['fields']=fields
+            
+            ### moments_norm_particle 
+            keys = ['density', 'heat_flux_parallel', 'j_parallel', 'max_repr_length', 'pressure_parallel', 'pressure_perpendicular', 'v_parallel_energy_perpendicular', 'v_perpendicular_square_energy', 'version']
+            mom_norm = dict.fromkeys(keys,None)
+            dict2['moments_norm_particle']=mom_norm
+        
+            ### Not present in old 
+            keys = ['initial_value_run','linear_weights_rotating_frame','moments_norm_gyrocenter','moments_norm_gyrocenter_bessel_0','moments_norm_gyrocenter_bessel_1',]
+            for key in keys: 
+                dict2[key]= None
+            
+            for key in ['version','max_repr_length']:
+                dict2[key]= None
+            
+            ## time_norm present in model. Defined below
+
+            ### code 
+            dict2['code']={}
+            dict2['code']['parameters'] = None # Same as the parameters in code field 
+            
+            for key in ['max_repr_length', 'output_flag', 'version']: 
+                dict2['code'][key] = new_gk['eigenmode'][0]['code'][key]
+
+            return [dict2] 
+    
+        ## eigenmode:
+        dict1['eigenmode']= f_get_eigenmode_dict(old_gk,new_gk)
+    
+        dict1['eigenmode'][0]['time_norm'] = old_gk_dict['model']['time_interval_norm'] 
+
+        return [dict1] 
+        
+
+    wavevector = f_get_wavevector(old_gk_dict,new_gk_dict)
+    dict_c = {'wavevector': wavevector}
+
+    for key in ['max_repr_length', 'version']: 
+        dict_c[key] = new_gk_dict['linear'][key]
+
+    ## Finally overwrite parameters to that from field 'code' 
+    dict_c['wavevector'][0]['eigenmode'][0]['code']['parameters'] =\
+    xmltodict.unparse({'root':old_gk_dict['code']['parameters']},pretty=True)
+    
+    return {'linear':dict_c} 
+
+
 if __name__=="__main__":
     ## Load file data 
     fname='gyro_imas_old.yaml'
@@ -174,10 +321,35 @@ if __name__=="__main__":
 
     print(gk_dict.keys(),'\n',GK_dict.keys())
 
-    ## Test modules 
+    ## Test modules
     f_collisions(gk_dict,GK_dict)
     f_flux_surface(gk_dict,GK_dict)
     f_species_all(gk_dict,GK_dict)
     f_species(gk_dict,GK_dict)
     f_ids_properties(gk_dict,GK_dict)
     f_model(gk_dict,GK_dict)
+    f_code(gk_dict,GK_dict)
+    f_linear(gk_dict,GK_dict)
+
+
+    ## Full conversion 
+    modified_gk = {} 
+    key='collisions'
+    modified_gk[key] = f_collisions(gk_dict,GK_dict)
+    key='flux_surface'
+    modified_gk[key] = f_flux_surface(gk_dict,GK_dict)
+    key='species_all'
+    modified_gk[key] = f_species_all(gk_dict,GK_dict)
+    key='species'
+    modified_gk[key] = f_species(gk_dict,GK_dict)
+    key='ids_properties'
+    modified_gk[key] = f_ids_properties(gk_dict,GK_dict)
+    key='model'
+    modified_gk[key] = f_model(gk_dict,GK_dict)
+    key='code'
+    modified_gk[key] = f_code(gk_dict,GK_dict)
+    key='linear'
+    modified_gk[key] = f_linear(gk_dict,GK_dict)
+
+    print(modified_gk)
+    

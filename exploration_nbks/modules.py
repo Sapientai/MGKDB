@@ -10,6 +10,30 @@ import yaml
 import json
 import xmltodict
 
+
+
+
+'''
+### Completed : 
+#### ( checks needed, empty fields need to be filled)
+- collisions
+- flux_surface
+- species
+- species_all
+- ids_properties
+- model
+- code
+- linear -> wavevector
+- version
+- max_repr_length
+- normalizing_quantities
+- time
+
+### Remaining:
+- non_linear
+
+
+'''
 def f_collisions(old_gk_dict,new_gk_dict):
     ''' conversion for key: collisions '''
 
@@ -309,6 +333,34 @@ def f_linear(old_gk_dict,new_gk_dict):
     return {'linear':dict_c} 
 
 
+def f_normalizing_q(old_gk_dict,new_gk_dict):
+    ''' conversion for key: normalizing_quantities 
+    Not present in old IMAS 
+    Not using old_gk_dict yet
+    '''
+
+    main_key='normalizing_quantities'
+    dict1={}
+    
+    keys = ['b_field_tor', 'max_repr_length', 'n_e', 'r', 't_e', 'version']
+    for key in keys: 
+        dict1[key] = None
+        
+    return dict1
+
+
+def f_others(modified_gk,new_gk_dict): 
+    ''' Not present in old IMAS '''
+    
+    for key in ['version','max_repr_length']:
+        modified_gk[key]= new_gk_dict[key]
+
+    for key in ['time','non_linear']:
+        modified_gk[key] = None
+        
+    return modified_gk
+
+
 if __name__=="__main__":
     ## Load file data 
     fname='gyro_imas_old.yaml'
@@ -330,8 +382,8 @@ if __name__=="__main__":
     f_model(gk_dict,GK_dict)
     f_code(gk_dict,GK_dict)
     f_linear(gk_dict,GK_dict)
-
-
+    f_normalizing_q(gk_dict,GK_dict)
+    
     ## Full conversion 
     modified_gk = {} 
     key='collisions'
@@ -350,6 +402,12 @@ if __name__=="__main__":
     modified_gk[key] = f_code(gk_dict,GK_dict)
     key='linear'
     modified_gk[key] = f_linear(gk_dict,GK_dict)
+    
+    key='normalizing_quantities'
+    modified_gk[key] = f_normalizing_q(gk_dict,GK_dict)
+    
+    modified_gk = f_others(modified_gk,GK_dict)
 
+    
     print(modified_gk)
     

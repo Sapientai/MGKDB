@@ -89,9 +89,13 @@ if __name__=="__main__":
     fname = data_dir+'input.cgyro'.format(suffix)
     gkcode="CGYRO"
 
-    data_dir = "pyro_tests/data/CGYRO_nonlinear/"
+    data_dir = "pyro_tests/data/test_cgyro_miller/KY_0.30_PX0_0.00/"
     fname = data_dir+'input.cgyro'.format(suffix)
     gkcode="CGYRO"
+
+    # data_dir = "pyro_tests/data/CGYRO_nonlinear/"
+    # fname = data_dir+'input.cgyro'.format(suffix)
+    # gkcode="CGYRO"
 
     json_data = create_gk_dict_with_pyro(fname,gkcode)
 

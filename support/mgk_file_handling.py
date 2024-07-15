@@ -562,15 +562,16 @@ def isLinear(folder_name, sim_type):
         
     elif sim_type=='CGYRO':
         fname=os.path.join(folder_name+'/{0}/input.cgyro'.format(suffix))
-
-
         assert os.path.isfile(fname),"File %s does not exist"%(fname)
 
+        non_lin = None
         with open(fname,'r') as f:
             for line in f: 
-                if line.split(' = ')[0]=='NONLINEAR_FLAG':
-                    non_lin = line.split(' = ')[1]
+                if line.split('=')[0].strip()=='NONLINEAR_FLAG':
+                    non_lin = int(line.split('=')[1].strip()) # Remove blank space to just get 0 or 1
         
+        assert non_lin is not None, "Didn't find NONLINEAR_FLAG in file(%s)"%(fname) 
+
         linear = False if non_lin else True
         return linear
         

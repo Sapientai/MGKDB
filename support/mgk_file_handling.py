@@ -528,18 +528,17 @@ def query_plot(db, collection, query, projection = {'Meta':1, 'Diagnostics':1}):
 def isLinear(folder_name, sim_type):
     linear = None
 
-    if sim_type=='GENE':
-        #check parameters file for 'nonlinear' value
-        suffixes = get_suffixes(folder_name, sim_type)
-        
-        if len(suffixes):
-            suffixes.sort()
-            suffix = suffixes[0] #assuming all parameters files are of the same linear/nonlinear type
-            print('Scanning parameters{} for deciding linear/Nonlinar.')
-        else:
-            suffix = ''
-        
-    #    print(folder_name) 
+    #check file for 'nonlinear' value
+    suffixes = get_suffixes(folder_name, sim_type)
+    
+    if len(suffixes):
+        suffixes.sort()
+        suffix = suffixes[0] #assuming all parameters files are of the same linear/nonlinear type
+        print('Scanning parameters{} for deciding linear/Nonlinar.')
+    else:
+        suffix = ''
+
+    if sim_type=='GENE': 
         fname = os.path.join(folder_name, 'parameters' + suffix)
         if os.path.isfile( fname ):
             par = Parameters()
@@ -562,7 +561,17 @@ def isLinear(folder_name, sim_type):
             assert linear is None, "Can not decide, please include linear/nonlin as the suffix of your data folder!"
         
     elif sim_type=='CGYRO':
-        linear = True
+        fname=os.path.join(folder_name+'/{0}/input.cgyro'.format(suffix))
+
+
+        assert os.path.isfile(fname),"File %s does not exist"%(fname)
+
+        with open(fname,'r') as f:
+            for line in f: 
+                if line.split(' = ')[0]=='NONLINEAR_FLAG':
+                    non_lin = line.split(' = ')[1]
+        
+        linear = False if non_lin else True
         return linear
         
 def isUploaded(out_dir,runs_coll):
@@ -1174,10 +1183,6 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                          "last_updated": time_upload
                         }  
                    
-            # assert os.path.isfile(out_dir+'/gyrokinetics.json'), "File %s doesn't exist"%(out_dir+'/gyrokinetics.json')
-            # with open(out_dir+'/gyrokinetics.json', 'r') as j:
-            #     GK_dict = json.loads(j.read())
-            
             if sim_type == 'CGYRO':
                 fname=out_dir+'/{0}/input.cgyro'.format(suffix)
                 GK_dict = create_gk_dict_with_pyro(fname,'CGYRO')
@@ -1264,7 +1269,6 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
 #    manual_time_flag = True 
     for count, suffix in enumerate(suffixes):
         try:
-#        print(suffix)
             print('='*40)
             print('Working on files with suffix: {} in folder {}.......'.format(suffix, out_dir))
             print('Uploading files ....')
@@ -1341,11 +1345,12 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
                         }
             #data dictionary format for nonlinear runs
             if sim_type == 'CGYRO':
-                fname=out_dir+'/input.cgyro{0}'.format(suffix)
+                fname=out_dir+'/{0}/input.cgyro'.format(suffix)
                 GK_dict = create_gk_dict_with_pyro(fname,'CGYRO')
                 Diag_dict = {}
                 imag_dict = {}
-            elif sim_type=='GENE': 
+            
+            elif sim_type=='GENE':
                 fname=out_dir+'/parameters{0}'.format(suffix)
                 GK_dict = create_gk_dict_with_pyro(fname,'GENE')
 

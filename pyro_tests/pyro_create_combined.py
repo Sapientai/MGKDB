@@ -86,8 +86,11 @@ if __name__=="__main__":
     gkcode="GENE"
 
     data_dir = "test_data/data_cgyro_single/"
-    suffix=''
-    fname = data_dir+'input{0}.cgyro'.format(suffix)
+    fname = data_dir+'input.cgyro'.format(suffix)
+    gkcode="CGYRO"
+
+    data_dir = "pyro_tests/data/CGYRO_nonlinear/"
+    fname = data_dir+'input.cgyro'.format(suffix)
     gkcode="CGYRO"
 
     json_data = create_gk_dict_with_pyro(fname,gkcode)

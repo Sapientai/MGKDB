@@ -100,9 +100,6 @@ if __name__=="__main__":
     for count, (dirpath, dirnames, files) in enumerate(os.walk(output_folder)):
         if ( ( args.sim_type =='CGYRO' and count==0)  or (args.sim_type=='GENE' and str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1 and str(dirpath) not in exclude_folders) ):    
             print('Scanning in {} *******************\n'.format( str(dirpath)) )
-            #check if run is linear or nonlinear
-            #print(str(dirpath))
-    #            try:
             linear = isLinear(dirpath, args.sim_type)
             if linear == None:
                 linear_input = input('Cannot decide if this folder is a linear run or not. Please make the selection manually by typing:\n 1: Linear\n 2: Nonlinear \n 3: Skip this folder \n')

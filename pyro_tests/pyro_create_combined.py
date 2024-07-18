@@ -60,7 +60,7 @@ def create_gk_dict_with_pyro(fname,gkcode):
     Create gyrokinetics dictionary to be upload to database
     '''
 
-    assert gkcode in ['GENE','CGYRO'], "invalid gkcode type %s"%(gkcode)
+    assert gkcode in ['GENE','CGYRO','GS2','TGLF'], "invalid gkcode type %s"%(gkcode)
 
     pyro = Pyro(gk_file=fname, gk_code=gkcode)
     pyro.load_gk_output()
@@ -79,23 +79,32 @@ def create_gk_dict_with_pyro(fname,gkcode):
 
 if __name__=="__main__":
 
-    data_dir = "test_data/test_gene1_tracer_efit/"
+    # data_dir = "test_data/test_gene1_tracer_efit/"
     # data_dir = "test_data/test_gene2_miller_general/"
-    suffix='_0002'
-    fname = data_dir+'parameters{0}'.format(suffix)
-    gkcode="GENE"
+    # suffix='_0002'
+    # fname = data_dir+'parameters{0}'.format(suffix)
+    # gkcode="GENE"
 
-    data_dir = "test_data/data_cgyro_single/"
-    fname = data_dir+'input.cgyro'.format(suffix)
-    gkcode="CGYRO"
+    # data_dir = "test_data/test_cgyro_multi_runs/run1/"
+    # fname = data_dir+'input.cgyro'
+    # gkcode="CGYRO"
 
-    data_dir = "pyro_tests/data/test_cgyro_miller/KY_0.30_PX0_0.00/"
-    fname = data_dir+'input.cgyro'.format(suffix)
-    gkcode="CGYRO"
+    # data_dir = "pyro_tests/data/test_cgyro_miller/KY_0.30_PX0_0.00/"
+    # fname = data_dir+'input.cgyro'
+    # gkcode="CGYRO"
 
     # data_dir = "pyro_tests/data/CGYRO_nonlinear/"
-    # fname = data_dir+'input.cgyro'.format(suffix)
+    # fname = data_dir+'input.cgyro'
     # gkcode="CGYRO"
+
+    # data_dir = "pyro_tests/data/GS2_linear/"
+    # fname = data_dir+'gs2.in'
+    # gkcode="GS2"
+
+    # data_dir = "pyro_tests/data/TGLF_linear/"
+    data_dir = "pyro_tests/data/TGLF_transport/"
+    fname = data_dir+'input.tglf'
+    gkcode="TGLF"
 
     json_data = create_gk_dict_with_pyro(fname,gkcode)
 

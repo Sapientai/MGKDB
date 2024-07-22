@@ -60,7 +60,7 @@ def create_gk_dict_with_pyro(fname,gkcode):
     Create gyrokinetics dictionary to be upload to database
     '''
 
-    assert gkcode in ['GENE','CGYRO','GS2','TGLF'], "invalid gkcode type %s"%(gkcode)
+    assert gkcode in ['GENE','CGYRO','TGLF','GS2'], "invalid gkcode type %s"%(gkcode)
 
     pyro = Pyro(gk_file=fname, gk_code=gkcode)
     pyro.load_gk_output()
@@ -102,8 +102,8 @@ if __name__=="__main__":
     # gkcode="GS2"
 
     # data_dir = "pyro_tests/data/TGLF_linear/"
-    # data_dir = "pyro_tests/data/TGLF_transport/"
-    data_dir = "pyro_tests/data/TGLF_2/"
+    # data_dir = "pyro_tests/data/TOGLTGLF_transport/"
+    data_dir = "pyro_tests/data/TGLF/TGLF_2/"
     fname = data_dir+'input.tglf'
     gkcode="TGLF"
 

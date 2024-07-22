@@ -60,7 +60,7 @@ def create_gk_dict_with_pyro(fname,gkcode):
     Create gyrokinetics dictionary to be upload to database
     '''
 
-    assert gkcode in ['GENE','CGYRO'], "invalid gkcode type %s"%(gkcode)
+    assert gkcode in ['GENE','CGYRO','TGLF','GS2'], "invalid gkcode type %s"%(gkcode)
 
     try: 
 

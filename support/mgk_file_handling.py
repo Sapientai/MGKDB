@@ -60,14 +60,6 @@ class Global_vars():
             self.Docs_L = ['field', 'mom', 'vsp']
             self.Keys_L = ['field', 'mom', 'vsp']
 
-            #User specified files#
-            self.Docs_ex = [] 
-            self.Keys_ex = []
-
-            self.file_related_keys = self.Keys + self.Keys_L + self.Keys_ex
-            self.file_related_docs = self.Docs + self.Docs_L + self.Docs_ex
-            self.troubled_runs = [] # a global list to collection runs where exception happens
-
         elif sim_type=='CGYRO':
 
             self.Docs = ['input.cgyro', 'input.cgyro.gen', 'input.gacode', 'out.cgyro.info']    
@@ -77,13 +69,22 @@ class Global_vars():
             self.Docs_L = []
             self.Keys_L = []
 
-            #User specified files#
-            self.Docs_ex = [] 
-            self.Keys_ex = []
+        elif sim_type=='TGLF':
 
-            self.file_related_keys = self.Keys + self.Keys_L + self.Keys_ex
-            self.file_related_docs = self.Docs + self.Docs_L + self.Docs_ex
-            self.troubled_runs = [] # a global list to collection runs where exception happens
+            self.Docs = ['input.tglf', 'input.tglf.gen', 'out.tglf.run']    
+            self.Keys = ['input_tglf', 'input_tglf_gen', 'out_tglf_run']    
+
+            #Large files#
+            self.Docs_L = []
+            self.Keys_L = []
+
+        #User specified files#
+        self.Docs_ex = [] 
+        self.Keys_ex = []
+
+        self.file_related_keys = self.Keys + self.Keys_L + self.Keys_ex
+        self.file_related_docs = self.Docs + self.Docs_L + self.Docs_ex
+        self.troubled_runs = [] # a global list to collection runs where exception happens
 
     def reset_docs_keys(self,sim_type):
         ## Reset values 
@@ -574,7 +575,12 @@ def isLinear(folder_name, sim_type):
 
         linear = False if non_lin else True
         return linear
+    
+    elif sim_type=='TGLF':
+        linear = True
+        return linear
         
+
 def isUploaded(out_dir,runs_coll):
     '''
     check if out_dir appears in the database collection.
@@ -835,7 +841,7 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
             files = []
             if sim_type=='GENE':
                 files = files + [get_file_list(out_dir, doc+s) for s in suffixes] # get file with path
-            elif sim_type=='CGYRO':
+            elif sim_type in ['CGYRO','TGLF']:
                 files = files + [get_file_list(out_dir+'/%s/'%(s), doc) for s in suffixes] # get file with path
 
             assert len(files), "Files specified not found!"
@@ -859,8 +865,13 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
             for suffix in suffixes:
                 if affect_QoI in ['Y', 'y']:
                     if sim_type == 'CGYRO':
-                        fname=out_dir+'/input.cgyro{0}'.format(suffix)
+                        fname=out_dir+'/{0}/input.cgyro'.format(suffix)
                         GK_dict = create_gk_dict_with_pyro(fname,'CGYRO')
+                        Diag_dict = {}
+                        imag_dict = {}
+                    elif sim_type == 'TGLF':
+                        fname=out_dir+'/{0}/input.tglf'.format(suffix)
+                        GK_dict = create_gk_dict_with_pyro(fname,'TGLF')
                         Diag_dict = {}
                         imag_dict = {}
                     elif sim_type=='GENE': 
@@ -914,8 +925,13 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
             for suffix in run_suffixes:
                 if affect_QoI in ['Y', 'y']:
                     if sim_type == 'CGYRO':
-                        fname=out_dir+'/input.cgyro{0}'.format(suffix)
+                        fname=out_dir+'/{0}/input.cgyro'.format(suffix)
                         GK_dict = create_gk_dict_with_pyro(fname,'CGYRO')
+                        Diag_dict = {}
+                        imag_dict = {}
+                    elif sim_type == 'TGLF':
+                        fname=out_dir+'/{0}/input.tglf'.format(suffix)
+                        GK_dict = create_gk_dict_with_pyro(fname,'TGLF')
                         Diag_dict = {}
                         imag_dict = {}
                     elif sim_type=='GENE': 
@@ -1064,7 +1080,7 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
         if isinstance(run_shared,list):
             output_files += [get_file_list(out_dir, ns) for ns in run_shared]
             
-    elif sim_type=='CGYRO':
+    elif sim_type in ['CGYRO','TGLF']:
 
         output_files = [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
         
@@ -1137,7 +1153,7 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
             for _id, line in list(object_ids.items()):  # it is necessary because the dict changes size during loop.
                 for Q_name, Key in zip(_docs, _keys):
                     if sim_type=='GENE' :     fname = os.path.join(out_dir,Q_name+suffix)
-                    elif sim_type=='CGYRO' :  fname = os.path.join(out_dir+'/%s/'%(suffix),Q_name)
+                    elif sim_type in ['CGYRO','TGLF'] :  fname = os.path.join(out_dir+'/%s/'%(suffix),Q_name)
                     
                     if fname == line:
                         if '.' in Key:
@@ -1187,10 +1203,13 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
             if sim_type == 'CGYRO':
                 fname=out_dir+'/{0}/input.cgyro'.format(suffix)
                 GK_dict = create_gk_dict_with_pyro(fname,'CGYRO')
-
                 Diag_dict = {}
                 imag_dict = {}
-            
+            elif sim_type == 'TGLF':
+                fname=out_dir+'/{0}/input.tglf'.format(suffix)
+                GK_dict = create_gk_dict_with_pyro(fname,'TGLF')
+                Diag_dict = {}
+                imag_dict = {}
             elif sim_type=='GENE': 
                 ## Old method: direct computation
                 # GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear=True)
@@ -1299,7 +1318,7 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
             for _id, line in list(object_ids.items()):  
                 for Q_name, Key in zip(_docs, _keys):
                     if sim_type=='GENE' :  fname = os.path.join(out_dir,Q_name+suffix)
-                    elif sim_type=='CGYRO' :  fname = os.path.join(out_dir+'/%s/'%(suffix),Q_name)
+                    elif sim_type in ['CGYRO','TGLF'] :  fname = os.path.join(out_dir+'/%s/'%(suffix),Q_name)
                     
                     if fname == line:
                         if '.' in Key:
@@ -1350,7 +1369,11 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
                 GK_dict = create_gk_dict_with_pyro(fname,'CGYRO')
                 Diag_dict = {}
                 imag_dict = {}
-            
+            elif sim_type == 'TGLF':
+                fname=out_dir+'/{0}/input.tglf'.format(suffix)
+                GK_dict = create_gk_dict_with_pyro(fname,'TGLF')
+                Diag_dict = {}
+                imag_dict = {}            
             elif sim_type=='GENE':
                 fname=out_dir+'/parameters{0}'.format(suffix)
                 GK_dict = create_gk_dict_with_pyro(fname,'GENE')

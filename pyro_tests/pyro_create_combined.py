@@ -102,7 +102,8 @@ if __name__=="__main__":
     # gkcode="GS2"
 
     # data_dir = "pyro_tests/data/TGLF_linear/"
-    data_dir = "pyro_tests/data/TGLF_transport/"
+    # data_dir = "pyro_tests/data/TGLF_transport/"
+    data_dir = "pyro_tests/data/TGLF_2/"
     fname = data_dir+'input.tglf'
     gkcode="TGLF"
 
@@ -120,5 +121,3 @@ if __name__=="__main__":
     #     print(key,a==b)
     #     if (a!=b):
     #         print("Unequal", key,a,b)
-
-    # print("done")

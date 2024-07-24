@@ -1125,6 +1125,20 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
         try:
             print('='*40)
             print('Working on files with suffix: {} in folder {}.......'.format(suffix, out_dir))           
+
+            ### First compute gyrokinetics IMAS using pyrokinetics package
+            print("Computing gyrokinetics IMAS using pyrokinetics")
+            if sim_type == 'CGYRO':
+                fname=out_dir+'/{0}/input.cgyro'.format(suffix)
+                GK_dict = create_gk_dict_with_pyro(fname,'CGYRO')
+            elif sim_type == 'TGLF':
+                fname=out_dir+'/{0}/input.tglf'.format(suffix)
+                GK_dict = create_gk_dict_with_pyro(fname,'TGLF')
+            elif sim_type=='GENE': 
+                fname=out_dir+'/parameters{0}'.format(suffix)
+                GK_dict = create_gk_dict_with_pyro(fname,'GENE')
+
+            ### Upload files to DB 
             print('Uploading files ....')
             if count == 0:
                 object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, run_shared, global_vars)
@@ -1201,22 +1215,12 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                         }  
                    
             if sim_type == 'CGYRO':
-                fname=out_dir+'/{0}/input.cgyro'.format(suffix)
-                GK_dict = create_gk_dict_with_pyro(fname,'CGYRO')
                 Diag_dict = {}
                 imag_dict = {}
             elif sim_type == 'TGLF':
-                fname=out_dir+'/{0}/input.tglf'.format(suffix)
-                GK_dict = create_gk_dict_with_pyro(fname,'TGLF')
                 Diag_dict = {}
                 imag_dict = {}
             elif sim_type=='GENE': 
-                ## Old method: direct computation
-                # GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear=True)
-                
-                fname=out_dir+'/parameters{0}'.format(suffix)
-                GK_dict = create_gk_dict_with_pyro(fname,'GENE')
-
                 print('='*60)
                 print('\n Working on diagnostics with user specified tspan .....\n')
                 Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
@@ -1291,6 +1295,20 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
         try:
             print('='*40)
             print('Working on files with suffix: {} in folder {}.......'.format(suffix, out_dir))
+
+            ### First compute gyrokinetics IMAS using pyrokinetics package
+            print("Computing gyrokinetics IMAS using pyrokinetics")
+            if sim_type == 'CGYRO':
+                fname=out_dir+'/{0}/input.cgyro'.format(suffix)
+                GK_dict = create_gk_dict_with_pyro(fname,'CGYRO')
+            elif sim_type == 'TGLF':
+                fname=out_dir+'/{0}/input.tglf'.format(suffix)
+                GK_dict = create_gk_dict_with_pyro(fname,'TGLF')
+            elif sim_type=='GENE': 
+                fname=out_dir+'/parameters{0}'.format(suffix)
+                GK_dict = create_gk_dict_with_pyro(fname,'GENE')
+
+            ### Upload files to DB 
             print('Uploading files ....')
             if count == 0:
                 object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, run_shared, global_vars)
@@ -1365,19 +1383,12 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
                         }
             #data dictionary format for nonlinear runs
             if sim_type == 'CGYRO':
-                fname=out_dir+'/{0}/input.cgyro'.format(suffix)
-                GK_dict = create_gk_dict_with_pyro(fname,'CGYRO')
                 Diag_dict = {}
                 imag_dict = {}
             elif sim_type == 'TGLF':
-                fname=out_dir+'/{0}/input.tglf'.format(suffix)
-                GK_dict = create_gk_dict_with_pyro(fname,'TGLF')
                 Diag_dict = {}
                 imag_dict = {}            
             elif sim_type=='GENE':
-                fname=out_dir+'/parameters{0}'.format(suffix)
-                GK_dict = create_gk_dict_with_pyro(fname,'GENE')
-
                 print('='*60)
                 print('\n Working on diagnostics with user specified tspan .....\n')
                 Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)

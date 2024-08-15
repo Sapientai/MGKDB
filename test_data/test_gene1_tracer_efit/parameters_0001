@@ -1,0 +1,161 @@
+&parallelization
+n_procs_s =   1
+n_procs_v =   2
+n_procs_w =   4
+n_procs_x =   1
+n_procs_y =   1
+n_procs_z =  32
+n_procs_sim =    256
+n_parallel_sims =      3
+/
+
+&box
+n_spec =    3
+nx0    =    7
+nky0   =    1
+nz0    =   64
+nv0    =   36
+nw0    =    8
+
+kymin =   0.90000000    
+lv    =   3.00000    
+lw    =   9.00000    
+adapt_lx = T
+x0    =   0.82500000    
+n0_global =     19
+ky0_ind =   1
+/
+
+&in_out
+diagdir = '/pscratch/sd/j/joeschm/NSXTU_discharges/132588/r_0.825_q5_MTM_mode/convergence_check/nz0_edgeopt_hypz_scans_V3/nz0-64_edge_opt-12_hyp_z--8/scanfiles0000/'
+
+read_checkpoint  = F
+write_checkpoint = F
+
+istep_field  =     100
+istep_mom    =     600
+istep_nrg    =      50
+istep_omega  =      20
+istep_vsp    =    5000
+istep_schpt  =    5000
+istep_energy =     100
+
+write_std = T
+iterdb_file     = '/global/homes/j/joeschm/data/ST_research/NSTXU_discharges/132588/NSTXU132588.iterdb'
+/
+
+&general
+nonlinear =   F
+comp_type = 'IV'
+perf_vec  =  1 2 2 3 1 2 2 2 2
+nblocks   =       6
+arakawa_zv =   F
+
+timescheme = 'RK4'
+dt_max     =   0.6810E-03
+dt_vlasov  =   0.6810E-03
+ev_coll    =    1228.0    
+
+timelim    =    8600000
+ntimesteps =   20000000
+
+beta       =   0.47801501E-01
+debye2     =   0.98276809E-05
+collision_op = 'landau'
+coll         =   0.66031494E-02
+coll_cons_model  = 'xu_rosenbluth'
+
+init_cond = 'alm'
+
+hyp_z_with_dz_prefactor = F
+hyp_z =   -8.000    
+hyp_v_with_dv_prefactor = F
+hyp_v =   0.2000    
+
+perf_tsteps =  -1
+
+/
+
+&geometry
+magn_geometry = 'tracer_efit'
+q0       =    4.9951917    
+shat     =    2.8808061    
+geomdir  = '/global/homes/j/joeschm/data/ST_research/NSTXU_discharges/132588/'
+geomfile = 'g132588.00650'
+edge_opt =    12.000000    
+minor_r  =    1.0000000    
+major_R  =   0.94126021    
+rhostar  =   0.76466201E-02
+dpdx_term= 'full_drift'
+dpdx_pm  =    1.1908992    
+norm_flux_projection  = F
+/
+
+&species
+name   = 'i'
+omn    =    5.9963121    
+omt    =    2.8994479    
+
+mass   =    1.0000000    
+temp   =    1.4903085    
+dens   =   0.45278531    
+charge =    1.0000000    
+/
+
+&species
+name   = 'e'
+omn    =    5.1120980    
+omt    =    11.441190    
+
+mass   =   0.27240000E-03
+temp   =    1.0000000    
+dens   =    1.0000000    
+charge =   -1.0000000    
+/
+
+&species
+name   = 'c'
+omn    =    4.3804671    
+omt    =    2.8994479    
+
+mass   =    6.0000000    
+temp   =    1.4903085    
+dens   =   0.91202449E-01
+charge =    6.0000000    
+/
+
+&info
+step_time  =     0.0028
+number of computed time steps =   64299
+time for initial value solver =    179.552
+calc_dt = T
+nltdt_off = F
+ev_coll_est  =    1567.1689    
+init_time =     3.7977
+n_fields = 2
+n_moms   =  6
+nrgcols  = 10
+lx =  0.385695    
+ly =   6.98132    
+PRECISION  = DOUBLE
+ENDIANNESS = LITTLE
+OMP_NUM_THREADS =   1
+GIT_BRANCH = 4ee4f597491b9fc7e6850309318f931f2b98ca17                    
+RELEASE = 2.0 - patch 4
+nu_ei =   5.978923
+nustar_i =   0.135416
+nustar_e =   0.425340
+/
+
+&units
+Bref =   3.5980164687834171E-01
+Tref =   4.4041936641938340E-01
+nref =   3.4865538031686114E+00
+Lref =   1.1003037380870726E+00
+mref =   2.0000000000000000E+00
+/
+
+&bsgrid
+is_bsg = F
+/
+

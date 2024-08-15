@@ -13,15 +13,18 @@ Optional fields:    confidence
 """
 
 import sys
-sys.path.append('support')
-
-from mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars 
-#from ParIO import *
 import os
-from mgk_login import mgk_login,f_login_dbase
-
 import argparse
 from sys import exit
+# sys.path.append('support')
+
+from support.mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars 
+#from ParIO import *
+from support.mgk_login import mgk_login,f_login_dbase
+sys.path.append('../pyro_tests/')
+from pyro_tests.pyro_create_combined import * 
+
+
 
 def f_parse_args():
     #==========================================================
@@ -29,7 +32,7 @@ def f_parse_args():
     #==========================================================
     parser = argparse.ArgumentParser(description='Process input for uploading files')
 
-    parser.add_argument('-T', '--target', help='Target GENE output folder')
+    parser.add_argument('-T', '--target', help='Target run output folder')
     parser.add_argument('-H', '--input_heat', default = 'None', help='input heat')
 
     parser.add_argument('-V', '--verbose', dest='verbose', default = False, action='store_true', help='output verbose')
@@ -37,7 +40,7 @@ def f_parse_args():
     parser.add_argument('-L', '--large_files', dest='large_files', default = False, action='store_true', help='whether or not to include extra files')
                         
     parser.add_argument('-K', '--keywords', default = '-', help='relevant keywords for future references, separated by comma')
-    parser.add_argument('-SIM', '--sim_type', choices=['GENE','CGYRO'], type=str, help='Type of simulation', required=True)
+    parser.add_argument('-SIM', '--sim_type', choices=['GENE','CGYRO','TGLF'], type=str, help='Type of simulation', required=True)
     parser.add_argument('-A', '--authenticate', default = None, help='locally saved login info, a .pkl file')
     parser.add_argument('-X', '--exclude', default = None, help='folders to exclude')
     parser.add_argument('-Img', '--image_dir', default = './mgk_diagplots', help='folders to save temporal image files.')
@@ -81,9 +84,6 @@ if __name__=="__main__":
         exfiles = input('Please type FULL file names to update, separated by comma.\n').split(',')
         exkeys  = input('Please type key names for each file you typed, separated by comma.\n').split(',')
         
-        Docs_ex += exfiles
-        Keys_ex += exkeys
-
         global_vars.Docs_ex +=exfiles
         global_vars.Keys_ex +=exkeys
 
@@ -97,14 +97,10 @@ if __name__=="__main__":
     #######################################################################
     print("Processing files for uploading ........")
     #scan through a directory for more than one run
-    for dirpath, dirnames, files in os.walk(output_folder):
-        print(dirnames)
-        if args.sim_type =='CGYRO' or str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1 and str(dirpath) not in exclude_folders:    
+    for count, (dirpath, dirnames, files) in enumerate(os.walk(output_folder)):
+        if ( ( args.sim_type in ['CGYRO','TGLF'] and count==0)  or (args.sim_type=='GENE' and str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1 and str(dirpath) not in exclude_folders) ):    
             print('Scanning in {} *******************\n'.format( str(dirpath)) )
-            #check if run is linear or nonlinear
-            #print(str(dirpath))
-    #            try:
-            linear = isLinear(dirpath)
+            linear = isLinear(dirpath, args.sim_type)
             if linear == None:
                 linear_input = input('Cannot decide if this folder is a linear run or not. Please make the selection manually by typing:\n 1: Linear\n 2: Nonlinear \n 3: Skip this folder \n')
                 if linear_input.strip() == '1':
@@ -127,7 +123,7 @@ if __name__=="__main__":
             #print(linear)                                        
 
             if not default:
-                suffixes = get_suffixes(dirpath)
+                suffixes = get_suffixes(dirpath, args.sim_type)
                 print("Found in {} these suffixes:\n {}".format(dirpath, suffixes))
                 
                 suffixes = input('Which run do you want to upload? Separate them by comma. \n Press q to skip. Press ENTER to upload ALL.\n')
@@ -162,8 +158,8 @@ if __name__=="__main__":
             
             # Send run to upload_to_mongo to be uploaded
             upload_to_mongo(database, dirpath, user, linear, confidence, args.input_heat, 
-                             keywords_lin, comments, args.sim_type, img_dir, suffixes, run_shared,
-                             args.large_files, args.extra, args.verbose, manual_time_flag,global_vars)
+                            keywords_lin, comments, args.sim_type, img_dir, suffixes, run_shared,
+                            args.large_files, args.extra, args.verbose, manual_time_flag,global_vars)
 
     if len(global_vars.troubled_runs):
         print("The following runs are skipped due to exceptions.")

@@ -1,0 +1,6 @@
+-------------------------------------------------------
+Choice for parallelization:    3   2   4   1   1  16
+Choice for alternative routines:  1 1 1 1 1 1 1 1 1
+nblocks =       12
+Time for chosen settings:  1.7977+308
+using BLAS routines for (i,j) loops: no

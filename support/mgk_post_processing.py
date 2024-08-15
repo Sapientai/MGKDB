@@ -109,20 +109,24 @@ def get_parsed_params(filepath):
     pars = par.pardict 
     
     return pars
-def get_suffixes(out_dir):
+def get_suffixes(out_dir, sim_type):
     suffixes = []
-    
-    #scan files in GENE output directory, find all run suffixes, return as list
-#    print(out_dir)
-    files = next(os.walk(out_dir))[2]
-#    print(files)
-    for count, name in enumerate(files, start=0):
-        if name.startswith('parameters_'):
-            suffix = name.split('_',1)[1]
-            suffix = '_' + suffix
-            suffixes.append(suffix)
-        elif name.lower().startswith('parameters.dat'):
-            suffixes = ['.dat']                
+
+    if sim_type=='GENE':
+        #scan files in output directory, find all run suffixes, return as list
+        files = next(os.walk(out_dir))[2]
+
+        for count, name in enumerate(files, start=0):
+            if name.startswith('parameters_'):
+                suffix = name.split('_',1)[1]
+                suffix = '_' + suffix
+                suffixes.append(suffix)
+            elif name.lower().startswith('parameters.dat'):
+                suffixes = ['.dat']    
+    elif sim_type in ['CGYRO','TGLF']:
+        ## scan folders return as list 
+        suffixes = next(os.walk(out_dir))[1]
+
     return suffixes
 
 
@@ -185,8 +189,7 @@ def get_diag_from_run(out_dir, suffix, t_span = None, img_dir='./mgk_diagplots')
     par0 = Parameters()
     par0.Read_Pars(os.path.join(out_dir , 'parameters' + suffix))
     pars0 = par0.pardict 
-    #print('pars0[nonlinear]',pars0['nonlinear'])
-    #dummy = input('press key')
+
     if pars0['nonlinear'] == 'T' or pars0['nonlinear'] == True:
         nonlinear = True
     else:
@@ -237,13 +240,6 @@ def get_diag_from_run(out_dir, suffix, t_span = None, img_dir='./mgk_diagplots')
     '''
     Creat a folder for saving plots if it does not exist
     '''
-#    img_dir = os.path.join(out_dir, 'mgk_diagplots')
-    #if not os.path.exists(img_dir):
-    #    try:
-    #        Path(img_dir).mkdir(parents=True)
-    #    except OSError:
-    #        print ("Creation of the directory %s failed" % img_dir)
-
     if nonlinear:   #Only calculate spectra for nonlinear
         selected_diags = []
         diag_keys = []

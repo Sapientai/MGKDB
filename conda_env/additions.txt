@@ -1,0 +1,7 @@
+conda activate mgkdb
+
+git clone git@github.com:pyro-kinetics/pyrokinetics.git
+cd pyrokinetics
+
+pip install . 
+

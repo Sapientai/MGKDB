@@ -63,7 +63,8 @@ def create_gk_dict_with_pyro(fname,gkcode):
     assert gkcode in ['GENE','CGYRO','TGLF','GS2'], "invalid gkcode type %s"%(gkcode)
 
     pyro = Pyro(gk_file=fname, gk_code=gkcode)
-    pyro.load_gk_output()
+    # pyro.load_gk_output()
+    pyro.load_gk_output(load_fields=False)
 
     gkdict = gkids.GyrokineticsLocal()
     idspy.fill_default_values_ids(gkdict)
@@ -81,7 +82,9 @@ if __name__=="__main__":
 
     # data_dir = "test_data/test_gene1_tracer_efit/"
     # data_dir = "test_data/test_gene2_miller_general/"
-    # suffix='_0002'
+    # data_dir = "pyro_tests/data/test_gene3_gene_old/"
+    # data_dir = "pyro_tests/data/test_gene4_gene_old/"
+    # suffix='_0001'
     # fname = data_dir+'parameters{0}'.format(suffix)
     # gkcode="GENE"
 
@@ -93,9 +96,12 @@ if __name__=="__main__":
     # fname = data_dir+'input.cgyro'
     # gkcode="CGYRO"
 
-    # data_dir = "pyro_tests/data/CGYRO_nonlinear/"
-    # fname = data_dir+'input.cgyro'
-    # gkcode="CGYRO"
+    data_dir = "pyro_tests/data/CGYRO_nonlinear/run1/"
+    data_dir = "pyro_tests/data/CGYRO_nonlinear4/"
+    # data_dir = "pyro_tests/data/CGYRO_nonlinear5/"
+    fname = data_dir+'input.cgyro'
+    # fname = data_dir+'input.gacode'
+    gkcode="CGYRO"
 
     # data_dir = "pyro_tests/data/GS2_linear/"
     # fname = data_dir+'gs2.in'
@@ -103,9 +109,9 @@ if __name__=="__main__":
 
     # data_dir = "pyro_tests/data/TGLF_linear/"
     # data_dir = "pyro_tests/data/TOGLTGLF_transport/"
-    data_dir = "pyro_tests/data/TGLF/TGLF_2/"
-    fname = data_dir+'input.tglf'
-    gkcode="TGLF"
+    # data_dir = "pyro_tests/data/TGLF/TGLF_2/"
+    # fname = data_dir+'input.tglf'
+    # gkcode="TGLF"
 
     json_data = create_gk_dict_with_pyro(fname,gkcode)
 

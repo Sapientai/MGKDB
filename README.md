@@ -51,7 +51,7 @@ The directory will be created if it does not exist.
 For uploads, users need to execute the script `mgk_uploader.py`. 
 
 Run the uploader as \
-```python3 MGKDB/mgk_uploader.py -A <user_credentials.pkl> -T /global/homes/d/dykuang/mgk-dev/data_linear_multi```.  Option -T is for specifying your target folder. Use option --help to display other options.  
+```python3 MGKDB/mgk_uploader.py -A <user_credentials.pkl> -T test_data/TGLF/ -SIM TGLF ```.  Option -T is for specifying your target folder. Use option --help to display other options.  
 
 Please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/MGKDB-at-NERSC) for step-by-step instructions and further options.
 

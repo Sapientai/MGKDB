@@ -83,7 +83,6 @@ if __name__=="__main__":
     # data_dir = "test_data/test_gene1_tracer_efit/"
     # data_dir = "test_data/test_gene2_miller_general/"
     # data_dir = "pyro_tests/data/test_gene3_gene_old/"
-    # data_dir = "pyro_tests/data/test_gene4_gene_old/"
     # suffix='_0001'
     # fname = data_dir+'parameters{0}'.format(suffix)
     # gkcode="GENE"
@@ -92,16 +91,17 @@ if __name__=="__main__":
     # fname = data_dir+'input.cgyro'
     # gkcode="CGYRO"
 
-    # data_dir = "pyro_tests/data/test_cgyro_miller/KY_0.30_PX0_0.00/"
-    # fname = data_dir+'input.cgyro'
-    # gkcode="CGYRO"
-
-    data_dir = "pyro_tests/data/CGYRO_nonlinear/run1/"
-    data_dir = "pyro_tests/data/CGYRO_nonlinear4/"
-    # data_dir = "pyro_tests/data/CGYRO_nonlinear5/"
+    data_dir = "pyro_tests/data/test_cgyro_miller/KY_0.30_PX0_0.00/"
+    # data_dir = "pyro_tests/data/CGYRO_linear_scan/ky_0.10/"
     fname = data_dir+'input.cgyro'
-    # fname = data_dir+'input.gacode'
     gkcode="CGYRO"
+
+    # data_dir = "pyro_tests/data/CGYRO_nonlinear_template/run1/"
+    # data_dir = "pyro_tests/data/CGYRO_nonlinear2_no_apar_saved/"
+    # data_dir = "pyro_tests/data/CGYRO_nonlinear3/"
+    # fname = data_dir+'input.cgyro'
+    # fname = data_dir+'input.gacode'
+    # gkcode="CGYRO"
 
     # data_dir = "pyro_tests/data/GS2_linear/"
     # fname = data_dir+'gs2.in'

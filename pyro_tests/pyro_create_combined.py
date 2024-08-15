@@ -91,10 +91,10 @@ if __name__=="__main__":
     # fname = data_dir+'input.cgyro'
     # gkcode="CGYRO"
 
-    data_dir = "pyro_tests/data/test_cgyro_miller/KY_0.30_PX0_0.00/"
+    # data_dir = "pyro_tests/data/test_cgyro_miller/KY_0.30_PX0_0.00/"
     # data_dir = "pyro_tests/data/CGYRO_linear_scan/ky_0.10/"
-    fname = data_dir+'input.cgyro'
-    gkcode="CGYRO"
+    # fname = data_dir+'input.cgyro'
+    # gkcode="CGYRO"
 
     # data_dir = "pyro_tests/data/CGYRO_nonlinear_template/run1/"
     # data_dir = "pyro_tests/data/CGYRO_nonlinear2_no_apar_saved/"
@@ -103,9 +103,9 @@ if __name__=="__main__":
     # fname = data_dir+'input.gacode'
     # gkcode="CGYRO"
 
-    # data_dir = "pyro_tests/data/GS2_linear/"
-    # fname = data_dir+'gs2.in'
-    # gkcode="GS2"
+    data_dir = "pyro_tests/data/GS2_linear/"
+    fname = data_dir+'gs2.in'
+    gkcode="GS2"
 
     # data_dir = "pyro_tests/data/TGLF_linear/"
     # data_dir = "pyro_tests/data/TOGLTGLF_transport/"

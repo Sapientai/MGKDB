@@ -84,8 +84,10 @@ if __name__=="__main__":
     # data_dir = "test_data/test_gene2_miller_general/"
     # data_dir = "pyro_tests/data/test_gene3_gene_old/"
     # suffix='_0001'
-    # fname = data_dir+'parameters{0}'.format(suffix)
-    # gkcode="GENE"
+    data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/upload_datasets/non_lin_gene_tracer_J78697_x985/"
+    suffix='_1'
+    fname = data_dir+'parameters{0}'.format(suffix)
+    gkcode="GENE"
 
     # data_dir = "test_data/test_cgyro_multi_runs/run1/"
     # fname = data_dir+'input.cgyro'
@@ -103,9 +105,9 @@ if __name__=="__main__":
     # fname = data_dir+'input.gacode'
     # gkcode="CGYRO"
 
-    data_dir = "pyro_tests/data/GS2_linear/"
-    fname = data_dir+'gs2.in'
-    gkcode="GS2"
+    # data_dir = "pyro_tests/data/GS2_linear/"
+    # fname = data_dir+'gs2.in'
+    # gkcode="GS2"
 
     # data_dir = "pyro_tests/data/TGLF_linear/"
     # data_dir = "pyro_tests/data/TOGLTGLF_transport/"

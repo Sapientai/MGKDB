@@ -886,11 +886,6 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
                             fs.delete(val)
                             print('deleted!')
                             
-#                    for key, val in run['Plots'].items():
-#                        if val != 'None':
-#                            print((key, val))
-#                            fs.delete(val)
-#                            print('deleted!')
 
                     for key, val in Diag_dict.items():
                         Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
@@ -945,12 +940,6 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
                             print((key, val))
                             fs.delete(val)
                             print('deleted!')
-                            
-#                    for key, val in run['Plots'].items():
-#                        if val != 'None':
-#                            print((key, val))
-#                            fs.delete(val)
-#                            print('deleted!')
 
                     for key, val in Diag_dict.items():
                         Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
@@ -1138,6 +1127,10 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                 fname=out_dir+'/parameters{0}'.format(suffix)
                 GK_dict = create_gk_dict_with_pyro(fname,'GENE')
 
+            ## For linear runs, delete the field linear-> fields
+            for keys in ['phi_potential_perturbed_norm','a_field_parallel_perturbed_norm','b_field_parallel_perturbed_norm']:
+                GK_dict['linear']['wavevector'][0]['eigenmode'][0]['fields'][key]=None
+
             ### Upload files to DB 
             print('Uploading files ....')
             if count == 0:
@@ -1307,6 +1300,10 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
             elif sim_type=='GENE': 
                 fname=out_dir+'/parameters{0}'.format(suffix)
                 GK_dict = create_gk_dict_with_pyro(fname,'GENE')
+
+
+            ## For non-linear runs, delete the field non_linear-> fields_4d
+            GK_dict['non_linear']['fields_4d']=None
 
             ### Upload files to DB 
             print('Uploading files ....')

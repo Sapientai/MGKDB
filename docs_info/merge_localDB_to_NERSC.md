@@ -10,9 +10,11 @@ The following information is only relevant for users who want to build a local v
 
 Steps to merge local database to the main NERSC database: 
 1. Create local database and upload data to it ( For details, refer to [Local MGKDB](https://github.com/Sapientai/MGKDB/wiki/Local-MGKDB) page on the wiki page of this repository)
-2. From the terminal, create a dump of the local database: ```mongodump --db mgk_local --out <target_destination>```
-3. Move this data (which will be much smaller than the original data) to NERSC 
-4. Login to NERSC
-5. From the terminal, restore to target database (NERSC database) ``` mongorestore --db mgk_fusion --dir <path_to_mongodump_output>```
+2. From the terminal, create a dump of the local database: \
+   ```mongodump --db mgk_local --out <target_destination>```
+4. Move this data (which will be much smaller than the original data) to NERSC 
+5. Login to NERSC
+6. From the terminal, restore to the NERSC database using \
+   ``` mongorestore --db mgk_fusion --dir <path_to_mongodump_output>```
 
 

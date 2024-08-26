@@ -1128,8 +1128,9 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                 GK_dict = create_gk_dict_with_pyro(fname,'GENE')
 
             ## For linear runs, delete the field linear-> fields
-            for keys in ['phi_potential_perturbed_norm','a_field_parallel_perturbed_norm','b_field_parallel_perturbed_norm']:
-                GK_dict['linear']['wavevector'][0]['eigenmode'][0]['fields'][key]=None
+            # for i in range(len(GK_dict['linear']['wavevector'][0]['eigenmode'])): ## For each particle species, delete fields
+            #     for keys in ['phi_potential_perturbed_norm','a_field_parallel_perturbed_norm','b_field_parallel_perturbed_norm']:
+            #         GK_dict['linear']['wavevector'][0]['eigenmode'][i]['fields'][key]=None
 
             ### Upload files to DB 
             print('Uploading files ....')
@@ -1303,7 +1304,7 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
 
 
             ## For non-linear runs, delete the field non_linear-> fields_4d
-            GK_dict['non_linear']['fields_4d']=None
+            # GK_dict['non_linear']['fields_4d']=None
 
             ### Upload files to DB 
             print('Uploading files ....')

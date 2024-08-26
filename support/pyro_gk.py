@@ -54,6 +54,34 @@ def convert_to_json(obj,separate_real_imag = False):
     else:
         return obj
 
+def prune_imas_gk_dict(gk_dict):
+    ''' Removed 4d files for linear and non-linear runs  '''
+
+    ## Find linear or non-linear 
+    if gk_dict['linear']['wavevector']==[]:
+        ## Another condition 'phi_potential_perturbed_norm' in gk_dict['non_linear']['fields_4d'].keys()
+        linear = False 
+        print('Non-linear')
+    elif gk_dict['non_linear']['fields_4d']['phi_potential_perturbed_norm']==[]:
+        ## Another condition 'phi_potential_perturbed_norm' in gk_dict['linear']['wavevector'][0]['eigenmode'][0]['fields'].keys()
+        linear = True
+        print('Linear')
+    else : 
+        print("Can't say Linear or non-Linear")
+        raise SystemError
+
+
+    if linear: # If linear, drop entries in ['linear']['wavevector'][0]['eigenmode'][i]['fields'][key] 
+        keys_list = ['phi_potential_perturbed_norm','a_field_parallel_perturbed_norm','b_field_parallel_perturbed_norm']
+
+        for i in range(len(gk_dict['linear']['wavevector'][0]['eigenmode'])): ## For each particle species, delete fields
+            for key in keys_list:
+                gk_dict['linear']['wavevector'][0]['eigenmode'][i]['fields'][key]=None
+
+    else: # If non-linear, drop  ['non_linear']['fields_4d]
+        gk_dict['non_linear']['fields_4d']=None
+
+    return gk_dict 
 
 def create_gk_dict_with_pyro(fname,gkcode):
     '''
@@ -76,6 +104,8 @@ def create_gk_dict_with_pyro(fname,gkcode):
             )
         
         json_data = convert_to_json(gkdict)
+
+        json_data = prune_imas_gk_dict(json_data)
 
     except Exception as e: 
         print(e)

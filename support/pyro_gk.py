@@ -5,6 +5,7 @@ from pyrokinetics.databases.imas import pyro_to_imas_mapping
 import idspy_toolkit as idspy
 from idspy_dictionaries import ids_gyrokinetics_local as gkids
 from pathlib import Path
+import os
 
 # 
 def convert_to_json(obj,separate_real_imag = False):
@@ -83,6 +84,49 @@ def prune_imas_gk_dict(gk_dict):
 
     return gk_dict 
 
+
+def f_check_linear(fname,gkcode):
+
+    assert os.path.exists(fname), "Cannot find file %s"%(fname)
+
+    if gkcode =='GENE': 
+        with open(fname,'r') as f: 
+            for line in f: 
+                val = line.split('=')
+                
+                if val[0].strip()=='nonlinear':
+                    if (val[1].strip()=='T'):
+                        return False ## run is non linear
+                    elif (val[1].strip()=='F'):
+                        return True 
+                    else : 
+                        print("Unknown entry in parameter file for field \"nonlinear\" ",line)
+                        raise SystemError
+        
+        print('Could not find \"nonlinear\" field in parameters file')
+        raise SystemError
+        
+    elif gkcode =='CGYRO':
+        with open(fname,'r') as f:
+            for line in f: 
+                val = line.split('=')
+
+                if val[0].strip()=='NONLINEAR_FLAG':
+                    if (val[1].strip()=='1'):
+                        return False ## run is non linear
+                    elif (val[1].strip()=='0'):
+                        return True 
+                    else : 
+                        print("Unknown entry in parameter file for field \"NONLINEAR_FLAG\" ",line)
+                        raise SystemError
+
+        print('Could not find \"NONLINEAR_FLAG\" field in parameters file')
+        raise SystemError
+    
+    elif gkcode in ['TGLF','GS2']:
+        linear = True
+        return linear
+
 def create_gk_dict_with_pyro(fname,gkcode):
     '''
     Create gyrokinetics dictionary to be upload to database
@@ -90,10 +134,16 @@ def create_gk_dict_with_pyro(fname,gkcode):
 
     assert gkcode in ['GENE','CGYRO','TGLF','GS2'], "invalid gkcode type %s"%(gkcode)
 
+    linear = f_check_linear(fname,gkcode)
+
     try: 
 
         pyro = Pyro(gk_file=fname, gk_code=gkcode)
-        pyro.load_gk_output()
+
+        if linear: 
+            pyro.load_gk_output(load_fields=True)
+        else: # Loading fields for non-linear runs can take too long, so do not read them 
+            pyro.load_gk_output(load_fields=False)
 
         gkdict = gkids.GyrokineticsLocal()
         idspy.fill_default_values_ids(gkdict)

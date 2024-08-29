@@ -21,8 +21,8 @@ from sys import exit
 from support.mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars 
 #from ParIO import *
 from support.mgk_login import mgk_login,f_login_dbase
-sys.path.append('../pyro_tests/')
-from pyro_tests.pyro_create_combined import * 
+# sys.path.append('../pyro_tests/')
+#from pyro_tests.pyro_create_combined import * 
 
 
 

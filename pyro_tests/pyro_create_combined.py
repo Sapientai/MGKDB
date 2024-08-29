@@ -54,38 +54,10 @@ def convert_to_json(obj,separate_real_imag = False):
     else:
         return obj
 
-def prune_imas_gk_dict(gk_dict):
-    ''' Removed 4d files for linear and non-linear runs  '''
-
-    ## Find linear or non-linear 
-    if gk_dict['linear']['wavevector']==[]:
-        ## Another condition 'phi_potential_perturbed_norm' in gk_dict['non_linear']['fields_4d'].keys()
-        linear = False 
-        print('Non-linear')
-    elif gk_dict['non_linear']['fields_4d']['phi_potential_perturbed_norm']==[]:
-        ## Another condition 'phi_potential_perturbed_norm' in gk_dict['linear']['wavevector'][0]['eigenmode'][0]['fields'].keys()
-        linear = True
-        print('Linear')
-    else : 
-        print("Can't say Linear or non-Linear")
-        raise SystemError
-
-
-    if linear: # If linear, drop entries in ['linear']['wavevector'][0]['eigenmode'][i]['fields'][key] 
-        keys_list = ['phi_potential_perturbed_norm','a_field_parallel_perturbed_norm','b_field_parallel_perturbed_norm']
-
-        for i in range(len(gk_dict['linear']['wavevector'][0]['eigenmode'])): ## For each particle species, delete fields
-            for key in keys_list:
-                gk_dict['linear']['wavevector'][0]['eigenmode'][i]['fields'][key]=None
-
-    else: # If non-linear, drop  ['non_linear']['fields_4d]
-        gk_dict['non_linear']['fields_4d']=None
-
-
-    return gk_dict 
-
 def f_check_linear(fname,gkcode):
-
+    '''
+    Use parameter file to check if a run is linear or non-linear
+    '''
     assert os.path.exists(fname), "Cannot find file %s"%(fname)
 
     if gkcode =='GENE': 
@@ -126,6 +98,25 @@ def f_check_linear(fname,gkcode):
         linear = True
         return linear
     
+def prune_imas_gk_dict(gk_dict, linear):
+    ''' Remove 4d files for linear and non-linear runs  '''
+
+    if linear: # If linear, drop entries in ['linear']['wavevector'][0]['eigenmode'][i]['fields'][key] 
+        if gk_dict['non_linear']['fields_4d'] is not None:   
+            assert gk_dict['non_linear']['fields_4d']['phi_potential_perturbed_norm']==[], "phi_potential_perturbed_norm field in non_linear, fields_4d is not empty"
+
+        keys_list = ['phi_potential_perturbed_norm','a_field_parallel_perturbed_norm','b_field_parallel_perturbed_norm']
+        if gk_dict['linear']['wavevector'] !=[]: 
+            for i in range(len(gk_dict['linear']['wavevector'][0]['eigenmode'])): ## For each particle species, delete fields
+                for key in keys_list:
+                    gk_dict['linear']['wavevector'][0]['eigenmode'][i]['fields'][key]=None
+
+    else: # If non-linear, drop  ['non_linear']['fields_4d]
+        assert (gk_dict['linear']['wavevector']==[]),"wavevector field in linear is not empty"
+
+        gk_dict['non_linear']['fields_4d']=None
+
+    return gk_dict 
 
 def create_gk_dict_with_pyro(fname,gkcode):
     '''
@@ -152,22 +143,22 @@ def create_gk_dict_with_pyro(fname,gkcode):
     
     json_data = convert_to_json(gkdict)
 
-    json_data = prune_imas_gk_dict(json_data)
+    json_data = prune_imas_gk_dict(json_data, linear)
 
     return json_data
 
 if __name__=="__main__":
 
     # data_dir = "test_data/test_gene1_tracer_efit/"
-    # data_dir = "test_data/test_gene2_miller_general/"
-    # suffix='_0001'
-    # fname = data_dir+'parameters{0}'.format(suffix)
-    # gkcode="GENE"
-
-    data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/upload_datasets/test_nonlin_gene_tracer_efit/"
+    data_dir = "test_data/test_gene2_miller_general/"
     suffix='_0001'
     fname = data_dir+'parameters{0}'.format(suffix)
     gkcode="GENE"
+
+    # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/upload_datasets/test_nonlin_gene_tracer_efit/"
+    # suffix='_0001'
+    # fname = data_dir+'parameters{0}'.format(suffix)
+    # gkcode="GENE"
 
     # data_dir = "test_data/test_cgyro_multi_runs/run1/"
     # fname = data_dir+'input.cgyro'

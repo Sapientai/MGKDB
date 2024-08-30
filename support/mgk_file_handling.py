@@ -577,9 +577,26 @@ def isLinear(folder_name, sim_type):
         return linear
     
     elif sim_type=='TGLF':
-        linear = True
+
+        fname=os.path.join(folder_name+'/{0}/input.tglf'.format(suffix))
+        assert os.path.isfile(fname),"File %s does not exist"%(fname)
+
+        with open(fname,'r') as f:
+            for line in f: 
+                val = line.split('=')
+
+                if val[0].strip()=='USE_TRANSPORT_MODEL':
+                    true_present  = [strg in val[1].strip() for strg in ['true','T','t']]
+                    false_present = [strg in val[1].strip() for strg in ['false','F','f']]
+                    if any(true_present): 
+                        linear = False ## run is non linear
+                    elif any(false_present):
+                        linear = True 
+                    else : 
+                        print("Unknown entry in parameter file for field \"USE_TRANSPORT_MODEL\" ",line)
+                        raise SystemError
+                    break
         return linear
-        
 
 def isUploaded(out_dir,runs_coll):
     '''

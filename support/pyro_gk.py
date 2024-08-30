@@ -81,9 +81,7 @@ def create_gk_dict_with_pyro(fname,gkcode):
     '''
 
     assert gkcode in ['GENE','CGYRO','TGLF','GS2'], "invalid gkcode type %s"%(gkcode)
-
-    linear = not pyro.numerics.nonlinear
-
+    
     try: 
         pyro = Pyro(gk_file=fname, gk_code=gkcode)
         linear = not pyro.numerics.nonlinear

@@ -54,6 +54,6 @@ Steps to merge local database to the main NERSC database:
 module load mongodb/4.0.28
 mongo -u <db_username> -p <db_password> mongodb03.nersc.gov/mgk_fusion
 ```
-5. Restore to the NERSC database using \
+5. Merge local databse to the NERSC database using \
    ``` mongorestore --db mgk_fusion --dir <path_to_mongodump_output>```
 

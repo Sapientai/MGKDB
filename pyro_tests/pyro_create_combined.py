@@ -94,7 +94,26 @@ def f_check_linear(fname,gkcode):
         print('Could not find \"NONLINEAR_FLAG\" field in parameters file')
         raise SystemError
     
-    elif gkcode in ['TGLF','GS2']:
+    elif gkcode =='TGLF':
+        with open(fname,'r') as f:
+            for line in f: 
+                val = line.split('=')
+
+                if val[0].strip()=='USE_TRANSPORT_MODEL':
+                    true_present  = [strg in val[1].strip() for strg in ['true','T','t']]
+                    false_present = [strg in val[1].strip() for strg in ['false','F','f']]
+                    if any(true_present): 
+                        return False ## run is non linear
+                    elif any(false_present):
+                        return True 
+                    else : 
+                        print("Unknown entry in parameter file for field \"USE_TRANSPORT_MODEL\" ",line)
+                        raise SystemError
+
+        print('Could not find \"USE_TRANSPORT_MODEL\" field in parameters file')
+        raise SystemError
+
+    elif gkcode in ['GS2']:
         linear = True
         return linear
     
@@ -125,8 +144,9 @@ def create_gk_dict_with_pyro(fname,gkcode):
 
     assert gkcode in ['GENE','CGYRO','TGLF','GS2'], "invalid gkcode type %s"%(gkcode)
 
-    linear = f_check_linear(fname,gkcode)
     pyro = Pyro(gk_file=fname, gk_code=gkcode)
+    # linear = f_check_linear(fname,gkcode)
+    linear = not pyro.numerics.nonlinear
 
     if linear: 
         pyro.load_gk_output(load_fields=True)
@@ -150,10 +170,10 @@ def create_gk_dict_with_pyro(fname,gkcode):
 if __name__=="__main__":
 
     # data_dir = "test_data/test_gene1_tracer_efit/"
-    data_dir = "test_data/test_gene2_miller_general/"
-    suffix='_0001'
-    fname = data_dir+'parameters{0}'.format(suffix)
-    gkcode="GENE"
+    # data_dir = "test_data/test_gene2_miller_general/"
+    # suffix='_0001'
+    # fname = data_dir+'parameters{0}'.format(suffix)
+    # gkcode="GENE"
 
     # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/upload_datasets/test_nonlin_gene_tracer_efit/"
     # suffix='_0001'
@@ -179,11 +199,11 @@ if __name__=="__main__":
     # fname = data_dir+'gs2.in'
     # gkcode="GS2"
 
-    # data_dir = "test_data/TGLF/TGLF_linear/"
+    data_dir = "test_data/TGLF/TGLF_linear/"
     # data_dir = "test_data/TGLF/TGLF_transport/"
     # data_dir = "test_data/TGLF/TGLF_1/"
-    # fname = data_dir+'input.tglf'
-    # gkcode="TGLF"
+    fname = data_dir+'input.tglf'
+    gkcode="TGLF"
 
     json_data = create_gk_dict_with_pyro(fname,gkcode)
 

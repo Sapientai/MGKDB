@@ -12,7 +12,7 @@ When performing this for the first time, it might be safer to test merging of tw
 The sample code below implements this: 
 
 ##### Start local database and access it from the terminal
-`mongosh`
+Access local database engine (For details, please refer to [Local MGKDB](https://github.com/Sapientai/MGKDB/wiki/Local-MGKDB) page on the wiki page of this repository)
 
 ##### Create first database 
 ```use mgk_test1
@@ -45,16 +45,15 @@ Reponse to prompts:
 
 ## Merging to NERSC database (Use with caution)
 Steps to merge local database to the main NERSC database: 
-1. Create local database and upload data to it ( For details, refer to [Local MGKDB](https://github.com/Sapientai/MGKDB/wiki/Local-MGKDB) page on the wiki page of this repository)
-2. From the terminal, create a dump of the local database: \
+1. From the terminal, create a dump of the local database: \
    ```mongodump --db mgk_local --out <target_destination>```
-4. Move this data (which will be much smaller than the original data) to NERSC 
-5. Login to NERSC
-6. Login to database from the terminal with database credentials
+2. Move this data (which will be much smaller than the original data) to NERSC 
+3. Login to NERSC
+4. Login to database from the terminal with database credentials
 ```
 module load mongodb/4.0.28
 mongo -u <db_username> -p <db_password> mongodb03.nersc.gov/mgk_fusion
 ```
-7. Restore to the NERSC database using \
+5. Restore to the NERSC database using \
    ``` mongorestore --db mgk_fusion --dir <path_to_mongodump_output>```
 

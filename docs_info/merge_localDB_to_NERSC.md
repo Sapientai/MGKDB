@@ -12,7 +12,7 @@ When performing this for the first time, it might be safer to test merging of tw
 The sample code below implements this: 
 
 ##### Start local database and access it from the terminal
-Access local database engine (For details, please refer to [Local MGKDB](https://github.com/Sapientai/MGKDB/wiki/Local-MGKDB) page on the wiki page of this repository)
+Access local database engine from the terminal (For details, please refer to [Local MGKDB](https://github.com/Sapientai/MGKDB/wiki/Local-MGKDB) page on the wiki page of this repository)
 
 ##### Create first database 
 ```use mgk_test1

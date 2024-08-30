@@ -16,14 +16,10 @@ import sys
 import os
 import argparse
 from sys import exit
-# sys.path.append('support')
 
 from support.mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars 
 #from ParIO import *
 from support.mgk_login import mgk_login,f_login_dbase
-# sys.path.append('../pyro_tests/')
-#from pyro_tests.pyro_create_combined import * 
-
 
 
 def f_parse_args():
@@ -118,10 +114,8 @@ if __name__=="__main__":
                 lin = ['nonlin']
 
             #add linear/nonlin to keywords
-            keywords_lin = keywords.split('#') + lin
-            #print(keywords_lin)
-            #print(linear)                                        
-
+            keywords_lin = keywords.split('#') + lin                                 
+            
             if not default:
                 suffixes = get_suffixes(dirpath, args.sim_type)
                 print("Found in {} these suffixes:\n {}".format(dirpath, suffixes))

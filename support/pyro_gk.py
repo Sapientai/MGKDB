@@ -85,6 +85,8 @@ def create_gk_dict_with_pyro(fname,gkcode):
     try: 
         pyro = Pyro(gk_file=fname, gk_code=gkcode)
         linear = not pyro.numerics.nonlinear
+        ## For TGLF : always assume linear 
+        if gkcode=='TGLF':   linear = True
 
         if linear: 
             pyro.load_gk_output(load_fields=True)

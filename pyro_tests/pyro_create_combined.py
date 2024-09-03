@@ -146,8 +146,11 @@ def create_gk_dict_with_pyro(fname,gkcode):
 
     pyro = Pyro(gk_file=fname, gk_code=gkcode)
     # linear = f_check_linear(fname,gkcode)
+    
     linear = not pyro.numerics.nonlinear
 
+    if gkcode=='TGLF':   linear = True
+    
     if linear: 
         pyro.load_gk_output(load_fields=True)
     else: # Loading fields for non-linear runs can take too long, so do not read them 
@@ -192,19 +195,19 @@ if __name__=="__main__":
     # data_dir = "pyro_tests/data/CGYRO_nonlinear1_template/run1/"
     # data_dir = "pyro_tests/data/CGYRO_nonlinear2/run1/"
     # data_dir = "pyro_tests/data/CGYRO_nonlinear3_no_apar_saved/run1/"
-    data_dir = "pyro_tests/data/CGYRO_nonlinear6_runs_multi_ebelli/d_lti00_ge00/"
-    fname = data_dir+'input.cgyro'
-    gkcode="CGYRO"
+    # data_dir = "pyro_tests/data/CGYRO_nonlinear6_runs_multi_ebelli/d_lti00_ge00/"
+    # fname = data_dir+'input.cgyro'
+    # gkcode="CGYRO"
 
     # data_dir = "test_data/GS2_linear/"
     # fname = data_dir+'gs2.in'
     # gkcode="GS2"
 
     # data_dir = "test_data/TGLF/TGLF_linear/"
-    # data_dir = "test_data/TGLF/TGLF_transport/"
+    data_dir = "test_data/TGLF/TGLF_transport/"
     # data_dir = "test_data/TGLF/TGLF_1/"
-    # fname = data_dir+'input.tglf'
-    # gkcode="TGLF"
+    fname = data_dir+'input.tglf'
+    gkcode="TGLF"
 
     json_data = create_gk_dict_with_pyro(fname,gkcode)
 

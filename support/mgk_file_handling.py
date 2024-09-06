@@ -120,19 +120,19 @@ def get_time_for_diag(run_suffix):
     
     return tspan
 
-def get_diag_with_user_input(out_dir, suffix,  manual_time_flag, img_dir='./mgk_diagplots'):
+def get_diag_with_user_input(out_dir, suffix,  manual_time_flag):
 
     if manual_time_flag:
         tspan = get_time_for_diag(suffix)
         if tspan == -1:
             manual_time_flag = False
-            Diag_dict, imag_dict = get_diag_from_run(out_dir, suffix, None, img_dir)
+            Diag_dict = get_diag_from_run(out_dir, suffix, None)
         else:
-            Diag_dict, imag_dict = get_diag_from_run(out_dir, suffix, tspan, img_dir) 
+            Diag_dict = get_diag_from_run(out_dir, suffix, tspan) 
     else:
-        Diag_dict, imag_dict = get_diag_from_run(out_dir, suffix, None, img_dir)
+        Diag_dict = get_diag_from_run(out_dir, suffix, None)
         
-    return Diag_dict, manual_time_flag, imag_dict
+    return Diag_dict, manual_time_flag
 
 def get_data(key, *args):
     '''
@@ -892,7 +892,7 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
                         Diag_dict = {}
                         imag_dict = {}
                     elif sim_type=='GENE': 
-                        Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
+                        Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
 
                     run = runs_coll.find_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix})
                     for key, val in run['Diagnostics'].items():
@@ -905,7 +905,7 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
                         Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
 
                     runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, 
-                            { "$set": {'gyrokinetics': GK_dict, 'Diagnostics':Diag_dict, 'Plots': imag_dict}} 
+                            { "$set": {'gyrokinetics': GK_dict, 'Diagnostics':Diag_dict}} 
                                  )
                     
                 runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix}, 
@@ -943,8 +943,8 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
                         Diag_dict = {}
                         imag_dict = {}
                     elif sim_type=='GENE': 
-                        Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
-                    
+                        Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
+
                     run = runs_coll.find_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix})
                     for key, val in run['Diagnostics'].items():
                         if val != 'None':
@@ -956,7 +956,7 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
                         Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
 
                     runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix },
-                            { "$set": {'gyrokinetics': GK_dict, 'Diagnostics':Diag_dict, 'Plots': imag_dict}}
+                            { "$set": {'gyrokinetics': GK_dict, 'Diagnostics':Diag_dict}}
                                  )
 
                 file = os.path.join(out_dir, doc  + suffix)
@@ -1007,13 +1007,6 @@ def remove_from_mongo(out_dir, db, runs_coll):
                 print((key, val))
                 fs.delete(val)
                 print('deleted!')
-                
-#        for key, val in run['Plots'].items():
-#            if val != 'None':
-#                print((key, val))
-#                fs.delete(val)
-#                print('deleted!')
-                    
                 
 #        delete the header file
         runs_coll.delete_one(run)
@@ -1220,7 +1213,7 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
             elif sim_type=='GENE': 
                 print('='*60)
                 print('\n Working on diagnostics with user specified tspan .....\n')
-                Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
+                Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
                 print('='*60)
                 for key, val in Diag_dict.items():
                     Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
@@ -1233,7 +1226,7 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                 Diag_dict['omega']['omega'] = omega_val[2]
 
 
-            run_data =  {'Meta': meta_dict, 'Files': files_dict, 'gyrokinetics': GK_dict, 'Diagnostics': Diag_dict, 'Plots': imag_dict}
+            run_data =  {'Meta': meta_dict, 'Files': files_dict, 'gyrokinetics': GK_dict, 'Diagnostics': Diag_dict}
             runs_coll.insert_one(run_data).inserted_id  
             print('Files with suffix: {} in folder {} uploaded successfully'.format(suffix, out_dir))
             print('='*40)
@@ -1385,13 +1378,13 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
             elif sim_type=='GENE':
                 print('='*60)
                 print('\n Working on diagnostics with user specified tspan .....\n')
-                Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
+                Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
                 print('='*60)
                 for key, val in Diag_dict.items():
                     Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
 
             #combine dictionaries and upload
-            run_data =  {'Meta': meta_dict, 'Files': files_dict, 'gyrokinetics': GK_dict, 'Diagnostics': Diag_dict, 'Plots': imag_dict}
+            run_data =  {'Meta': meta_dict, 'Files': files_dict, 'gyrokinetics': GK_dict, 'Diagnostics': Diag_dict}
             runs_coll.insert_one(run_data).inserted_id  
     
             print('Files with suffix: {} in folder {} uploaded successfully.'.format(suffix, out_dir))

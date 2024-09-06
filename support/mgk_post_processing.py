@@ -12,8 +12,6 @@ sys.path.append('support')
 #from mgk_file_handling import *
 import numpy as np
 import optparse as op
-import matplotlib
-#matplotlib.use('Agg') # uncomment if using MAC, others WXAgg, GTKAgg, QT4Agg, QT5Agg, TkAgg, GTK, GDK, GTKCairo, PS 
 import matplotlib.pyplot as plt
 from fieldlib import *
 from ParIO import * 
@@ -182,7 +180,7 @@ from diagnostics.diag_flux_spectra import DiagFluxSpectra
 from diagnostics.diag_amplitude_spectra import DiagAmplitudeSpectra
 from diagnostics.diag_field_mom_snapshots import DiagFieldMomSnapshots
 
-def get_diag_from_run(out_dir, suffix, t_span = None, img_dir='./mgk_diagplots'):
+def get_diag_from_run(out_dir, suffix, t_span = None):
 #    t_start = 0.0 # use start/end time in nrg files?
 #    t_end = 100.0
 
@@ -298,33 +296,7 @@ def get_diag_from_run(out_dir, suffix, t_span = None, img_dir='./mgk_diagplots')
     Grid
     '''
     Diag_dict['Grid'] = vars(run.spatialgrid)
-    
-    
-    img_dict = get_diag_image(img_dir, suffix)
-    
-    return Diag_dict, img_dict
 
-from pathlib import Path        
-def get_diag_image(img_dir, suffix):
-    img_dict = {}
-#  #  img_dir = os.path.join(out_dir, 'mgk_diagplots')
-    
-    #try:
-    #    img_files = os.listdir(img_dir)
-    #except:
-    #    print("Folder for saving temporary images not created!")
-    #    
-    #img_target = [img for img in img_files if suffix in img and img.endswith('.png')]
-    #for img in img_target:
-    #    with open(os.path.join(img_dir, img), "rb") as imageFile:
-    #        img_str = base64.b64encode(imageFile.read() ).decode('utf-8')
-#   #         img_str = Binary(imageFile.read())
-    #    key = '_'.join(img.split('_')[:-1])
-    #    
-    #    img_dict[key] = img_str
-   # 
-   #     os.remove(os.path.join(img_dir, img))
-           
-    return img_dict
+    return Diag_dict
     
         

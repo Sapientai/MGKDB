@@ -881,19 +881,17 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
             manual_time_flag = True
             for suffix in suffixes:
                 if affect_QoI in ['Y', 'y']:
-                    if sim_type == 'CGYRO':
-                        fname=out_dir+'/{0}/input.cgyro'.format(suffix)
-                        GK_dict, quasi_linear = create_gk_dict_with_pyro(fname,'CGYRO')
-                        Diag_dict = {}
-                        imag_dict = {}
-                    elif sim_type == 'TGLF':
-                        fname=out_dir+'/{0}/input.tglf'.format(suffix)
-                        GK_dict, quasi_linear = create_gk_dict_with_pyro(fname,'TGLF')
+
+                    fname_dict = {'CGYRO':out_dir+'/{0}/input.cgyro'.format(suffix),\
+                                'TGLF':out_dir+'/{0}/input.tglf'.format(suffix),\
+                                'GENE':out_dir+'/parameters{0}'.format(suffix)}
+
+                    GK_dict, quasi_linear = create_gk_dict_with_pyro(fname_dict[sim_type],sim_type)
+
+                    if sim_type in ['CGYRO','TGLF']:
                         Diag_dict = {}
                         imag_dict = {}
                     elif sim_type=='GENE': 
-                        fname=out_dir+'/parameters{0}'.format(suffix)
-                        GK_dict, quasi_linear = create_gk_dict_with_pyro(fname,'GENE')
                         Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
 
                     run = runs_coll.find_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix})
@@ -902,8 +900,7 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
                             print((key, val))
                             fs.delete(val)
                             print('deleted!')
-                            
-
+                    
                     for key, val in Diag_dict.items():
                         Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
 
@@ -936,21 +933,18 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
             manual_time_flag = True
             for suffix in run_suffixes:
                 if affect_QoI in ['Y', 'y']:
-                    if sim_type == 'CGYRO':
-                        fname=out_dir+'/{0}/input.cgyro'.format(suffix)
-                        GK_dict, quasi_linear = create_gk_dict_with_pyro(fname,'CGYRO')
-                        Diag_dict = {}
-                        imag_dict = {}
-                    elif sim_type == 'TGLF':
-                        fname=out_dir+'/{0}/input.tglf'.format(suffix)
-                        GK_dict, quasi_linear = create_gk_dict_with_pyro(fname,'TGLF')
+                    fname_dict = {'CGYRO':out_dir+'/{0}/input.cgyro'.format(suffix),\
+                                'TGLF':out_dir+'/{0}/input.tglf'.format(suffix),\
+                                'GENE':out_dir+'/parameters{0}'.format(suffix)}
+
+                    GK_dict, quasi_linear = create_gk_dict_with_pyro(fname_dict[sim_type],sim_type)      
+
+                    if sim_type in ['CGYRO','TGLF']:
                         Diag_dict = {}
                         imag_dict = {}
                     elif sim_type=='GENE': 
-                        fname=out_dir+'/parameters{0}'.format(suffix)
-                        GK_dict, quasi_linear = create_gk_dict_with_pyro(fname,'GENE')
                         Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
-
+                    
                     run = runs_coll.find_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix})
                     for key, val in run['Diagnostics'].items():
                         if val != 'None':
@@ -1134,15 +1128,11 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
 
             ### First compute gyrokinetics IMAS using pyrokinetics package
             print("Computing gyrokinetics IMAS using pyrokinetics")
-            if sim_type == 'CGYRO':
-                fname=out_dir+'/{0}/input.cgyro'.format(suffix)
-                GK_dict, quasi_linear = create_gk_dict_with_pyro(fname,'CGYRO')
-            elif sim_type == 'TGLF':
-                fname=out_dir+'/{0}/input.tglf'.format(suffix)
-                GK_dict, quasi_linear = create_gk_dict_with_pyro(fname,'TGLF')
-            elif sim_type=='GENE': 
-                fname=out_dir+'/parameters{0}'.format(suffix)
-                GK_dict, quasi_linear = create_gk_dict_with_pyro(fname,'GENE')
+            fname_dict = {'CGYRO':out_dir+'/{0}/input.cgyro'.format(suffix),\
+                          'TGLF':out_dir+'/{0}/input.tglf'.format(suffix),\
+                          'GENE':out_dir+'/parameters{0}'.format(suffix)}
+
+            GK_dict, quasi_linear = create_gk_dict_with_pyro(fname_dict[sim_type],sim_type)
 
             ### Upload files to DB 
             print('Uploading files ....')
@@ -1305,15 +1295,11 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
 
             ### First compute gyrokinetics IMAS using pyrokinetics package
             print("Computing gyrokinetics IMAS using pyrokinetics")
-            if sim_type == 'CGYRO':
-                fname=out_dir+'/{0}/input.cgyro'.format(suffix)
-                GK_dict, quasi_linear = create_gk_dict_with_pyro(fname,'CGYRO')
-            elif sim_type == 'TGLF':
-                fname=out_dir+'/{0}/input.tglf'.format(suffix)
-                GK_dict, quasi_linear = create_gk_dict_with_pyro(fname,'TGLF')
-            elif sim_type=='GENE': 
-                fname=out_dir+'/parameters{0}'.format(suffix)
-                GK_dict, quasi_linear = create_gk_dict_with_pyro(fname,'GENE')
+            fname_dict = {'CGYRO':out_dir+'/{0}/input.cgyro'.format(suffix),\
+                          'TGLF':out_dir+'/{0}/input.tglf'.format(suffix),\
+                          'GENE':out_dir+'/parameters{0}'.format(suffix)}
+
+            GK_dict, quasi_linear = create_gk_dict_with_pyro(fname_dict[sim_type],sim_type)
 
             ### Upload files to DB 
             print('Uploading files ....')

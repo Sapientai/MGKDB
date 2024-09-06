@@ -146,12 +146,15 @@ def create_gk_dict_with_pyro(fname,gkcode):
 
     pyro = Pyro(gk_file=fname, gk_code=gkcode)
     # linear = f_check_linear(fname,gkcode)
-    
-    linear = not pyro.numerics.nonlinear
 
-    if gkcode=='TGLF':   linear = True
+    if gkcode=='TGLF':   
+        quasi_linear = pyro.numerics.nonlinear
+        linear = True
+    else:      
+        linear = not pyro.numerics.nonlinear
+        quasi_linear = False 
     
-    if linear: 
+    if linear:
         pyro.load_gk_output(load_fields=True)
     else: # Loading fields for non-linear runs can take too long, so do not read them 
         pyro.load_gk_output(load_fields=False)
@@ -168,7 +171,7 @@ def create_gk_dict_with_pyro(fname,gkcode):
 
     json_data = prune_imas_gk_dict(json_data, linear)
 
-    return json_data
+    return json_data,quasi_linear
 
 if __name__=="__main__":
 
@@ -203,13 +206,13 @@ if __name__=="__main__":
     # fname = data_dir+'gs2.in'
     # gkcode="GS2"
 
-    # data_dir = "test_data/TGLF/TGLF_linear/"
-    data_dir = "test_data/TGLF/TGLF_transport/"
-    # data_dir = "test_data/TGLF/TGLF_1/"
+    data_dir = "test_data/TGLF/TGLF_linear/"
+    # data_dir = "test_data/TGLF/TGLF_transport/"
+    # data_dir = "test_data/TGLF/TGLF_transport2/"
     fname = data_dir+'input.tglf'
     gkcode="TGLF"
 
-    json_data = create_gk_dict_with_pyro(fname,gkcode)
+    json_data, quasi_linear = create_gk_dict_with_pyro(fname,gkcode)
 
     with open(data_dir+"gyrokinetics.json", "w") as json_file:
         json.dump(json_data, json_file, indent=4)

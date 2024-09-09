@@ -649,6 +649,65 @@ def get_record(out_dir, runs_coll):
         record.append(run)
     return record
    
+
+
+    ## Extract linked_ID
+
+def f_check_id_exists(db, _id):
+    ''' Given an object ID, check if it exists in linear or nonlinear collections
+    '''
+
+    for collection in ['LinearRuns','NonlinRuns']:
+        runs_coll =  getattr(db,collection)
+
+        try: 
+            record = runs_coll.find_one({"_id": _id})
+        except Exception as e:
+            # print(e)
+            print("Invalid object ID",_id)
+            return False
+    
+        if record is not None: return True
+
+    print("Entry %s not found in database, please double check the id"%(_id))
+    return False
+
+def f_get_linked_oid(database, args):
+    '''
+    Get linked ObjectID
+    '''
+
+    if ((args.linked_id_file is not None) and (args.linked_id_string is not None)): 
+        print("Both linked_id_file and lnked_id_string specified. Please choose any one and re-upload")
+        raise SystemError
+
+    elif args.linked_id_file is not None:
+        fname = args.linked_id_file
+        assert os.path.exists(fname), "File %s does not exist"%(fname)
+        print("Input file for OID is %s",fname)
+
+        ## Get OID from file 
+        with open(fname, 'r') as f:
+            data_dict = json.load(f)
+
+        oid = ObjectId(data_dict['_id'])
+
+    elif args.linked_id_string is not None: 
+        oid = ObjectId(args.linked_id_string)
+
+    else:  oid = None
+
+    if oid is not None: 
+        id_exists = f_check_id_exists(database, oid)
+
+        if id_exists:
+            print("Linked OID %s"%(oid))
+            return oid
+        else : 
+            return None
+    else: return None
+
+
 def download_file_by_path(db, filepath, destination, revision=-1, session=None):
     '''
     db: database name
@@ -761,9 +820,7 @@ def download_runs_by_id(db, runs_coll, _id, destination):
         raise SystemExit
         
     path = os.path.join(destination, dir_name.split('/')[-1])
-#    path = destination
-#    print(destination)
-#    print(path)
+
     if not os.path.exists(path):
         try:
 #            path = os.path.join(destination, dir_name.split('/')[-1])
@@ -836,7 +893,7 @@ def update_Meta(out_dir, runs_coll, suffix):
     
 
 
-def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mgk_diagplots', suffixes=None):
+def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffixes=None):
     '''
     only update file related entries, no comparison made before update
 
@@ -890,7 +947,6 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
 
                     if sim_type in ['CGYRO','TGLF']:
                         Diag_dict = {}
-                        imag_dict = {}
                     elif sim_type=='GENE': 
                         Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
 
@@ -941,7 +997,6 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
 
                     if sim_type in ['CGYRO','TGLF']:
                         Diag_dict = {}
-                        imag_dict = {}
                     elif sim_type=='GENE': 
                         Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
 
@@ -1099,7 +1154,7 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
     return object_ids
 
 def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
-                  img_dir = './mgk_diagplots', suffixes = None, run_shared = None,
+                  linked_id, suffixes = None, run_shared = None,
                   large_files=False, extra=False, verbose=True, manual_time_flag = True, global_vars=None):
     #connect to linear collection
     runs_coll = db.LinearRuns
@@ -1198,6 +1253,7 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                          "keywords": keywords,
                          "simulation_type": sim_type,
                          "quasi_linear": quasi_linear,
+                         "linked_objectID":linked_id,
                          "confidence": confidence,
                          "comments": comments,
                          "time_uploaded": time_upload,
@@ -1206,10 +1262,8 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                    
             if sim_type == 'CGYRO':
                 Diag_dict = {}
-                imag_dict = {}
             elif sim_type == 'TGLF':
                 Diag_dict = {}
-                imag_dict = {}
             elif sim_type=='GENE': 
                 print('='*60)
                 print('\n Working on diagnostics with user specified tspan .....\n')
@@ -1267,7 +1321,7 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
         
         
 def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
-                  img_dir = './mgk_diagplots', suffixes = None, run_shared=None,
+                  linked_id, suffixes = None, run_shared=None,
                   large_files=False, extra=False, verbose=True, manual_time_flag = True , global_vars=None):
     #connect to nonlinear collection
     runs_coll = db.NonlinRuns
@@ -1363,6 +1417,7 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
                          "keywords": keywords,
                          "simulation_type": sim_type,
                          "quasi_linear": quasi_linear,
+                         "linked_objectID":linked_id,
                          "confidence": confidence,
                          "comments": comments,
                          "time uploaded": time_upload,
@@ -1371,10 +1426,8 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
             #data dictionary format for nonlinear runs
             if sim_type == 'CGYRO':
                 Diag_dict = {}
-                imag_dict = {}
             elif sim_type == 'TGLF':
                 Diag_dict = {}
-                imag_dict = {}            
             elif sim_type=='GENE':
                 print('='*60)
                 print('\n Working on diagnostics with user specified tspan .....\n')
@@ -1428,7 +1481,7 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
     global_vars.reset_docs_keys(sim_type)
             
 def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords, comments, sim_type, 
-                    img_dir= './mgk_diagplots', suffixes = None, run_shared=None,
+                    linked_id, suffixes = None, run_shared=None,
                     large_files = False, extra=False, verbose=True, manual_time_flag = True, global_vars=None):
     #print(linear)
     #for linear runs
@@ -1443,16 +1496,16 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
                 #for now, delete and reupload instead of update - function under construction
                 remove_from_mongo(out_dir, db, runs_coll)   
                 upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
-                              img_dir, suffixes, run_shared,
+                              linked_id, suffixes, run_shared,
                               large_files, extra, verbose, manual_time_flag, global_vars)
             elif update == '1':
-                update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir)
+                update_mongo(out_dir, db, runs_coll, user, linear, sim_type, linked_id)
             else:
                 print('Run collection \'' + out_dir + '\' skipped.')
         else:
             print('Folder tag:\n{}\n not detected, creating new.\n'.format(out_dir))
             upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
-                          img_dir, suffixes, run_shared,
+                          linked_id, suffixes, run_shared,
                           large_files, extra, verbose, manual_time_flag, global_vars)
                 
     #for nonlinear runs
@@ -1467,17 +1520,17 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
                 #for now, delete and reupload instead of update - function under construction
                 remove_from_mongo(out_dir, db, runs_coll)   
                 upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type, 
-                              img_dir, suffixes, run_shared,
+                              linked_id, suffixes, run_shared,
                               large_files, extra, verbose,manual_time_flag, global_vars)
             elif update == '1':
-                update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir)
+                update_mongo(out_dir, db, runs_coll, user, linear, sim_type, linked_id)
 
             else:
                 print('Run collection \'' + out_dir + '\' skipped.')
         else:
             print('Folder tag:\n{}\n not detected, creating new.\n'.format(out_dir))
             upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
-                          img_dir, suffixes, run_shared,
+                          linked_id, suffixes, run_shared,
                           large_files, extra, verbose,manual_time_flag, global_vars)
     else:
         exit('Cannot decide if the folder is subject to linear or nonlinear runs.')

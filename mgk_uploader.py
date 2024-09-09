@@ -17,10 +17,9 @@ import os
 import argparse
 from sys import exit
 
-from support.mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars 
+from support.mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars, f_get_linked_oid
 #from ParIO import *
 from support.mgk_login import mgk_login,f_login_dbase
-
 
 def f_parse_args():
     #==========================================================
@@ -39,7 +38,8 @@ def f_parse_args():
     parser.add_argument('-SIM', '--sim_type', choices=['GENE','CGYRO','TGLF'], type=str, help='Type of simulation', required=True)
     parser.add_argument('-A', '--authenticate', default = None, help='locally saved login info, a .pkl file')
     parser.add_argument('-X', '--exclude', default = None, help='folders to exclude')
-    parser.add_argument('-Img', '--image_dir', default = './mgk_diagplots', help='folders to save temporal image files.')
+    parser.add_argument('-lf', '--linked_id_file', default = None, help='File with Object ID to link')
+    parser.add_argument('-ls', '--linked_id_string', default = None, help='String of Object ID to link')
 
     parser.add_argument('-D', '--default', default = False, action='store_true', help='Using default inputs for all.')
 
@@ -56,7 +56,6 @@ if __name__=="__main__":
     ### Initial setup 
     output_folder = os.path.abspath(args.target)
     keywords = args.keywords
-    img_dir = os.path.abspath(args.image_dir)
 
     if args.exclude is not None:
         exclude_folders = args.exclude.split(',')
@@ -83,11 +82,12 @@ if __name__=="__main__":
         global_vars.Docs_ex +=exfiles
         global_vars.Keys_ex +=exkeys
 
-    
     ### Connect to database 
     login = f_login_dbase(args.authenticate)
     database = login.connect()
     user = login.login['user']
+
+    linked_id = f_get_linked_oid(database, args)
 
     ### Run uploader 
     #######################################################################
@@ -152,7 +152,7 @@ if __name__=="__main__":
             
             # Send run to upload_to_mongo to be uploaded
             upload_to_mongo(database, dirpath, user, linear, confidence, args.input_heat, 
-                            keywords_lin, comments, args.sim_type, img_dir, suffixes, run_shared,
+                            keywords_lin, comments, args.sim_type, linked_id, suffixes, run_shared,
                             args.large_files, args.extra, args.verbose, manual_time_flag,global_vars)
 
     if len(global_vars.troubled_runs):

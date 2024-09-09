@@ -28,16 +28,16 @@ def f_parse_args():
     parser = argparse.ArgumentParser(description='Process input for uploading files')
 
     parser.add_argument('-T', '--target', help='Target run output folder')
-    parser.add_argument('-H', '--input_heat', default = 'None', help='input heat')
 
     parser.add_argument('-V', '--verbose', dest='verbose', default = False, action='store_true', help='output verbose')
     parser.add_argument('-Ex', '--extra', dest='extra', default = False, action='store_true', help='whether or not to include extra files')
-    parser.add_argument('-L', '--large_files', dest='large_files', default = False, action='store_true', help='whether or not to include extra files')
+    parser.add_argument('-L', '--large_files', dest='large_files', default = False, action='store_true', help='whether or not to include large files')
                         
     parser.add_argument('-K', '--keywords', default = '-', help='relevant keywords for future references, separated by comma')
     parser.add_argument('-SIM', '--sim_type', choices=['GENE','CGYRO','TGLF'], type=str, help='Type of simulation', required=True)
     parser.add_argument('-A', '--authenticate', default = None, help='locally saved login info, a .pkl file')
     parser.add_argument('-X', '--exclude', default = None, help='folders to exclude')
+    
     parser.add_argument('-lf', '--linked_id_file', default = None, help='File with Object ID to link')
     parser.add_argument('-ls', '--linked_id_string', default = None, help='String of Object ID to link')
 
@@ -151,7 +151,7 @@ if __name__=="__main__":
                 run_shared = None
             
             # Send run to upload_to_mongo to be uploaded
-            upload_to_mongo(database, dirpath, user, linear, confidence, args.input_heat, 
+            upload_to_mongo(database, dirpath, user, linear, confidence, 
                             keywords_lin, comments, args.sim_type, linked_id, suffixes, run_shared,
                             args.large_files, args.extra, args.verbose, manual_time_flag,global_vars)
 

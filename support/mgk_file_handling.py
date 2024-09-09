@@ -1153,7 +1153,7 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
             
     return object_ids
 
-def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
+def upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
                   linked_id, suffixes = None, run_shared = None,
                   large_files=False, extra=False, verbose=True, manual_time_flag = True, global_vars=None):
     #connect to linear collection
@@ -1320,7 +1320,7 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
     global_vars.reset_docs_keys(sim_type)
         
         
-def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
+def upload_nonlin(db, out_dir, user, confidence, keywords, comments, sim_type,
                   linked_id, suffixes = None, run_shared=None,
                   large_files=False, extra=False, verbose=True, manual_time_flag = True , global_vars=None):
     #connect to nonlinear collection
@@ -1480,7 +1480,7 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
     
     global_vars.reset_docs_keys(sim_type)
             
-def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords, comments, sim_type, 
+def upload_to_mongo(db, out_dir, user, linear, confidence, keywords, comments, sim_type, 
                     linked_id, suffixes = None, run_shared=None,
                     large_files = False, extra=False, verbose=True, manual_time_flag = True, global_vars=None):
     #print(linear)
@@ -1495,7 +1495,7 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
             if update == '0':
                 #for now, delete and reupload instead of update - function under construction
                 remove_from_mongo(out_dir, db, runs_coll)   
-                upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
+                upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
                               linked_id, suffixes, run_shared,
                               large_files, extra, verbose, manual_time_flag, global_vars)
             elif update == '1':
@@ -1504,7 +1504,7 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
                 print('Run collection \'' + out_dir + '\' skipped.')
         else:
             print('Folder tag:\n{}\n not detected, creating new.\n'.format(out_dir))
-            upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
+            upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
                           linked_id, suffixes, run_shared,
                           large_files, extra, verbose, manual_time_flag, global_vars)
                 
@@ -1519,7 +1519,7 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
             if update == '0':
                 #for now, delete and reupload instead of update - function under construction
                 remove_from_mongo(out_dir, db, runs_coll)   
-                upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type, 
+                upload_nonlin(db, out_dir, user, confidence,keywords, comments, sim_type, 
                               linked_id, suffixes, run_shared,
                               large_files, extra, verbose,manual_time_flag, global_vars)
             elif update == '1':
@@ -1529,7 +1529,7 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
                 print('Run collection \'' + out_dir + '\' skipped.')
         else:
             print('Folder tag:\n{}\n not detected, creating new.\n'.format(out_dir))
-            upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
+            upload_nonlin(db, out_dir, user, confidence, keywords, comments, sim_type,
                           linked_id, suffixes, run_shared,
                           large_files, extra, verbose,manual_time_flag, global_vars)
     else:

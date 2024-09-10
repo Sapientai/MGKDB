@@ -5,6 +5,7 @@ from pyrokinetics.databases.imas import pyro_to_imas_mapping
 import idspy_toolkit as idspy
 from idspy_dictionaries import ids_gyrokinetics_local as gkids
 from pathlib import Path
+import os
 
 # 
 def convert_to_json(obj,separate_real_imag = False):
@@ -54,6 +55,25 @@ def convert_to_json(obj,separate_real_imag = False):
     else:
         return obj
 
+def prune_imas_gk_dict(gk_dict, linear):
+    ''' Remove 4d files for linear and non-linear runs  '''
+
+    if linear: # If linear, drop entries in ['linear']['wavevector'][0]['eigenmode'][i]['fields'][key] 
+        if gk_dict['non_linear']['fields_4d'] is not None:   
+            assert gk_dict['non_linear']['fields_4d']['phi_potential_perturbed_norm']==[], "phi_potential_perturbed_norm field in non_linear, fields_4d is not empty"
+
+        keys_list = ['phi_potential_perturbed_norm','a_field_parallel_perturbed_norm','b_field_parallel_perturbed_norm']
+        if gk_dict['linear']['wavevector'] !=[]: 
+            for i in range(len(gk_dict['linear']['wavevector'][0]['eigenmode'])): ## For each particle species, delete fields
+                for key in keys_list:
+                    gk_dict['linear']['wavevector'][0]['eigenmode'][i]['fields'][key]=None
+
+    else: # If non-linear, drop  ['non_linear']['fields_4d]
+        assert (gk_dict['linear']['wavevector']==[]),"wavevector field in linear is not empty"
+
+        gk_dict['non_linear']['fields_4d']=None
+
+    return gk_dict 
 
 def create_gk_dict_with_pyro(fname,gkcode):
     '''
@@ -61,11 +81,22 @@ def create_gk_dict_with_pyro(fname,gkcode):
     '''
 
     assert gkcode in ['GENE','CGYRO','TGLF','GS2'], "invalid gkcode type %s"%(gkcode)
-
+    
     try: 
-
         pyro = Pyro(gk_file=fname, gk_code=gkcode)
-        pyro.load_gk_output()
+        linear = not pyro.numerics.nonlinear
+
+        if gkcode=='TGLF':   
+            quasi_linear = pyro.numerics.nonlinear
+            linear = True
+        else:      
+            linear = not pyro.numerics.nonlinear
+            quasi_linear = False 
+
+        if linear: 
+            pyro.load_gk_output(load_fields=True)
+        else: # Loading fields for non-linear runs can take too long, so do not read them 
+            pyro.load_gk_output(load_fields=False)
 
         gkdict = gkids.GyrokineticsLocal()
         idspy.fill_default_values_ids(gkdict)
@@ -77,8 +108,10 @@ def create_gk_dict_with_pyro(fname,gkcode):
         
         json_data = convert_to_json(gkdict)
 
+        json_data = prune_imas_gk_dict(json_data, linear)
+
     except Exception as e: 
         print(e)
         raise SystemError
     
-    return json_data
+    return json_data,quasi_linear

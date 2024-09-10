@@ -45,7 +45,6 @@ if __name__=="__main__":
     ### Initial setup 
     tar_dir = args.target
     filepath = args.file
-    info = args.authenticate
     OID = args.objectID
     destination = args.destination
     op_fname = args.saveas
@@ -55,7 +54,6 @@ if __name__=="__main__":
     login = f_login_dbase(args.authenticate)
     database = login.connect()
 
-    # print(args)
     ## Dict to convert from argument to collection name in database
     collection_dict={'linear':'LinearRuns','nonlinear':'NonlinRuns','files':'fs.files'}
     collection_name =  getattr(database,collection_dict[args.collection])

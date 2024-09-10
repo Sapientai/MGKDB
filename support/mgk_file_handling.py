@@ -120,19 +120,19 @@ def get_time_for_diag(run_suffix):
     
     return tspan
 
-def get_diag_with_user_input(out_dir, suffix,  manual_time_flag, img_dir='./mgk_diagplots'):
+def get_diag_with_user_input(out_dir, suffix,  manual_time_flag):
 
     if manual_time_flag:
         tspan = get_time_for_diag(suffix)
         if tspan == -1:
             manual_time_flag = False
-            Diag_dict, imag_dict = get_diag_from_run(out_dir, suffix, None, img_dir)
+            Diag_dict = get_diag_from_run(out_dir, suffix, None)
         else:
-            Diag_dict, imag_dict = get_diag_from_run(out_dir, suffix, tspan, img_dir) 
+            Diag_dict = get_diag_from_run(out_dir, suffix, tspan) 
     else:
-        Diag_dict, imag_dict = get_diag_from_run(out_dir, suffix, None, img_dir)
+        Diag_dict = get_diag_from_run(out_dir, suffix, None)
         
-    return Diag_dict, manual_time_flag, imag_dict
+    return Diag_dict, manual_time_flag
 
 def get_data(key, *args):
     '''
@@ -577,9 +577,26 @@ def isLinear(folder_name, sim_type):
         return linear
     
     elif sim_type=='TGLF':
-        linear = True
+
+        fname=os.path.join(folder_name+'/{0}/input.tglf'.format(suffix))
+        assert os.path.isfile(fname),"File %s does not exist"%(fname)
+
+        with open(fname,'r') as f:
+            for line in f: 
+                val = line.split('=')
+
+                if val[0].strip()=='USE_TRANSPORT_MODEL':
+                    true_present  = [strg in val[1].strip() for strg in ['true','T','t']]
+                    false_present = [strg in val[1].strip() for strg in ['false','F','f']]
+                    if any(true_present): 
+                        linear = False ## run is non linear
+                    elif any(false_present):
+                        linear = True 
+                    else : 
+                        print("Unknown entry in parameter file for field \"USE_TRANSPORT_MODEL\" ",line)
+                        raise SystemError
+                    break
         return linear
-        
 
 def isUploaded(out_dir,runs_coll):
     '''
@@ -632,6 +649,65 @@ def get_record(out_dir, runs_coll):
         record.append(run)
     return record
    
+
+
+    ## Extract linked_ID
+
+def f_check_id_exists(db, _id):
+    ''' Given an object ID, check if it exists in linear or nonlinear collections
+    '''
+
+    for collection in ['LinearRuns','NonlinRuns']:
+        runs_coll =  getattr(db,collection)
+
+        try: 
+            record = runs_coll.find_one({"_id": _id})
+        except Exception as e:
+            # print(e)
+            print("Invalid object ID",_id)
+            return False
+    
+        if record is not None: return True
+
+    print("Entry %s not found in database, please double check the id"%(_id))
+    return False
+
+def f_get_linked_oid(database, args):
+    '''
+    Get linked ObjectID
+    '''
+
+    if ((args.linked_id_file is not None) and (args.linked_id_string is not None)): 
+        print("Both linked_id_file and lnked_id_string specified. Please choose any one and re-upload")
+        raise SystemError
+
+    elif args.linked_id_file is not None:
+        fname = args.linked_id_file
+        assert os.path.exists(fname), "File %s does not exist"%(fname)
+        print("Input file for OID is %s",fname)
+
+        ## Get OID from file 
+        with open(fname, 'r') as f:
+            data_dict = json.load(f)
+
+        oid = ObjectId(data_dict['_id'])
+
+    elif args.linked_id_string is not None: 
+        oid = ObjectId(args.linked_id_string)
+
+    else:  oid = None
+
+    if oid is not None: 
+        id_exists = f_check_id_exists(database, oid)
+
+        if id_exists:
+            print("Linked OID %s"%(oid))
+            return oid
+        else : 
+            return None
+    else: return None
+
+
 def download_file_by_path(db, filepath, destination, revision=-1, session=None):
     '''
     db: database name
@@ -744,9 +820,7 @@ def download_runs_by_id(db, runs_coll, _id, destination):
         raise SystemExit
         
     path = os.path.join(destination, dir_name.split('/')[-1])
-#    path = destination
-#    print(destination)
-#    print(path)
+
     if not os.path.exists(path):
         try:
 #            path = os.path.join(destination, dir_name.split('/')[-1])
@@ -819,7 +893,7 @@ def update_Meta(out_dir, runs_coll, suffix):
     
 
 
-def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mgk_diagplots', suffixes=None):
+def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffixes=None):
     '''
     only update file related entries, no comparison made before update
 
@@ -864,20 +938,17 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
             manual_time_flag = True
             for suffix in suffixes:
                 if affect_QoI in ['Y', 'y']:
-                    if sim_type == 'CGYRO':
-                        fname=out_dir+'/{0}/input.cgyro'.format(suffix)
-                        GK_dict = create_gk_dict_with_pyro(fname,'CGYRO')
+
+                    fname_dict = {'CGYRO':out_dir+'/{0}/input.cgyro'.format(suffix),\
+                                'TGLF':out_dir+'/{0}/input.tglf'.format(suffix),\
+                                'GENE':out_dir+'/parameters{0}'.format(suffix)}
+
+                    GK_dict, quasi_linear = create_gk_dict_with_pyro(fname_dict[sim_type],sim_type)
+
+                    if sim_type in ['CGYRO','TGLF']:
                         Diag_dict = {}
-                        imag_dict = {}
-                    elif sim_type == 'TGLF':
-                        fname=out_dir+'/{0}/input.tglf'.format(suffix)
-                        GK_dict = create_gk_dict_with_pyro(fname,'TGLF')
-                        Diag_dict = {}
-                        imag_dict = {}
                     elif sim_type=='GENE': 
-                        fname=out_dir+'/parameters{0}'.format(suffix)
-                        GK_dict = create_gk_dict_with_pyro(fname,'GENE')
-                        Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
+                        Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
 
                     run = runs_coll.find_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix})
                     for key, val in run['Diagnostics'].items():
@@ -885,18 +956,12 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
                             print((key, val))
                             fs.delete(val)
                             print('deleted!')
-                            
-#                    for key, val in run['Plots'].items():
-#                        if val != 'None':
-#                            print((key, val))
-#                            fs.delete(val)
-#                            print('deleted!')
-
+                    
                     for key, val in Diag_dict.items():
                         Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
 
                     runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, 
-                            { "$set": {'gyrokinetics': GK_dict, 'Diagnostics':Diag_dict, 'Plots': imag_dict}} 
+                            { "$set": {'gyrokinetics': GK_dict, 'Diagnostics':Diag_dict}} 
                                  )
                     
                 runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix}, 
@@ -924,20 +989,16 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
             manual_time_flag = True
             for suffix in run_suffixes:
                 if affect_QoI in ['Y', 'y']:
-                    if sim_type == 'CGYRO':
-                        fname=out_dir+'/{0}/input.cgyro'.format(suffix)
-                        GK_dict = create_gk_dict_with_pyro(fname,'CGYRO')
+                    fname_dict = {'CGYRO':out_dir+'/{0}/input.cgyro'.format(suffix),\
+                                'TGLF':out_dir+'/{0}/input.tglf'.format(suffix),\
+                                'GENE':out_dir+'/parameters{0}'.format(suffix)}
+
+                    GK_dict, quasi_linear = create_gk_dict_with_pyro(fname_dict[sim_type],sim_type)      
+
+                    if sim_type in ['CGYRO','TGLF']:
                         Diag_dict = {}
-                        imag_dict = {}
-                    elif sim_type == 'TGLF':
-                        fname=out_dir+'/{0}/input.tglf'.format(suffix)
-                        GK_dict = create_gk_dict_with_pyro(fname,'TGLF')
-                        Diag_dict = {}
-                        imag_dict = {}
                     elif sim_type=='GENE': 
-                        fname=out_dir+'/parameters{0}'.format(suffix)
-                        GK_dict = create_gk_dict_with_pyro(fname,'GENE')
-                        Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
+                        Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
 
                     run = runs_coll.find_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix})
                     for key, val in run['Diagnostics'].items():
@@ -945,18 +1006,12 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir = './mg
                             print((key, val))
                             fs.delete(val)
                             print('deleted!')
-                            
-#                    for key, val in run['Plots'].items():
-#                        if val != 'None':
-#                            print((key, val))
-#                            fs.delete(val)
-#                            print('deleted!')
 
                     for key, val in Diag_dict.items():
                         Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
 
                     runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix },
-                            { "$set": {'gyrokinetics': GK_dict, 'Diagnostics':Diag_dict, 'Plots': imag_dict}}
+                            { "$set": {'gyrokinetics': GK_dict, 'Diagnostics':Diag_dict}}
                                  )
 
                 file = os.path.join(out_dir, doc  + suffix)
@@ -1007,13 +1062,6 @@ def remove_from_mongo(out_dir, db, runs_coll):
                 print((key, val))
                 fs.delete(val)
                 print('deleted!')
-                
-#        for key, val in run['Plots'].items():
-#            if val != 'None':
-#                print((key, val))
-#                fs.delete(val)
-#                print('deleted!')
-                    
                 
 #        delete the header file
         runs_coll.delete_one(run)
@@ -1105,8 +1153,8 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
             
     return object_ids
 
-def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
-                  img_dir = './mgk_diagplots', suffixes = None, run_shared = None,
+def upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
+                  linked_id, suffixes = None, run_shared = None,
                   large_files=False, extra=False, verbose=True, manual_time_flag = True, global_vars=None):
     #connect to linear collection
     runs_coll = db.LinearRuns
@@ -1128,15 +1176,11 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
 
             ### First compute gyrokinetics IMAS using pyrokinetics package
             print("Computing gyrokinetics IMAS using pyrokinetics")
-            if sim_type == 'CGYRO':
-                fname=out_dir+'/{0}/input.cgyro'.format(suffix)
-                GK_dict = create_gk_dict_with_pyro(fname,'CGYRO')
-            elif sim_type == 'TGLF':
-                fname=out_dir+'/{0}/input.tglf'.format(suffix)
-                GK_dict = create_gk_dict_with_pyro(fname,'TGLF')
-            elif sim_type=='GENE': 
-                fname=out_dir+'/parameters{0}'.format(suffix)
-                GK_dict = create_gk_dict_with_pyro(fname,'GENE')
+            fname_dict = {'CGYRO':out_dir+'/{0}/input.cgyro'.format(suffix),\
+                          'TGLF':out_dir+'/{0}/input.tglf'.format(suffix),\
+                          'GENE':out_dir+'/parameters{0}'.format(suffix)}
+
+            GK_dict, quasi_linear = create_gk_dict_with_pyro(fname_dict[sim_type],sim_type)
 
             ### Upload files to DB 
             print('Uploading files ....')
@@ -1208,6 +1252,8 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                          "run_suffix": '' + suffix,
                          "keywords": keywords,
                          "simulation_type": sim_type,
+                         "quasi_linear": quasi_linear,
+                         "linked_objectID":linked_id,
                          "confidence": confidence,
                          "comments": comments,
                          "time_uploaded": time_upload,
@@ -1216,14 +1262,12 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                    
             if sim_type == 'CGYRO':
                 Diag_dict = {}
-                imag_dict = {}
             elif sim_type == 'TGLF':
                 Diag_dict = {}
-                imag_dict = {}
             elif sim_type=='GENE': 
                 print('='*60)
                 print('\n Working on diagnostics with user specified tspan .....\n')
-                Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
+                Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
                 print('='*60)
                 for key, val in Diag_dict.items():
                     Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
@@ -1236,7 +1280,7 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
                 Diag_dict['omega']['omega'] = omega_val[2]
 
 
-            run_data =  {'Meta': meta_dict, 'Files': files_dict, 'gyrokinetics': GK_dict, 'Diagnostics': Diag_dict, 'Plots': imag_dict}
+            run_data =  {'Meta': meta_dict, 'Files': files_dict, 'gyrokinetics': GK_dict, 'Diagnostics': Diag_dict}
             runs_coll.insert_one(run_data).inserted_id  
             print('Files with suffix: {} in folder {} uploaded successfully'.format(suffix, out_dir))
             print('='*40)
@@ -1276,8 +1320,8 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
     global_vars.reset_docs_keys(sim_type)
         
         
-def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
-                  img_dir = './mgk_diagplots', suffixes = None, run_shared=None,
+def upload_nonlin(db, out_dir, user, confidence, keywords, comments, sim_type,
+                  linked_id, suffixes = None, run_shared=None,
                   large_files=False, extra=False, verbose=True, manual_time_flag = True , global_vars=None):
     #connect to nonlinear collection
     runs_coll = db.NonlinRuns
@@ -1298,15 +1342,11 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
 
             ### First compute gyrokinetics IMAS using pyrokinetics package
             print("Computing gyrokinetics IMAS using pyrokinetics")
-            if sim_type == 'CGYRO':
-                fname=out_dir+'/{0}/input.cgyro'.format(suffix)
-                GK_dict = create_gk_dict_with_pyro(fname,'CGYRO')
-            elif sim_type == 'TGLF':
-                fname=out_dir+'/{0}/input.tglf'.format(suffix)
-                GK_dict = create_gk_dict_with_pyro(fname,'TGLF')
-            elif sim_type=='GENE': 
-                fname=out_dir+'/parameters{0}'.format(suffix)
-                GK_dict = create_gk_dict_with_pyro(fname,'GENE')
+            fname_dict = {'CGYRO':out_dir+'/{0}/input.cgyro'.format(suffix),\
+                          'TGLF':out_dir+'/{0}/input.tglf'.format(suffix),\
+                          'GENE':out_dir+'/parameters{0}'.format(suffix)}
+
+            GK_dict, quasi_linear = create_gk_dict_with_pyro(fname_dict[sim_type],sim_type)
 
             ### Upload files to DB 
             print('Uploading files ....')
@@ -1376,6 +1416,8 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
                          "run_suffix": '' + suffix,
                          "keywords": keywords,
                          "simulation_type": sim_type,
+                         "quasi_linear": quasi_linear,
+                         "linked_objectID":linked_id,
                          "confidence": confidence,
                          "comments": comments,
                          "time uploaded": time_upload,
@@ -1384,20 +1426,18 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
             #data dictionary format for nonlinear runs
             if sim_type == 'CGYRO':
                 Diag_dict = {}
-                imag_dict = {}
             elif sim_type == 'TGLF':
                 Diag_dict = {}
-                imag_dict = {}            
             elif sim_type=='GENE':
                 print('='*60)
                 print('\n Working on diagnostics with user specified tspan .....\n')
-                Diag_dict, manual_time_flag, imag_dict = get_diag_with_user_input(out_dir, suffix, manual_time_flag, img_dir)
+                Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
                 print('='*60)
                 for key, val in Diag_dict.items():
                     Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
 
             #combine dictionaries and upload
-            run_data =  {'Meta': meta_dict, 'Files': files_dict, 'gyrokinetics': GK_dict, 'Diagnostics': Diag_dict, 'Plots': imag_dict}
+            run_data =  {'Meta': meta_dict, 'Files': files_dict, 'gyrokinetics': GK_dict, 'Diagnostics': Diag_dict}
             runs_coll.insert_one(run_data).inserted_id  
     
             print('Files with suffix: {} in folder {} uploaded successfully.'.format(suffix, out_dir))
@@ -1440,8 +1480,8 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
     
     global_vars.reset_docs_keys(sim_type)
             
-def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords, comments, sim_type, 
-                    img_dir= './mgk_diagplots', suffixes = None, run_shared=None,
+def upload_to_mongo(db, out_dir, user, linear, confidence, keywords, comments, sim_type, 
+                    linked_id, suffixes = None, run_shared=None,
                     large_files = False, extra=False, verbose=True, manual_time_flag = True, global_vars=None):
     #print(linear)
     #for linear runs
@@ -1455,17 +1495,17 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
             if update == '0':
                 #for now, delete and reupload instead of update - function under construction
                 remove_from_mongo(out_dir, db, runs_coll)   
-                upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
-                              img_dir, suffixes, run_shared,
+                upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
+                              linked_id, suffixes, run_shared,
                               large_files, extra, verbose, manual_time_flag, global_vars)
             elif update == '1':
-                update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir)
+                update_mongo(out_dir, db, runs_coll, user, linear, sim_type, linked_id)
             else:
                 print('Run collection \'' + out_dir + '\' skipped.')
         else:
             print('Folder tag:\n{}\n not detected, creating new.\n'.format(out_dir))
-            upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
-                          img_dir, suffixes, run_shared,
+            upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
+                          linked_id, suffixes, run_shared,
                           large_files, extra, verbose, manual_time_flag, global_vars)
                 
     #for nonlinear runs
@@ -1479,18 +1519,18 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, input_heat, keywords,
             if update == '0':
                 #for now, delete and reupload instead of update - function under construction
                 remove_from_mongo(out_dir, db, runs_coll)   
-                upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type, 
-                              img_dir, suffixes, run_shared,
+                upload_nonlin(db, out_dir, user, confidence,keywords, comments, sim_type, 
+                              linked_id, suffixes, run_shared,
                               large_files, extra, verbose,manual_time_flag, global_vars)
             elif update == '1':
-                update_mongo(out_dir, db, runs_coll, user, linear, sim_type, img_dir)
+                update_mongo(out_dir, db, runs_coll, user, linear, sim_type, linked_id)
 
             else:
                 print('Run collection \'' + out_dir + '\' skipped.')
         else:
             print('Folder tag:\n{}\n not detected, creating new.\n'.format(out_dir))
-            upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments, sim_type,
-                          img_dir, suffixes, run_shared,
+            upload_nonlin(db, out_dir, user, confidence, keywords, comments, sim_type,
+                          linked_id, suffixes, run_shared,
                           large_files, extra, verbose,manual_time_flag, global_vars)
     else:
         exit('Cannot decide if the folder is subject to linear or nonlinear runs.')

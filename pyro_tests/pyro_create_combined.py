@@ -1,4 +1,4 @@
-import json
+import json, bson
 import numpy as np
 from pyrokinetics import Pyro,template_dir
 from pyrokinetics.databases.imas import pyro_to_imas_mapping
@@ -171,6 +171,15 @@ def create_gk_dict_with_pyro(fname,gkcode):
 
     json_data = prune_imas_gk_dict(json_data, linear)
 
+    ## Confirm IMAS size is less than 2MB
+    bson_data = bson.BSON.encode(json_data)
+    imas_size = len(bson_data)/1e6 # IMAS size in Megabytes
+    if imas_size  > 2.0 : 
+        print("Size of IMAS dict: ",imas_size,"MB")
+        print("IMAS size is larger than 2MB. Need to check IMAS content")
+        raise SystemError
+    
+    
     return json_data,quasi_linear
 
 if __name__=="__main__":
@@ -181,10 +190,10 @@ if __name__=="__main__":
     # fname = data_dir+'parameters{0}'.format(suffix)
     # gkcode="GENE"
 
-    # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/upload_datasets/test_nonlin_gene_tracer_efit/"
-    # suffix='_0001'
-    # fname = data_dir+'parameters{0}'.format(suffix)
-    # gkcode="GENE"
+    data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/upload_datasets/test_nonlin_gene_tracer_efit/"
+    suffix='_0001'
+    fname = data_dir+'parameters{0}'.format(suffix)
+    gkcode="GENE"
 
     # data_dir = "test_data/test_cgyro_multi_runs/run1/"
     # fname = data_dir+'input.cgyro'
@@ -206,11 +215,11 @@ if __name__=="__main__":
     # fname = data_dir+'gs2.in'
     # gkcode="GS2"
 
-    data_dir = "test_data/TGLF/TGLF_linear/"
+    # data_dir = "test_data/TGLF/TGLF_linear/"
     # data_dir = "test_data/TGLF/TGLF_transport/"
     # data_dir = "test_data/TGLF/TGLF_transport2/"
-    fname = data_dir+'input.tglf'
-    gkcode="TGLF"
+    # fname = data_dir+'input.tglf'
+    # gkcode="TGLF"
 
     json_data, quasi_linear = create_gk_dict_with_pyro(fname,gkcode)
 

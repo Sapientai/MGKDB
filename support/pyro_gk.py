@@ -1,4 +1,4 @@
-import json
+import json, bson
 import numpy as np
 from pyrokinetics import Pyro,template_dir
 from pyrokinetics.databases.imas import pyro_to_imas_mapping
@@ -110,6 +110,14 @@ def create_gk_dict_with_pyro(fname,gkcode):
 
         json_data = prune_imas_gk_dict(json_data, linear)
 
+        ## Confirm IMAS size is less than 2MB
+        bson_data = bson.BSON.encode(json_data)
+        imas_size = len(bson_data)/1e6 # IMAS size in Megabytes
+        if imas_size  > 2.0 : 
+            print("Size of IMAS dict: ",imas_size,"MB")
+            print("IMAS size is larger than 2MB. Need to check IMAS content")
+            raise SystemError
+    
     except Exception as e: 
         print(e)
         raise SystemError

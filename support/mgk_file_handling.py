@@ -78,6 +78,15 @@ class Global_vars():
             self.Docs_L = []
             self.Keys_L = []
 
+        elif sim_type=='GS2':
+
+            self.Docs = ['gs2.in','gs2.out.nc']    
+            self.Keys = ['gs2_in','gs2_out_nc']    
+
+            #Large files#
+            self.Docs_L = []
+            self.Keys_L = []
+
         #User specified files#
         self.Docs_ex = [] 
         self.Keys_ex = []
@@ -597,6 +606,10 @@ def isLinear(folder_name, sim_type):
                         raise SystemError
                     break
         return linear
+    
+    elif sim_type=='GS2':
+        return True
+    
 
 def isUploaded(out_dir,runs_coll):
     '''
@@ -915,7 +928,7 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
             files = []
             if sim_type=='GENE':
                 files = files + [get_file_list(out_dir, doc+s) for s in suffixes] # get file with path
-            elif sim_type in ['CGYRO','TGLF']:
+            elif sim_type in ['CGYRO','TGLF','GS2']:
                 files = files + [get_file_list(out_dir+'/%s/'%(s), doc) for s in suffixes] # get file with path
 
             assert len(files), "Files specified not found!"
@@ -941,11 +954,13 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
 
                     fname_dict = {'CGYRO':out_dir+'/{0}/input.cgyro'.format(suffix),\
                                 'TGLF':out_dir+'/{0}/input.tglf'.format(suffix),\
-                                'GENE':out_dir+'/parameters{0}'.format(suffix)}
+                                'GENE':out_dir+'/parameters{0}'.format(suffix),\
+                                'GS2': out_dir+'/{0}/gs2.in'.format(suffix)
+                                }
 
                     GK_dict, quasi_linear = create_gk_dict_with_pyro(fname_dict[sim_type],sim_type)
 
-                    if sim_type in ['CGYRO','TGLF']:
+                    if sim_type in ['CGYRO','TGLF','GS2']:
                         Diag_dict = {}
                     elif sim_type=='GENE': 
                         Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
@@ -991,11 +1006,13 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
                 if affect_QoI in ['Y', 'y']:
                     fname_dict = {'CGYRO':out_dir+'/{0}/input.cgyro'.format(suffix),\
                                 'TGLF':out_dir+'/{0}/input.tglf'.format(suffix),\
-                                'GENE':out_dir+'/parameters{0}'.format(suffix)}
+                                'GENE':out_dir+'/parameters{0}'.format(suffix),
+                                'GS2': out_dir+'/{0}/gs2.in'.format(suffix)
+                                }
 
                     GK_dict, quasi_linear = create_gk_dict_with_pyro(fname_dict[sim_type],sim_type)      
 
-                    if sim_type in ['CGYRO','TGLF']:
+                    if sim_type in ['CGYRO','TGLF','GS2']:
                         Diag_dict = {}
                     elif sim_type=='GENE': 
                         Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
@@ -1128,7 +1145,7 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
         if isinstance(run_shared,list):
             output_files += [get_file_list(out_dir, ns) for ns in run_shared]
             
-    elif sim_type in ['CGYRO','TGLF']:
+    elif sim_type in ['CGYRO','TGLF','GS2']:
 
         output_files = [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
         
@@ -1178,7 +1195,9 @@ def upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
             print("Computing gyrokinetics IMAS using pyrokinetics")
             fname_dict = {'CGYRO':out_dir+'/{0}/input.cgyro'.format(suffix),\
                           'TGLF':out_dir+'/{0}/input.tglf'.format(suffix),\
-                          'GENE':out_dir+'/parameters{0}'.format(suffix)}
+                          'GENE':out_dir+'/parameters{0}'.format(suffix),
+                          'GS2': out_dir+'/{0}/gs2.in'.format(suffix)
+                        }
 
             GK_dict, quasi_linear = create_gk_dict_with_pyro(fname_dict[sim_type],sim_type)
 
@@ -1211,7 +1230,7 @@ def upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
             for _id, line in list(object_ids.items()):  # it is necessary because the dict changes size during loop.
                 for Q_name, Key in zip(_docs, _keys):
                     if sim_type=='GENE' :     fname = os.path.join(out_dir,Q_name+suffix)
-                    elif sim_type in ['CGYRO','TGLF'] :  fname = os.path.join(out_dir+'/%s/'%(suffix),Q_name)
+                    elif sim_type in ['CGYRO','TGLF','GS2'] :  fname = os.path.join(out_dir+'/%s/'%(suffix),Q_name)
                     
                     if fname == line:
                         if '.' in Key:
@@ -1260,9 +1279,7 @@ def upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
                          "last_updated": time_upload
                         }  
                    
-            if sim_type == 'CGYRO':
-                Diag_dict = {}
-            elif sim_type == 'TGLF':
+            if sim_type in ['CGYRO','TGLF','GS2']:
                 Diag_dict = {}
             elif sim_type=='GENE': 
                 print('='*60)
@@ -1344,7 +1361,9 @@ def upload_nonlin(db, out_dir, user, confidence, keywords, comments, sim_type,
             print("Computing gyrokinetics IMAS using pyrokinetics")
             fname_dict = {'CGYRO':out_dir+'/{0}/input.cgyro'.format(suffix),\
                           'TGLF':out_dir+'/{0}/input.tglf'.format(suffix),\
-                          'GENE':out_dir+'/parameters{0}'.format(suffix)}
+                          'GENE':out_dir+'/parameters{0}'.format(suffix),
+                          'GS2': out_dir+'/{0}/gs2.in'.format(suffix)
+                        }
 
             GK_dict, quasi_linear = create_gk_dict_with_pyro(fname_dict[sim_type],sim_type)
 
@@ -1376,7 +1395,7 @@ def upload_nonlin(db, out_dir, user, confidence, keywords, comments, sim_type,
             for _id, line in list(object_ids.items()):  
                 for Q_name, Key in zip(_docs, _keys):
                     if sim_type=='GENE' :  fname = os.path.join(out_dir,Q_name+suffix)
-                    elif sim_type in ['CGYRO','TGLF'] :  fname = os.path.join(out_dir+'/%s/'%(suffix),Q_name)
+                    elif sim_type in ['CGYRO','TGLF','GS2'] :  fname = os.path.join(out_dir+'/%s/'%(suffix),Q_name)
                     
                     if fname == line:
                         if '.' in Key:
@@ -1424,9 +1443,7 @@ def upload_nonlin(db, out_dir, user, confidence, keywords, comments, sim_type,
                          "last_updated": time_upload
                         }
             #data dictionary format for nonlinear runs
-            if sim_type == 'CGYRO':
-                Diag_dict = {}
-            elif sim_type == 'TGLF':
+            if sim_type in ['CGYRO','TGLF','GS2']:
                 Diag_dict = {}
             elif sim_type=='GENE':
                 print('='*60)

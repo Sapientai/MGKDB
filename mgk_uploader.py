@@ -34,7 +34,7 @@ def f_parse_args():
     parser.add_argument('-L', '--large_files', dest='large_files', default = False, action='store_true', help='whether or not to include large files')
                         
     parser.add_argument('-K', '--keywords', default = '-', help='relevant keywords for future references, separated by comma')
-    parser.add_argument('-SIM', '--sim_type', choices=['GENE','CGYRO','TGLF'], type=str, help='Type of simulation', required=True)
+    parser.add_argument('-SIM', '--sim_type', choices=['GENE','CGYRO','TGLF','GS2'], type=str, help='Type of simulation', required=True)
     parser.add_argument('-A', '--authenticate', default = None, help='locally saved login info, a .pkl file')
     parser.add_argument('-X', '--exclude', default = None, help='folders to exclude')
     
@@ -94,7 +94,7 @@ if __name__=="__main__":
     print("Processing files for uploading ........")
     #scan through a directory for more than one run
     for count, (dirpath, dirnames, files) in enumerate(os.walk(output_folder)):
-        if ( ( args.sim_type in ['CGYRO','TGLF'] and count==0)  or (args.sim_type=='GENE' and str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1 and str(dirpath) not in exclude_folders) ):    
+        if ( ( args.sim_type in ['CGYRO','TGLF','GS2'] and count==0)  or (args.sim_type=='GENE' and str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1 and str(dirpath) not in exclude_folders) ):    
             print('Scanning in {} *******************\n'.format( str(dirpath)) )
             linear = isLinear(dirpath, args.sim_type)
             if linear == None:

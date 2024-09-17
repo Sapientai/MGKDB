@@ -951,14 +951,8 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
             manual_time_flag = True
             for suffix in suffixes:
                 if affect_QoI in ['Y', 'y']:
-
-                    fname_dict = {'CGYRO':out_dir+'/{0}/input.cgyro'.format(suffix),\
-                                'TGLF':out_dir+'/{0}/input.tglf'.format(suffix),\
-                                'GENE':out_dir+'/parameters{0}'.format(suffix),\
-                                'GS2': out_dir+'/{0}/gs2.in'.format(suffix)
-                                }
-
-                    GK_dict, quasi_linear = create_gk_dict_with_pyro(fname_dict[sim_type],sim_type)
+                    input_fname = f_get_input_fname(out_dir, suffix, sim_type)
+                    GK_dict, quasi_linear = create_gk_dict_with_pyro(input_fname, sim_type)
 
                     if sim_type in ['CGYRO','TGLF','GS2']:
                         Diag_dict = {}
@@ -1004,13 +998,8 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
             manual_time_flag = True
             for suffix in run_suffixes:
                 if affect_QoI in ['Y', 'y']:
-                    fname_dict = {'CGYRO':out_dir+'/{0}/input.cgyro'.format(suffix),\
-                                'TGLF':out_dir+'/{0}/input.tglf'.format(suffix),\
-                                'GENE':out_dir+'/parameters{0}'.format(suffix),
-                                'GS2': out_dir+'/{0}/gs2.in'.format(suffix)
-                                }
-
-                    GK_dict, quasi_linear = create_gk_dict_with_pyro(fname_dict[sim_type],sim_type)      
+                    input_fname = f_get_input_fname(out_dir, suffix, sim_type)
+                    GK_dict, quasi_linear = create_gk_dict_with_pyro(input_fname, sim_type)   
 
                     if sim_type in ['CGYRO','TGLF','GS2']:
                         Diag_dict = {}
@@ -1170,6 +1159,18 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
             
     return object_ids
 
+def f_get_input_fname(out_dir, suffix, sim_type):
+    ''''
+    Get the name of the input file with suffix for the simluation type
+    '''
+    fname_dict = {'CGYRO':out_dir+'/{0}/input.cgyro'.format(suffix),\
+                    'TGLF':out_dir+'/{0}/input.tglf'.format(suffix),\
+                    'GENE':out_dir+'/parameters{0}'.format(suffix),
+                    'GS2': out_dir+'/{0}/gs2.in'.format(suffix)
+                }
+
+    return fname_dict[sim_type]
+
 def upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
                   linked_id, suffixes = None, run_shared = None,
                   large_files=False, extra=False, verbose=True, manual_time_flag = True, global_vars=None):
@@ -1193,13 +1194,8 @@ def upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
 
             ### First compute gyrokinetics IMAS using pyrokinetics package
             print("Computing gyrokinetics IMAS using pyrokinetics")
-            fname_dict = {'CGYRO':out_dir+'/{0}/input.cgyro'.format(suffix),\
-                          'TGLF':out_dir+'/{0}/input.tglf'.format(suffix),\
-                          'GENE':out_dir+'/parameters{0}'.format(suffix),
-                          'GS2': out_dir+'/{0}/gs2.in'.format(suffix)
-                        }
-
-            GK_dict, quasi_linear = create_gk_dict_with_pyro(fname_dict[sim_type],sim_type)
+            input_fname = f_get_input_fname(out_dir, suffix, sim_type)
+            GK_dict, quasi_linear = create_gk_dict_with_pyro(input_fname, sim_type)
 
             ### Upload files to DB 
             print('Uploading files ....')
@@ -1359,13 +1355,8 @@ def upload_nonlin(db, out_dir, user, confidence, keywords, comments, sim_type,
 
             ### First compute gyrokinetics IMAS using pyrokinetics package
             print("Computing gyrokinetics IMAS using pyrokinetics")
-            fname_dict = {'CGYRO':out_dir+'/{0}/input.cgyro'.format(suffix),\
-                          'TGLF':out_dir+'/{0}/input.tglf'.format(suffix),\
-                          'GENE':out_dir+'/parameters{0}'.format(suffix),
-                          'GS2': out_dir+'/{0}/gs2.in'.format(suffix)
-                        }
-
-            GK_dict, quasi_linear = create_gk_dict_with_pyro(fname_dict[sim_type],sim_type)
+            input_fname = f_get_input_fname(out_dir, suffix, sim_type)
+            GK_dict, quasi_linear = create_gk_dict_with_pyro(input_fname, sim_type)
 
             ### Upload files to DB 
             print('Uploading files ....')

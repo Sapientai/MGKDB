@@ -1,0 +1,154 @@
+&collisions_knobs
+ collision_model='none'
+ heating = .false.
+/
+
+!&hyper_knobs
+! hyper_option = 'visc_only'
+! const_amp = .false.
+! isotropic_shear = .false.
+! D_hypervisc = 0.1
+!/
+
+&theta_grid_parameters
+
+ ntheta= 32
+ nperiod= 5
+
+ rhoc = 0.5
+ shat = 0.796
+ qinp = 1.4
+ Rmaj = 2.77778
+ R_geo = 2.77778
+ shift = 0.0
+ akappa = 1.0
+ akappri = 0.0
+ tri = 0.0
+ tripri = 0.0
+/
+&parameters
+ beta = 0.0
+ zeff = 1.0
+/
+&theta_grid_eik_knobs
+ itor = 1
+ iflux = 0
+ irho = 2
+
+ ppl_eq = F
+ gen_eq = F
+ efit_eq = F
+ local_eq = T
+
+ eqfile = 'dskeq.cdf'
+ equal_arc = T
+ bishop = 4
+ s_hat_input = 0.796
+ beta_prime_input = 0.0
+ delrho = 1.e-3
+ isym = 0
+ writelots = F
+/
+&fields_knobs
+ field_option='implicit'
+/
+&gs2_diagnostics_knobs
+ write_moments = T
+ write_hrate = F
+ print_flux_line = F
+ write_nl_flux = F
+ print_line = T
+ write_line = T
+ write_omega = T
+ write_final_fields = T
+ write_g = T
+ write_verr = F
+ write_symmetry = F
+ nwrite=     50
+ navg=       50
+ nsave = 3000
+ omegatinst = 500.0
+ save_for_restart = .false.
+ omegatol = -1.0e-3
+/
+&le_grids_knobs
+ ngauss = 5
+ negrid = 12
+ vcut= 2.5
+/
+&dist_fn_knobs
+ adiabatic_option="iphi00=2"
+ gridfac=   1.0
+ boundary_option="default"
+ mach = 0.0
+/
+
+&kt_grids_knobs
+ grid_option='range'
+/
+&kt_grids_range_parameters
+ naky = 6
+ aky_min = 0.2
+ aky_max = 1.0
+/
+&init_g_knobs
+ chop_side = F
+ phiinit=   1.e-3
+ restart_file = "nc/gs2_cyc_ke_lin.nc"
+ ginit_option= "default"
+/
+&knobs
+ fphi =   1.0
+ fapar =  0.0
+ faperp = 0.0
+ delt = 0.05
+ nstep = 10000
+/
+&species_knobs
+ nspec= 2
+/
+&species_parameters_1
+ z=   1.0
+ mass=   1.0
+ dens=   1.0
+ temp=   1.0
+ tprim=  2.49
+ fprim=  0.8
+ uprim=  0.0
+ vnewk=  0.0
+ type='ion'
+/
+&dist_fn_species_knobs_1
+ fexpr= 0.48
+ bakdif= 0.02
+/
+&species_parameters_2
+ z=   -1.0
+ mass=   5.4e-4
+ dens=   1.0
+ temp=   1.0
+ tprim=  2.49
+ fprim=  0.8
+ uprim=  0.0
+ vnewk=  0.0
+ type='electron'
+/
+&dist_fn_species_knobs_2
+ fexpr= 0.48
+ bakdif= 0.02
+/
+&theta_grid_knobs
+ equilibrium_option='eik'
+/
+&nonlinear_terms_knobs
+ nonlinear_mode='off'
+ cfl = 0.25
+/
+&reinit_knobs
+ delt_adj = 2.0
+ delt_minimum = 1.e-4
+/
+&layouts_knobs
+ layout = 'lxyes'
+ local_field_solve = F
+/

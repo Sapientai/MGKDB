@@ -211,8 +211,13 @@ if __name__=="__main__":
     # fname = data_dir+'input.cgyro'
     # gkcode="CGYRO"
 
-    data_dir = "test_data/GS2_linear/"
+    data_dir = "test_data/GS2_linear/run1_template/"
     fname = data_dir+'gs2.in'
+    # data_dir = "test_data/GS2_linear/run2/"
+    # fname = data_dir+'gs2_cyc_ke_lin.in'
+    data_dir = "test_data/GS2_linear/run3/"
+    fname = data_dir+'gs2.in'
+    
     gkcode="GS2"
 
     # data_dir = "test_data/TGLF/TGLF_linear/"

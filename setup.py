@@ -3,7 +3,10 @@ from setuptools import setup, find_packages
 setup(
     name="MGKDB",
     version="0.1.0",
-    packages=find_packages(),
+    # packages=find_packages(),
+    packages=find_packages(where="src"),
+    # packages=['mgkdb'],
+    package_dir={"":"src"},
     install_requires=[ # dependencies
         'numpy==1.24.3', 
         'h5py', 'bson', 'pymongo'

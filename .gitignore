@@ -1,3 +1,4 @@
 __pycache__/
 *.ipynb_checkpoints
 src/mgkdb/pyro_tests/data
+scratchpad.py

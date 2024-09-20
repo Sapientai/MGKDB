@@ -199,15 +199,15 @@ if __name__=="__main__":
     # fname = data_dir+'input.cgyro'
     # gkcode="CGYRO"
 
-    # data_dir = "pyro_tests/data/test_cgyro_miller/KY_0.30_PX0_0.00/"
-    # data_dir = "pyro_tests/data/CGYRO_linear_scan/ky_0.10/"
+    # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_cgyro_miller/KY_0.30_PX0_0.00/"
+    # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/CGYRO_linear_scan/ky_0.10/"
     # fname = data_dir+'input.cgyro'
     # gkcode="CGYRO"
 
-    # data_dir = "pyro_tests/data/CGYRO_nonlinear1_template/run1/"
-    # data_dir = "pyro_tests/data/CGYRO_nonlinear2/run1/"
-    # data_dir = "pyro_tests/data/CGYRO_nonlinear3_no_apar_saved/run1/"
-    # data_dir = "pyro_tests/data/CGYRO_nonlinear6_runs_multi_ebelli/d_lti00_ge00/"
+    # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/CGYRO_nonlinear1_template/run1/"
+    # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/CGYRO_nonlinear2/run1/"
+    # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/CGYRO_nonlinear3_no_apar_saved/run1/"
+    # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/CGYRO_nonlinear6_runs_multi_ebelli/d_lti00_ge00/"
     # fname = data_dir+'input.cgyro'
     # gkcode="CGYRO"
 

@@ -87,7 +87,9 @@ class Global_vars():
             #Large files#
             self.Docs_L = []
             self.Keys_L = []
-
+        else : 
+            print("Invalid simulation type",sim_type)
+            raise SystemError
         #User specified files#
         self.Docs_ex = [] 
         self.Keys_ex = []
@@ -686,17 +688,17 @@ def f_check_id_exists(db, _id):
     print("Entry %s not found in database, please double check the id"%(_id))
     return False
 
-def f_get_linked_oid(database, args):
+def f_get_linked_oid(database, linked_id_file, linked_id_string):
     '''
     Get linked ObjectID
     '''
 
-    if ((args.linked_id_file is not None) and (args.linked_id_string is not None)): 
+    if ((linked_id_file is not None) and (linked_id_string is not None)): 
         print("Both linked_id_file and lnked_id_string specified. Please choose any one and re-upload")
         raise SystemError
 
-    elif args.linked_id_file is not None:
-        fname = args.linked_id_file
+    elif linked_id_file is not None:
+        fname = linked_id_file
         assert os.path.exists(fname), "File %s does not exist"%(fname)
         print("Input file for OID is %s",fname)
 
@@ -706,8 +708,8 @@ def f_get_linked_oid(database, args):
 
         oid = ObjectId(data_dict['_id'])
 
-    elif args.linked_id_string is not None: 
-        oid = ObjectId(args.linked_id_string)
+    elif linked_id_string is not None: 
+        oid = ObjectId(linked_id_string)
 
     else:  oid = None
 

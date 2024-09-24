@@ -47,25 +47,19 @@ def f_parse_args():
     return parser.parse_args()
 
 ### Main 
-
-if __name__=="__main__":
-    
-    ### Parse arguments 
-    args = f_parse_args()
-    print(args)
-
+def main_upload(target, keywords, exclude, default, sim_type, extra, authenticate, verbose, large_files, linked_id_file, linked_id_string):
     ### Initial setup 
-    output_folder = os.path.abspath(args.target)
-    keywords = args.keywords
+    output_folder = os.path.abspath(target)
+    keywords = keywords
 
-    if args.exclude is not None:
-        exclude_folders = args.exclude.split(',')
+    if exclude is not None:
+        exclude_folders = exclude.split(',')
         exclude_folders = [os.path.join(output_folder, fname) for fname in exclude_folders]
         print('Scanning will skip specified folders:\n {}\n'.format(exclude_folders) )
     else:
         exclude_folders = []
         
-    if args.default in ['T', 'True', '1', 't', 'true']:
+    if default in ['T', 'True', '1', 't', 'true']:
         default = True
         manual_time_flag = False
 
@@ -74,9 +68,9 @@ if __name__=="__main__":
         manual_time_flag = True
     
     ### Update global variables 
-    global_vars = Global_vars(args.sim_type)    
+    global_vars = Global_vars(sim_type)    
     
-    if args.extra: # this will change the global variable
+    if extra: # this will change the global variable
         exfiles = input('Please type FULL file names to update, separated by comma.\n').split(',')
         exkeys  = input('Please type key names for each file you typed, separated by comma.\n').split(',')
         
@@ -84,20 +78,20 @@ if __name__=="__main__":
         global_vars.Keys_ex +=exkeys
 
     ### Connect to database 
-    login = f_login_dbase(args.authenticate)
+    login = f_login_dbase(authenticate)
     database = login.connect()
     user = login.login['user']
 
-    linked_id = f_get_linked_oid(database, args)
+    linked_id = f_get_linked_oid(database, linked_id_file, linked_id_string)
 
     ### Run uploader 
     #######################################################################
     print("Processing files for uploading ........")
     #scan through a directory for more than one run
     for count, (dirpath, dirnames, files) in enumerate(os.walk(output_folder)):
-        if ( ( args.sim_type in ['CGYRO','TGLF','GS2'] and count==0)  or (args.sim_type=='GENE' and str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1 and str(dirpath) not in exclude_folders) ):    
+        if ( ( sim_type in ['CGYRO','TGLF','GS2'] and count==0)  or (sim_type=='GENE' and str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1 and str(dirpath) not in exclude_folders) ):    
             print('Scanning in {} *******************\n'.format( str(dirpath)) )
-            linear = isLinear(dirpath, args.sim_type)
+            linear = isLinear(dirpath, sim_type)
             if linear == None:
                 linear_input = input('Cannot decide if this folder is a linear run or not. Please make the selection manually by typing:\n 1: Linear\n 2: Nonlinear \n 3: Skip this folder \n')
                 if linear_input.strip() == '1':
@@ -118,7 +112,7 @@ if __name__=="__main__":
             keywords_lin = keywords.split('#') + lin                                 
             
             if not default:
-                suffixes = get_suffixes(dirpath, args.sim_type)
+                suffixes = get_suffixes(dirpath, sim_type)
                 print("Found in {} these suffixes:\n {}".format(dirpath, suffixes))
                 
                 suffixes = input('Which run do you want to upload? Separate them by comma. \n Press q to skip. Press ENTER to upload ALL.\n')
@@ -153,10 +147,19 @@ if __name__=="__main__":
             
             # Send run to upload_to_mongo to be uploaded
             upload_to_mongo(database, dirpath, user, linear, confidence, 
-                            keywords_lin, comments, args.sim_type, linked_id, suffixes, run_shared,
-                            args.large_files, args.extra, args.verbose, manual_time_flag,global_vars)
+                            keywords_lin, comments, sim_type, linked_id, suffixes, run_shared,
+                            large_files, extra, verbose, manual_time_flag,global_vars)
 
     if len(global_vars.troubled_runs):
         print("The following runs are skipped due to exceptions.")
         for r in global_vars.troubled_runs:
             print(r)
+
+## Runner 
+if __name__=="__main__":
+    
+    ### Parse arguments 
+    args = f_parse_args()
+    print(args)
+
+    main_upload(**vars(args))

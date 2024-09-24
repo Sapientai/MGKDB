@@ -102,7 +102,7 @@ def create_gk_dict_with_pyro(fname,gkcode):
         idspy.fill_default_values_ids(gkdict)
         gkdict = pyro_to_imas_mapping(
                 pyro,
-                comment=f"Testing IMAS %s"%(gkcode),
+                comment=f"Computing IMAS for %s"%(gkcode),
                 ids=gkdict
             )
         

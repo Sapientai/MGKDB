@@ -7,7 +7,6 @@
 
 
 import sys
-sys.path.append('support')
 
 #from mgk_file_handling import *
 import numpy as np
@@ -16,6 +15,12 @@ import matplotlib.pyplot as plt
 from fieldlib import *
 from ParIO import * 
 from finite_differences import *
+
+
+import pydiag.utils.comm as comm
+import pydiag.data.datafiles as datafiles
+from pydiag.utils.gkdb import GKDB_linear, GKDB_nonlin
+
 from sys import path
 from sys import exit
 import os
@@ -126,12 +131,6 @@ def get_suffixes(out_dir, sim_type):
         suffixes = next(os.walk(out_dir))[1]
 
     return suffixes
-
-
-import pydiag.utils.comm as comm
-import pydiag.data.datafiles as datafiles
-from pydiag.utils.gkdb import GKDB_linear, GKDB_nonlin
-
 
 def get_gyrokinetics_from_dir(out_dir,user, linear):
     suffixes = get_suffixes(out_dir)

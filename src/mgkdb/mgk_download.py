@@ -35,28 +35,19 @@ def f_parse_args():
     return parser.parse_args()
 
 ### Main 
+def main_download(target, file, objectID, destination, saveas, query, authenticate, collection):
 
-if __name__=="__main__":
+    OID = objectID
+    op_fname = saveas
 
-    ### Parse arguments 
-    args = f_parse_args()
-    # print(args)
-
-    ### Initial setup 
-    tar_dir = args.target
-    filepath = args.file
-    OID = args.objectID
-    destination = args.destination
-    op_fname = args.saveas
-    query = args.query
 
     ### Connect to database 
-    login = f_login_dbase(args.authenticate)
+    login = f_login_dbase(authenticate)
     database = login.connect()
 
     ## Dict to convert from argument to collection name in database
     collection_dict={'linear':'LinearRuns','nonlinear':'NonlinRuns','files':'fs.files'}
-    collection_name =  getattr(database,collection_dict[args.collection])
+    collection_name =  getattr(database,collection_dict[collection])
 
     if query:
         print("working on query: {} ......".format(query))
@@ -64,17 +55,27 @@ if __name__=="__main__":
         for oid in found:
             download_runs_by_id(database, collection_name, oid, destination)
 
-    elif filepath:
-        download_file_by_path(database, filepath, destination, revision=-1, session=None)   
+    elif file:
+        download_file_by_path(database, file, destination, revision=-1, session=None)   
         
     elif OID:
-        if args.collection=='files': 
+        if collection=='files': 
             download_file_by_id(database, ObjectId(OID), destination, op_fname, session = None)
-        elif args.collection in ['linear','nonlinear']:
+        elif collection in ['linear','nonlinear']:
             download_runs_by_id(database, collection_name, ObjectId(OID), destination)
         else : 
-            print("Invalid option for collection for OID",args.collection)
+            print("Invalid option for collection for OID",collection)
             raise SystemError
-    elif tar_dir:
-        download_dir_by_name(database, collection_name, tar_dir, destination)
+    elif target:
+        download_dir_by_name(database, collection_name, target, destination)
 
+
+
+
+if __name__=="__main__":
+
+    ### Parse arguments 
+    args = f_parse_args()
+    # print(args)
+
+    main_download(**vars(args))

@@ -20,7 +20,7 @@ classifiers = [
 ]
 dependencies = [
     'numpy==1.24.3', 
-    'h5py', 'bson', 'pymongo'
+    'h5py', 'pymongo'
 ]
 
 [project.urls]

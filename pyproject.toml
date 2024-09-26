@@ -27,7 +27,7 @@ dependencies = [
 Homepage = "https://github.com/Sapientai/MGKDB"
 
 [
-too.setuptools
+tool.setuptools
 ]
 package_dir={""="src"}
 

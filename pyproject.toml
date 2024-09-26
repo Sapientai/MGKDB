@@ -26,8 +26,10 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/Sapientai/MGKDB"
 
+
 [tool.setuptools]
-package_dir={""="src"}
+package_dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+

@@ -7,10 +7,10 @@ name = "MGKDB"
 version = "0.1.0"
 description = "Tools to acess MongoDB for nuclear fusion simulations"
 authors = [
-"Craig Michoski <michoski@gmail.com>",
-"Venkitesh Ayyar <venkiteshayyar@gmail.com>",
-"Dongyang Kuang <dykuangii@gmail.com>",
-"David Hatch <drdrhatch@googlemail.com>"
+{name = "Craig Michoski", email = "michoski@gmail.com"}
+{name = "Venkitesh Ayyar", email = "venkiteshayyar@gmail.com"}
+{name = "Dongyang Kuang", email = "dykuangii@gmail.com"}
+{name = "David Hatch", email = "drdrhatch@googlemail.com"}
 ]
 license = {text = "MIT"}
 classifiers = [

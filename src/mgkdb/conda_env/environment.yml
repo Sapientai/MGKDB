@@ -1,4 +1,4 @@
-name: test_mgkdb
+name: mgkdb
 channels: 
   - conda-forge
   - defaults

@@ -7,7 +7,7 @@ Created on Thu Dec 12 12:49:43 2019
 Functions for handling credentials
 """
 
-from pymongo import MongoClient
+import pymongo
 import pickle
 import os
 
@@ -42,9 +42,8 @@ class mgk_login(object):
     #   self.login.update(dict_to_update)
                 
     def connect(self):
-
-        # client = MongoClient('mongodb://%s:%s@%s:%s/%s'%(self.login['user'],self.login['pwd'],self.login['server'],self.login['port'],self.login['dbname']))
-        client = MongoClient('mongodb://{user}:{pwd}@{server}:{port}/{dbname}'.format(**self.login))
+        
+        client = pymongo.MongoClient('mongodb://{user}:{pwd}@{server}:{port}/{dbname}'.format(**self.login))
         database = client[self.login['dbname']]
         return database
         

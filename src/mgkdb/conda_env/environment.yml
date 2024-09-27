@@ -1,4 +1,4 @@
-name: mgkdb
+name: test_mgkdb
 channels: 
   - conda-forge
   - defaults
@@ -11,4 +11,4 @@ dependencies:
     - scipy==1.10.1
     - h5py==3.9.0
     - pymongo==3.9.0
-
+    - git+https://github.com/pyro-kinetics/pyrokinetics.git

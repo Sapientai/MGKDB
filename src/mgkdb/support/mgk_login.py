@@ -42,9 +42,6 @@ class mgk_login(object):
     #   self.login.update(dict_to_update)
                 
     def connect(self):
-        
-        # database = MongoClient(self.login['server'].strip(), int(self.login['port']) )[self.login['dbname'].strip()]
-        # database.authenticate(self.login['user'].strip(), self.login['pwd'].strip())
 
         # client = MongoClient('mongodb://%s:%s@%s:%s/%s'%(self.login['user'],self.login['pwd'],self.login['server'],self.login['port'],self.login['dbname']))
         client = MongoClient('mongodb://{user}:{pwd}@{server}:{port}/{dbname}'.format(**self.login))

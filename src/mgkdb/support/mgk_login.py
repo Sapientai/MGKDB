@@ -7,7 +7,7 @@ Created on Thu Dec 12 12:49:43 2019
 Functions for handling credentials
 """
 
-from pymongo import MongoClient
+import pymongo
 import pickle
 import os
 
@@ -42,10 +42,12 @@ class mgk_login(object):
     #   self.login.update(dict_to_update)
                 
     def connect(self):
-        
-        database = MongoClient(self.login['server'].strip(), int(self.login['port']) )[self.login['dbname'].strip()]
-        database.authenticate(self.login['user'].strip(), self.login['pwd'].strip())
-        
+        ## Old way for pymongo 3.*
+        # database = MongoClient(self.login['server'].strip(), int(self.login['port']) )[self.login['dbname'].strip()]
+        # database.authenticate(self.login['user'].strip(), self.login['pwd'].strip())
+
+        client = pymongo.MongoClient('mongodb://{user}:{pwd}@{server}:{port}/{dbname}'.format(**self.login))
+        database = client[self.login['dbname']]
         return database
         
 def f_login_dbase(authenticate):

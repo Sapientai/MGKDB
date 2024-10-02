@@ -1,7 +1,7 @@
 import numpy as np
 from os.path import getsize
 
-from pydiag.data.base_file import BinaryFile
+from .base_file import BinaryFile
 
 
 class MomFile(BinaryFile):

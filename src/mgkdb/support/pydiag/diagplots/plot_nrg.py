@@ -1,7 +1,7 @@
 import numpy as np
-import pydiag.utils.averages as av
-from pydiag.diagplots.baseplot import Plotting, plt
-from pydiag.utils import errors as err
+import ..utils.averages as av
+from .baseplot import Plotting, plt
+from .utils import errors as err
 
 
 class PlotNrgdata(Plotting):

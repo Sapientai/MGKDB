@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 
-import utils.aux_func as aux_func
-import utils.averages as averages
-from diagnostics.baseplot import Plotting
-from diagnostics.diagnostic import Diagnostic
+import ..utils.aux_func as aux_func
+import ..utils.averages as averages
+from .baseplot import Plotting
+from .diagnostic import Diagnostic
 
 
 class DiagSlicesgene3d(Diagnostic):

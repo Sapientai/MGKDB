@@ -1,7 +1,7 @@
 """ Module with the container objects defining velocitry grid and weights"""
 # -*- coding: utf-8 -*-
 import numpy as np
-from putils.par_io import Parameters
+from .par_io import Parameters
 
 class SpatialGrid:
     """ The numerical grid based on the parameters of a GENE run

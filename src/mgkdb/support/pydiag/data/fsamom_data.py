@@ -5,8 +5,8 @@ Contains the infrastructure to handle fsamom_spec_fext files
 """
 import numpy as np
 from bisect import bisect_left
-from pydiag.data.base_file import TimeSeries
-from pydiag.utils.ParIO import Parameters
+from .base_file import TimeSeries
+from ..utils.ParIO import Parameters
 
 
 class FSAmomFile(TimeSeries):

@@ -4,10 +4,10 @@ import warnings
 from tkinter import END
 import matplotlib.pyplot as plt
 import numpy as np
-from putils import fourier
-from diagnostics.diagnostic import Diagnostic
-from diagnostics.baseplot import Plotting
-from diagnostics.diagspace import DiagSpace
+from ..putils import fourier
+from .diagnostic import Diagnostic
+from .baseplot import Plotting
+from .diagspace import DiagSpace
 import os
 
 class DiagCrossPhase(Diagnostic):

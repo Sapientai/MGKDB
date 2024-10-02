@@ -11,8 +11,8 @@ import numpy as np
 #matplotlib.use('GTK') # uncomment if using MAC
 import scipy.linalg as linalg
 import matplotlib.pyplot as plt
-from putils import averages
-from diagnostics.baseplot import Plotting
+from .putils import averages
+from .diagnostics.baseplot import Plotting
 import time
 import os
 

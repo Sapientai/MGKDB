@@ -40,9 +40,9 @@ import json
 from time import strftime
 import pickle
 
-from pyro_gk import *
-from mgk_post_processing import *
-from ParIO import * 
+from .pyro_gk import *
+from .mgk_post_processing import *
+from .ParIO import * 
 #=======================================================
 
     

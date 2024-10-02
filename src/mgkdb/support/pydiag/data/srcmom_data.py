@@ -3,7 +3,7 @@
 from os.path import getsize
 import numpy as np
 
-from pydiag.data.base_file import BinaryFile, TimeSeries
+from .base_file import BinaryFile, TimeSeries
 
 
 class SrcmomFile(BinaryFile):

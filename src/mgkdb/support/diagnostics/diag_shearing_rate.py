@@ -5,8 +5,8 @@ from tkinter import END
 import matplotlib.pyplot as plt
 import numpy as np
 
-import putils.averages as averages
-import putils.derivatives as deriv
+import ..putils.averages as averages
+import ..putils.derivatives as deriv
 from .baseplot import Plotting
 from .diagnostic import Diagnostic
 import os

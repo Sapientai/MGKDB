@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import putils.averages as averages
 
-from diagnostics.diagnostic import Diagnostic
-from diagnostics.baseplot import Plotting
-from diagnostics.diagspace import DiagSpace
+from .diagnostic import Diagnostic
+from .baseplot import Plotting
+from .diagspace import DiagSpace
 
 
 class DiagContours(Diagnostic):

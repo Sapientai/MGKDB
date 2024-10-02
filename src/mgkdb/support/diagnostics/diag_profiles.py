@@ -5,9 +5,9 @@ import h5py
 import matplotlib.pyplot as plt
 import numpy as np
 
-import utils.averages as averages
-from diagnostics.baseplot import Plotting
-from diagnostics.diagnostic import Diagnostic
+import ..utils.averages as averages
+from .baseplot import Plotting
+from .diagnostic import Diagnostic
 
 
 class DiagProfiles(Diagnostic):

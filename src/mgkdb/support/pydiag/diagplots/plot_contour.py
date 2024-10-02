@@ -6,12 +6,12 @@ import numpy as np
 import warnings
 import multiprocessing
 
-import pydiag.diagplots.baseplot
-from pydiag.data.slices import MomFieldSlice
-from pydiag.utils.comm import DiagSpace
+import .baseplot
+from ..data.slices import MomFieldSlice
+from ..utils.comm import DiagSpace
 
-import pydiag.utils.averages as averages
-import pydiag.utils.geom
+import ..utils.averages as averages
+import ..utils.geom
 
 
 class MomFieldContour(object):

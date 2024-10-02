@@ -5,12 +5,12 @@ import numpy as np
 import warnings
 from multiprocessing.dummy import Pool
 
-from pydiag.diagplots.baseplot import Plotting
-from pydiag.data.slices import MomFieldSlice
-from pydiag.utils.comm import DiagSpace
+from .baseplot import Plotting
+from ..data.slices import MomFieldSlice
+from ..utils.comm import DiagSpace
 
-import pydiag.utils.averages as averages
-import pydiag.utils.geom
+import ..utils.averages as averages
+import ..utils.geom
 
 
 class AmplitudeSpectra(object):

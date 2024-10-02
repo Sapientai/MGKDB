@@ -9,9 +9,9 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 
-import utils.aux_func as aux_func
-from diagnostics.baseplot import Plotting
-from diagnostics.diagnostic import Diagnostic
+import ..utils.aux_func as aux_func
+from .baseplot import Plotting
+from .diagnostic import Diagnostic
 
 
 class DiagChivsGradientgene3d(Diagnostic):

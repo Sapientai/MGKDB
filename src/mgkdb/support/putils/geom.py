@@ -1,7 +1,7 @@
 """Module containing the treatment of GENE's geometry output"""
 import numpy as np
 import h5py
-from putils.par_io import Parameters
+from .par_io import Parameters
 import os
 import matplotlib.pyplot as plt
 

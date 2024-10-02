@@ -2,9 +2,9 @@
 
 
 import matplotlib.pyplot as plt
-from pydiag.diagplots.baseplot import Plotting
-from pydiag.data.srcmom_data import SrcmomSeries
-from pydiag.utils.averages import mytrapz
+from .baseplot import Plotting
+from ..data.srcmom_data import SrcmomSeries
+from ..utils.averages import mytrapz
 
 
 class PlotSrcmomAverage(Plotting):

@@ -1,8 +1,8 @@
 """plotfsamom.py: Module to do the plotting of flux-surface averaged moments """
 
 import numpy as np
-import pydiag.utils.averages as av
-from pydiag.diagplots.baseplot import plt, Plotting
+import ..utils.averages as av
+from .baseplot import plt, Plotting
 
 
 class PlotFSA(Plotting):

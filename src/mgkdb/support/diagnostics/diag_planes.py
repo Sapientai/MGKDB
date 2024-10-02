@@ -6,9 +6,9 @@ import numpy as np
 import scipy.interpolate as interp
 import matplotlib.pyplot as plt
 import matplotlib.tri as mtri
-from putils.fourier import kx_to_x, ky_to_y
-#from diagnostics.baseplot import Plotting
-from diagnostics.diagnostic import Diagnostic
+from ..putils.fourier import kx_to_x, ky_to_y
+#from .baseplot import Plotting
+from .diagnostic import Diagnostic
 
 
 class DiagPlanes(Diagnostic):

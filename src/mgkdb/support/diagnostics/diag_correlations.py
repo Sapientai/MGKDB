@@ -4,10 +4,10 @@ import os
 import h5py
 import matplotlib.pyplot as plt
 import numpy as np
-import putils.averages as averages
-import putils.fourier as fourier
-from diagnostics.baseplot import Plotting
-from diagnostics.diagnostic import Diagnostic
+import ..putils.averages as averages
+import ..putils.fourier as fourier
+from .baseplot import Plotting
+from .diagnostic import Diagnostic
 
 class DiagCorrelations(Diagnostic):
     # pylint: disable=invalid-name

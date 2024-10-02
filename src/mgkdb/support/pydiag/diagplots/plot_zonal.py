@@ -1,12 +1,12 @@
 """ Classes to do plots of the potential and its derivatives """
 import numpy as np
-import pydiag.utils.averages as av
-from pydiag.diagplots.baseplot import plt, Plotting
-import pydiag.utils.fourier as fourier
-from pydiag.utils import errors as err
-from pydiag.utils.geom import Geometry
-import pydiag.data.slices
-from pydiag.utils.comm import DiagSpace
+import ..utils.averages as av
+from .baseplot import plt, Plotting
+import ..utils.fourier as fourier
+from ..utils import errors as err
+from ..utils.geom import Geometry
+import ..data.slices
+from ..utils.comm import DiagSpace
 
 
 class ZonalAverage(pydiag.data.slices.MomFieldSlice):

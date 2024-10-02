@@ -5,9 +5,9 @@ including local scans derived from global profiles and scans producing neoclassi
 """
 import numpy as np
 
-from pydiag.utils.ParIO import Parameters
-from pydiag.utils.comm import CommonData
-from pydiag.data.nrgdata import NrgFile
+from ..utils.ParIO import Parameters
+from ..utils.comm import CommonData
+from .nrgdata import NrgFile
 
 
 class Scandata:

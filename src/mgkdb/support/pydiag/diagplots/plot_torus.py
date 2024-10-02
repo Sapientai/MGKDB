@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 import matplotlib.tri as mtri
 import matplotlib.animation as animation
 
-import pydiag.utils.comm
-import pydiag.utils.geom
-import pydiag.utils.averages
-import pydiag.data.slices
-import pydiag.diagplots.baseplot
+import ..utils.comm
+import ..utils.geom
+import ..utils.averages
+import ..data.slices
+import .baseplot
 
 import multiprocessing
 

@@ -5,14 +5,14 @@ import datetime
 import numpy as np
 import warnings
 from collections import OrderedDict
-import pydiag.utils.geom
-import pydiag.utils.comm
-import pydiag.data.omega_eigenvalue as eigenvalue
+import .geom
+import .comm
+import ..data.omega_eigenvalue as eigenvalue
 import json
-import pydiag.utils.averages as averages
+import .averages as averages
 import matplotlib.pyplot as plt #remove later
-import pydiag.diagplots.plot_ball as ballooning
-import pydiag.data.nrgdata as nrg
+import ..diagplots.plot_ball as ballooning
+import ..data.nrgdata as nrg
 from scipy import interpolate
 
 class GEOMFFT(object):

@@ -1,8 +1,8 @@
-import pydiag.data.fieldlib
-import pydiag.data.momlib
-import pydiag.data.profile_data
-import pydiag.data.nrgdata
-import pydiag.data.srcmom_data
+import .fieldlib
+import .momlib
+import .profile_data
+import .nrgdata
+import .srcmom_data
 
 
 class RunDataFiles(object):

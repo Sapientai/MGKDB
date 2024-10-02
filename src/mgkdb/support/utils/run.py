@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from utils.par_io import Parameters
-from utils.geom import Geometry
-from data.nrgdata import NrgFile
-from data.data import Data
-from data.profiledata import ProfileData
+from .par_io import Parameters
+from .geom import Geometry
+from ...data.nrgdata import NrgFile
+from ...data.data import Data
+from ...data.profiledata import ProfileData
 
 class Run:
     """ Class containing basic information on a simulation data set"""

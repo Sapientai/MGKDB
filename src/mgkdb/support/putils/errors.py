@@ -3,7 +3,7 @@
 """
 import numpy as np
 from multiprocessing.dummy import Pool as ThreadPool
-from putils.averages import mytrapz
+from .averages import mytrapz
 
 
 def autocorrtime(data, timefld):

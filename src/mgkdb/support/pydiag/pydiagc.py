@@ -7,25 +7,25 @@ import os
 import matplotlib.pyplot as plt
 from multiprocessing.dummy import Pool
 
-import pydiag.data.datafiles as datafiles
-import pydiag.data.srcmom_data
-import pydiag.data.nrgdata as nrg
-import pydiag.diagplots.plot_zonal as pzf
-import pydiag.diagplots.plot_fsamom as pfsa
-import pydiag.diagplots.plot_probdensfunc as ppdf
-import pydiag.utils.averages
-import pydiag.utils.comm as comm
-import pydiag.utils.gkdb as gkdb
-import pydiag.utils.geomfft as geomfft
-import pydiag.diagplots.plot_spectra as spectra
-import pydiag.diagplots.plot_contour as contour
-import pydiag.diagplots.plot_torus as torus
-import pydiag.diagplots.plot_ball as ballooning
-import pydiag.diagplots.plot_anisotropy as anisotropy
-from pydiag.data import profile_data, fsamom_data
-from pydiag.diagplots import plot_profiles, plot_nrg
-from pydiag.diagplots import plot_srcmom
-from pydiag.data.base_file import gluetimetraces
+import .pydiag.data.datafiles as datafiles
+import .pydiag.data.srcmom_data
+import .pydiag.data.nrgdata as nrg
+import .pydiag.diagplots.plot_zonal as pzf
+import .pydiag.diagplots.plot_fsamom as pfsa
+import .pydiag.diagplots.plot_probdensfunc as ppdf
+import .pydiag.utils.averages
+import .pydiag.utils.comm as comm
+import .pydiag.utils.gkdb as gkdb
+import .pydiag.utils.geomfft as geomfft
+import .pydiag.diagplots.plot_spectra as spectra
+import .pydiag.diagplots.plot_contour as contour
+import .pydiag.diagplots.plot_torus as torus
+import .pydiag.diagplots.plot_ball as ballooning
+import .pydiag.diagplots.plot_anisotropy as anisotropy
+from .pydiag.data import profile_data, fsamom_data
+from .pydiag.diagplots import plot_profiles, plot_nrg
+from .pydiag.diagplots import plot_srcmom
+from .pydiag.data.base_file import gluetimetraces
 
 xrange = (None, None)
 yrange = (None, None)

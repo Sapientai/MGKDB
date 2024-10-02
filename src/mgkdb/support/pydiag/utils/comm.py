@@ -1,7 +1,7 @@
 import numpy as np
 import warnings
 #import os
-from pydiag.utils.ParIO import Parameters
+from .ParIO import Parameters
 
 
 class CommonData(object):

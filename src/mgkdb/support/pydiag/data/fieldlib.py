@@ -1,7 +1,7 @@
 from os.path import getsize
 
 import numpy as np
-import pydiag.data.base_file
+import .base_file
 
 
 class FieldFile(pydiag.data.base_file.BinaryFile):

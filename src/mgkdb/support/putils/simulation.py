@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from putils.run import Run
-from data.data import Data
+from .run import Run
+from ..data.data import Data
 import os
 
 class Simulation:

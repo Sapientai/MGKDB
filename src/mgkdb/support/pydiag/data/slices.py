@@ -1,9 +1,9 @@
 import numpy as np
 import warnings
-import pydiag.utils.averages as avg
-from pydiag.utils.geom import Geometry
-from pydiag.data.base_file import TimeSeries
-import pydiag.utils.fourier as fourier
+import ..utils.averages as avg
+from ..utils.geom import Geometry
+from .base_file import TimeSeries
+import ..utils.fourier as fourier
 
 
 class MomFieldSlice(TimeSeries):

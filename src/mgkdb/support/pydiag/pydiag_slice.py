@@ -3,8 +3,8 @@
 import argparse
 import os
 
-import pydiag.data.slices as sli
-import pydiag.utils.comm as comm
+import ..data.slices as sli
+import ..utils.comm as comm
 
 xrange = (None, None)
 yrange = (None, None)

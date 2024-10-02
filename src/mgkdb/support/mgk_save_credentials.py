@@ -10,7 +10,7 @@ For downloading files from mgk_fusion in shell
 import sys
 import os
 from pymongo import MongoClient
-from mgk_login import mgk_login
+from .mgk_login import mgk_login
 
 ### Main 
 if __name__=="__main__":

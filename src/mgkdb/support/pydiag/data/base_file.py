@@ -5,7 +5,7 @@ from bisect import bisect_left, bisect_right
 import mmap
 
 import numpy as np
-import pydiag.utils.averages as av
+import ..utils.averages as av
 
 
 class BinaryFile(object):

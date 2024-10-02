@@ -3,9 +3,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import h5py
-import utils.averages as averages
-from diagnostics.diagnostic import Diagnostic
-from diagnostics.baseplot import Plotting
+import ..utils.averages as averages
+from .diagnostic import Diagnostic
+from .baseplot import Plotting
 
 
 class DiagDerivprofilegene3d(Diagnostic):

@@ -1,7 +1,7 @@
 """ This module contains a number of (semi-)analytic predictions from neoclassical theory"""
 
 import numpy as np
-import pydiag.utils.averages as av
+import .averages as av
 import scipy.integrate as intg
 import scipy.special as sps
 

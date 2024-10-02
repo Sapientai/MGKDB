@@ -5,7 +5,7 @@ Module handling neoclass files
 import csv
 import numpy as np
 
-from pydiag.data.base_file import TimeSeries
+from .base_file import TimeSeries
 
 
 class NeoclassFile(TimeSeries):

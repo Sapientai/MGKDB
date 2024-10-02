@@ -3,9 +3,9 @@
 from tkinter import END
 import matplotlib.pyplot as plt
 import numpy as np
-import putils.averages as avg
-from diagnostics.baseplot import Plotting
-from diagnostics.diagnostic import Diagnostic
+import ..putils.averages as avg
+from .baseplot import Plotting
+from .diagnostic import Diagnostic
 
 
 class DiagFieldMomSnapshots(Diagnostic):

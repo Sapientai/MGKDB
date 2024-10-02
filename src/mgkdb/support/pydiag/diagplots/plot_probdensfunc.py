@@ -4,7 +4,7 @@ Module for plotting of probability density functions
 
 import numpy as np
 from matplotlib.colors import LogNorm
-from pydiag.diagplots.baseplot import plt, mpl, Plotting
+from .baseplot import plt, mpl, Plotting
 
 
 class PlotProfilePdf(Plotting):

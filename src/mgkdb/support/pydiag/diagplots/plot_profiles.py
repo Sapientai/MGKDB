@@ -1,9 +1,9 @@
 """PlotProfiles.py: Module to do the plotting of profile diagnostic outputput """
 
 import numpy as np
-import pydiag.utils.averages as av
-from pydiag.utils import errors as err, nc_predictions
-from pydiag.diagplots.baseplot import plt, Plotting
+import ..utils.averages as av
+from ..utils import errors as err, nc_predictions
+from .baseplot import plt, Plotting
 
 
 def printaverageflux(prdlist, xmin, xmax):

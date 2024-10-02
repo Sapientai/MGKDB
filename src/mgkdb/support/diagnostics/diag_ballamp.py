@@ -6,10 +6,10 @@ from tkinter import END
 import matplotlib.pyplot as plt
 import numpy as np
 
-import putils.averages as averages
-from diagnostics.baseplot import Plotting
-from diagnostics.diagnostic import Diagnostic
-from putils.derivatives import derivativeO1
+import ..putils.averages as averages
+from .baseplot import Plotting
+from .diagnostic import Diagnostic
+from ..putils.derivatives import derivativeO1
 from scipy import integrate
 
 class DiagBallamp(Diagnostic):

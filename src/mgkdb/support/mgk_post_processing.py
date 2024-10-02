@@ -12,14 +12,14 @@ import sys
 import numpy as np
 import optparse as op
 import matplotlib.pyplot as plt
-from fieldlib import *
-from ParIO import * 
-from finite_differences import *
+from .fieldlib import *
+from .ParIO import * 
+from .finite_differences import *
 
 
-import pydiag.utils.comm as comm
-import pydiag.data.datafiles as datafiles
-from pydiag.utils.gkdb import GKDB_linear, GKDB_nonlin
+import .pydiag.utils.comm as comm
+import .pydiag.data.datafiles as datafiles
+from .pydiag.utils.gkdb import GKDB_linear, GKDB_nonlin
 
 from sys import path
 from sys import exit
@@ -164,20 +164,20 @@ def get_gyrokinetics_from_run(out_dir, suffix, user, linear, tspan = None):
     
     return tst.gkdict
 
-#from putils.units import Units
-#from putils.par_io import Parameters as Param
-from putils.loader import Loader
-from data.data import Data
-#from putils.geom import Geometry
-from putils.run import Run
-from putils.simulation import Simulation
-#from putils.spatial_grid import SpatialGrid
-#from putils.vsp_grid import VspGrid
-#from data.base_file import createGENEfile
+#from .putils.units import Units
+#from .putils.par_io import Parameters as Param
+from .putils.loader import Loader
+from .data.data import Data
+#from .putils.geom import Geometry
+from .putils.run import Run
+from .putils.simulation import Simulation
+#from .putils.spatial_grid import SpatialGrid
+#from .putils.vsp_grid import VspGrid
+#from .data.base_file import createGENEfile
 
-from diagnostics.diag_flux_spectra import DiagFluxSpectra
-from diagnostics.diag_amplitude_spectra import DiagAmplitudeSpectra
-from diagnostics.diag_field_mom_snapshots import DiagFieldMomSnapshots
+from .diagnostics.diag_flux_spectra import DiagFluxSpectra
+from .diagnostics.diag_amplitude_spectra import DiagAmplitudeSpectra
+from .diagnostics.diag_field_mom_snapshots import DiagFieldMomSnapshots
 
 def get_diag_from_run(out_dir, suffix, t_span = None):
 #    t_start = 0.0 # use start/end time in nrg files?

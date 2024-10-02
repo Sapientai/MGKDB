@@ -4,13 +4,13 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from multiprocessing.dummy import Pool
 
-from pydiag.diagplots.baseplot import Plotting
-from pydiag.data.slices import MomFieldSlice
+from .baseplot import Plotting
+from ..data.slices import MomFieldSlice
 
-from pydiag.utils.comm import DiagSpace
-import pydiag.utils.averages as averages
-import pydiag.utils.fourier as fourier
-from pydiag.utils import errors as err
+from .comm import DiagSpace
+import .averages as averages
+import .fourier as fourier
+from ..utils import errors as err
 
 class Anisotropy(object):
     """ Class for evaluating the scale-dependent anisotropy of magnetic field

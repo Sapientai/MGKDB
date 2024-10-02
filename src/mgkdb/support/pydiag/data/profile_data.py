@@ -7,9 +7,9 @@ Also includes nustar and the Chang-Hinton neoclassical heat flux prediction
 import math
 import numpy as np
 
-from pydiag.data.base_file import TimeSeries
-from pydiag.utils.geom import Geometry
-from pydiag.utils.nc_predictions import chang_hinton
+from .base_file import TimeSeries
+from ..utils.geom import Geometry
+from ..utils.nc_predictions import chang_hinton
 
 
 class ProfileFile(TimeSeries):

@@ -1,12 +1,12 @@
 """ Module with the container objects for single simulation data"""
 # -*- coding: utf-8 -*-
 from pathlib import Path
-from putils.par_io import Parameters
-from putils.vsp_grid import VspGrid
-from putils.spatial_grid import SpatialGrid
-from data.profiledata import ProfileData
-from putils.geom import Geometry
-from putils.units import Units
+from .par_io import Parameters
+from .vsp_grid import VspGrid
+from .spatial_grid import SpatialGrid
+from ..data.profiledata import ProfileData
+from .geom import Geometry
+from .units import Units
 import numpy as np
 import os
 

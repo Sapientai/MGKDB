@@ -4,7 +4,7 @@ import os
 import h5py
 import matplotlib.pyplot as plt
 import numpy as np
-import ..putils.averages as avg
+from ..putils.averages import flux_spectra_yz_av, flux_spectra_xz_av, xy_av3d_zprofile, mytrapz
 from .baseplot import Plotting
 from .diagnostic import Diagnostic
 from copy import deepcopy
@@ -66,14 +66,14 @@ class DiagFluxSpectra(Diagnostic):
             u_par = data.mom[i_spec].u_par(step=steps['mom'], extension=extensions['mom'])
 
             G_es = vE_x*np.conj(dens)*n0/run.geometry.Cxy
-            __spectra_kx[i_spec,0,:]=avg.flux_spectra_yz_av(G_es, run.geometry)
-            __spectra_ky[i_spec,0,:]=avg.flux_spectra_xz_av(G_es, run.geometry)
-            __profile_z[i_spec,0,:] = avg.xy_av3d_zprofile(np.real(G_es),run.geometry)
+            __spectra_kx[i_spec,0,:]=flux_spectra_yz_av(G_es, run.geometry)
+            __spectra_ky[i_spec,0,:]=flux_spectra_xz_av(G_es, run.geometry)
+            __profile_z[i_spec,0,:] = xy_av3d_zprofile(np.real(G_es),run.geometry)
             
             Q_es = (vE_x*np.conj(0.5*T_par + T_perp + 3./2.*dens)*n0*T0)/run.geometry.Cxy
-            __spectra_kx[i_spec,1,:]=avg.flux_spectra_yz_av(Q_es, run.geometry)
-            __spectra_ky[i_spec,1,:]=avg.flux_spectra_xz_av(Q_es, run.geometry)
-            __profile_z[i_spec,1,:] = avg.xy_av3d_zprofile(np.real(Q_es),run.geometry)
+            __spectra_kx[i_spec,1,:]=flux_spectra_yz_av(Q_es, run.geometry)
+            __spectra_ky[i_spec,1,:]=flux_spectra_xz_av(Q_es, run.geometry)
+            __profile_z[i_spec,1,:] = xy_av3d_zprofile(np.real(Q_es),run.geometry)
             #plt.plot(self.__spectra_ky[i_spec,1,:])
             #plt.title(str(time_point))
             #plt.show()
@@ -82,9 +82,9 @@ class DiagFluxSpectra(Diagnostic):
             #plt.show()
             
             P_es = (vE_x*np.conj(u_par)*n0*mass)/run.geometry.Cxy
-            __spectra_kx[i_spec,2,:]=avg.flux_spectra_yz_av(P_es, run.geometry)
-            __spectra_ky[i_spec,2,:]=avg.flux_spectra_xz_av(P_es, run.geometry)
-            __profile_z[i_spec,2,:] = avg.xy_av3d_zprofile(np.real(P_es),run.geometry)
+            __spectra_kx[i_spec,2,:]=flux_spectra_yz_av(P_es, run.geometry)
+            __spectra_ky[i_spec,2,:]=flux_spectra_xz_av(P_es, run.geometry)
+            __profile_z[i_spec,2,:] = xy_av3d_zprofile(np.real(P_es),run.geometry)
             
             #print("89")
             if run.parameters.pnt.n_fields>1:
@@ -108,15 +108,15 @@ class DiagFluxSpectra(Diagnostic):
                     G_em = G_em + (dBpar_dy_norm*np.conj(densI1))*n0/run.geometry.Cxy
                     Q_em = Q_em + (dBpar_dy_norm*np.conj(TparI1 + TppI1))*n0*T0/run.geometry.Cxy
                     
-                __spectra_kx[i_spec,3,:]=avg.flux_spectra_yz_av(G_em, run.geometry)
-                __spectra_ky[i_spec,3,:]=avg.flux_spectra_xz_av(G_em, run.geometry)
-                __profile_z[i_spec,3,:] = avg.xy_av3d_zprofile(np.real(G_em),run.geometry)
-                __spectra_kx[i_spec,4,:]=avg.flux_spectra_yz_av(Q_em, run.geometry)
-                __spectra_ky[i_spec,4,:]=avg.flux_spectra_xz_av(Q_em, run.geometry)
-                __profile_z[i_spec,4,:] = avg.xy_av3d_zprofile(np.real(Q_em),run.geometry)
-                __spectra_kx[i_spec,5,:]=avg.flux_spectra_yz_av(P_em, run.geometry)
-                __spectra_ky[i_spec,5,:]=avg.flux_spectra_xz_av(P_em, run.geometry)
-                __profile_z[i_spec,5,:] = avg.xy_av3d_zprofile(np.real(P_em),run.geometry)
+                __spectra_kx[i_spec,3,:]=flux_spectra_yz_av(G_em, run.geometry)
+                __spectra_ky[i_spec,3,:]=flux_spectra_xz_av(G_em, run.geometry)
+                __profile_z[i_spec,3,:] = xy_av3d_zprofile(np.real(G_em),run.geometry)
+                __spectra_kx[i_spec,4,:]=flux_spectra_yz_av(Q_em, run.geometry)
+                __spectra_ky[i_spec,4,:]=flux_spectra_xz_av(Q_em, run.geometry)
+                __profile_z[i_spec,4,:] = xy_av3d_zprofile(np.real(Q_em),run.geometry)
+                __spectra_kx[i_spec,5,:]=flux_spectra_yz_av(P_em, run.geometry)
+                __spectra_ky[i_spec,5,:]=flux_spectra_xz_av(P_em, run.geometry)
+                __profile_z[i_spec,5,:] = xy_av3d_zprofile(np.real(P_em),run.geometry)
                            
         #plt.plot(self.ky,__spectra_ky[1,1,:])
         #plt.title(str(time_point))
@@ -224,8 +224,8 @@ class DiagFluxSpectra(Diagnostic):
             
             for i_flux,flux in enumerate(self.plotbase.titles.keys()):
                 if time_requested.size>1:
-                    flux_kx = avg.mytrapz(np.asarray(self.flux_spectra_kx)[:,i_spec,i_flux,:], time_requested)
-                    flux_ky = avg.mytrapz(np.asarray(self.flux_spectra_ky)[:,i_spec,i_flux,:], time_requested)
+                    flux_kx = mytrapz(np.asarray(self.flux_spectra_kx)[:,i_spec,i_flux,:], time_requested)
+                    flux_ky = mytrapz(np.asarray(self.flux_spectra_ky)[:,i_spec,i_flux,:], time_requested)
                 else:
                     flux_kx = np.asarray(self.flux_spectra_kx)[0,i_spec,i_flux,:]
                     flux_ky = np.asarray(self.flux_spectra_ky)[0,i_spec,i_flux,:]

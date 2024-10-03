@@ -1,7 +1,7 @@
 """ This module contains a number of (semi-)analytic predictions from neoclassical theory"""
 
 import numpy as np
-import .averages as av
+from .averages import mytrapz
 import scipy.integrate as intg
 import scipy.special as sps
 
@@ -63,7 +63,7 @@ def fb_param_hinton_haz(prd):
     :param prd: Profile data object
     :returns: numpy array of k for each radial position
     """
-    avnustar = av.mytrapz(prd.prspec[0].nustar, prd.prspec[0].timearray)
+    avnustar = mytrapz(prd.prspec[0].nustar, prd.prspec[0].timearray)
     eps = np.array(prd.xs * prd.cm.pnt.minor_r / prd.cm.pnt.major_R)
     hhpred1 = (1.17 - 0.35 * avnustar ** (1 / 2)) / (1 + 0.7 * avnustar ** (1 / 2) * eps ** 3)
     hhpred2 = (hhpred1 - 2.1 * avnustar ** 2 * eps ** 3) / (1 + avnustar ** 2 * eps ** 3)
@@ -78,7 +78,7 @@ def fb_param_hirsch_sig(prd):
     eps = np.array(prd.xs * prd.cm.pnt.minor_r / prd.cm.pnt.major_R)
     ft = 1.96*np.sqrt(eps)
     fc = 1-ft
-    nustar = av.mytrapz(prd.prspec[0].nustar, prd.prspec[0].timearray)
+    nustar = mytrapz(prd.prspec[0].nustar, prd.prspec[0].timearray)
     k = np.zeros(prd.cm.pnt.nx0)
     for i in range(prd.cm.pnt.nx0):
         K11, eK11 = intg.quad(unintK, 0, 5, args=(1, 1, nustar[i], eps[i]))

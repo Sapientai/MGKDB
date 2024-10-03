@@ -1,9 +1,9 @@
 import numpy as np
 import warnings
-import ..utils.averages as avg
+from ..utils.averages import av3d_by_switch
 from ..utils.geom import Geometry
 from .base_file import TimeSeries
-import ..utils.fourier as fourier
+from ..utils.fourier import kx_to_x, x_to_kx, ky_to_y, y_to_ky, z_to_kz
 
 
 class MomFieldSlice(TimeSeries):
@@ -56,7 +56,7 @@ class MomFieldSlice(TimeSeries):
         """
         self.fileobject.set_time(time)
         var = self.fileobject.get_var(varname=self.quantity)
-        averagedvar = avg.av3d_by_switch(self.diagspace.xavg, self.diagspace.yavg,
+        averagedvar = av3d_by_switch(self.diagspace.xavg, self.diagspace.yavg,
                                          self.diagspace.zavg)(var, self.geom)
         averagedvar = self._apply_fouriertransforms(averagedvar)
         averagedvar = self.modifier_func(averagedvar)
@@ -77,17 +77,17 @@ class MomFieldSlice(TimeSeries):
 
         if self.diagspace.x_fourier != self.cm.x_local and not self.diagspace.xavg:
             if self.cm.x_local:
-                var = fourier.kx_to_x(var, self.cm.pnt.nx0, axis=xaxis)
+                var = kx_to_x(var, self.cm.pnt.nx0, axis=xaxis)
             else:
-                var = fourier.x_to_kx(var, self.cm.pnt.nx0, axis=xaxis)
+                var = x_to_kx(var, self.cm.pnt.nx0, axis=xaxis)
         if self.diagspace.y_fourier != self.cm.y_local and not self.diagspace.yavg:
             if self.cm.y_local:
-                var = fourier.ky_to_y(var, self.cm.pnt.nky0, axis=yaxis)
+                var = ky_to_y(var, self.cm.pnt.nky0, axis=yaxis)
             else:
                 warnings.warn("y-global is not well tested", RuntimeWarning)
-                var = fourier.y_to_ky(var, self.cm.pnt.nky0, axis=yaxis)
+                var = y_to_ky(var, self.cm.pnt.nky0, axis=yaxis)
         if self.diagspace.z_fourier:
-            var=fourier.z_to_kz(var, self.cm.pnt.nz0, axis=zaxis)
+            var=z_to_kz(var, self.cm.pnt.nz0, axis=zaxis)
         return var
 
     def write_to_numpy(self, filename):

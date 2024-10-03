@@ -26,7 +26,7 @@ ToDO:
 '''
 
 import sys
-sys.path.append('support')
+# sys.path.append('support')
 import numpy as np
 #from pymongo import MongoClient
 from bson.objectid import ObjectId
@@ -40,9 +40,14 @@ import json
 from time import strftime
 import pickle
 
+import pickle
+from bson.binary import Binary
+
 from .pyro_gk import *
 from .mgk_post_processing import *
 from .ParIO import * 
+from .diag_plot import diag_plot
+
 #=======================================================
 
     
@@ -446,8 +451,7 @@ def clear_ex(db):
     clear_ex_lin(db)
     clear_ex_Nonlin(db)
     
-import pickle
-from bson.binary import Binary
+
 def _npArray2Binary(npArray):
     """Utility method to turn an numpy array into a BSON Binary string.
     utilizes pickle protocol 2 (see http://www.python.org/dev/peps/pep-0307/
@@ -527,7 +531,6 @@ def _loadNPArrays(db, document):
             document[key] = _loadNPArrays(db, value)
     return document
 
-from diag_plot import diag_plot
 def query_plot(db, collection, query, projection = {'Meta':1, 'Diagnostics':1}):
     data_list = load(db, collection, query, projection)
     print('{} records found.'.format(len(data_list)))

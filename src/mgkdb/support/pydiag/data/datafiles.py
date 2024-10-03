@@ -1,8 +1,8 @@
-import .fieldlib
-import .momlib
-import .profile_data
-import .nrgdata
-import .srcmom_data
+from .fieldlib import FieldFile
+from .momlib import MomFile
+from .nrgdata import NrgFile
+from .profile_data import ProfileFile
+from .srcmom_data import SrcmomFile
 
 
 class RunDataFiles(object):
@@ -21,17 +21,17 @@ class RunDataFiles(object):
     def get_fileobject(self, name):
         if not self.filedict.get(name):
             if name == "field":
-                self.filedict["field"] = pydiag.data.fieldlib.FieldFile(
+                self.filedict["field"] = FieldFile(
                     "field{}".format(self.cm.fileextension), self.cm)
             elif name == "nrg":
-                self.filedict["nrg"] = pydiag.data.nrgdata.NrgFile("nrg{}".format(self.cm.fileextension), self.cm)
+                self.filedict["nrg"] = NrgFile("nrg{}".format(self.cm.fileextension), self.cm)
                 self.filedict["nrg"].generate_timeseries()
             elif name.startswith("mom_"):
-                self.filedict[name] = pydiag.data.momlib.MomFile("{}{}".format(name, self.cm.fileextension),self.cm)
+                self.filedict[name] = MomFile("{}{}".format(name, self.cm.fileextension),self.cm)
             elif name.startswith("profile_"):
-                self.filedict[name] = pydiag.data.profile_data.ProfileFile("{}{}".format(name, self.cm.fileextension),self.cm)
+                self.filedict[name] = ProfileFile("{}{}".format(name, self.cm.fileextension),self.cm)
             elif name.startswith("srcmom_"):
-                self.filedict[name] = pydiag.data.srcmom_data.SrcmomFile("{}{}".format(name, self.cm.fileextension),self.cm)
+                self.filedict[name] = SrcmomFile("{}{}".format(name, self.cm.fileextension),self.cm)
 
             else:
                 raise RuntimeError("Invalid file object identifier")

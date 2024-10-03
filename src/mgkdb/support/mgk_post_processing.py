@@ -17,8 +17,11 @@ from .ParIO import *
 from .finite_differences import *
 
 
-import .pydiag.utils.comm as comm
-import .pydiag.data.datafiles as datafiles
+# import mgkdb.support.pydiag.utils.comm as comm
+from .pydiag.utils import comm 
+
+from .pydiag.data import datafiles
+# import .pydiag.data.datafiles as datafiles
 from .pydiag.utils.gkdb import GKDB_linear, GKDB_nonlin
 
 from sys import path

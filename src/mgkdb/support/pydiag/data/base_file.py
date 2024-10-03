@@ -5,7 +5,8 @@ from bisect import bisect_left, bisect_right
 import mmap
 
 import numpy as np
-import ..utils.averages as av
+
+from ..utils.averages import mytrapz
 
 
 class BinaryFile(object):
@@ -153,10 +154,10 @@ class TimeSeries(object):
 
     def generate_timeaverage(self):
         if len(self.dataarray):
-            self.timeaverage = av.mytrapz(self.dataarray, self.timearray)
+            self.timeaverage = mytrapz(self.dataarray, self.timearray)
         else:
             self.generate_timeseries()
-            self.timeaverage = av.mytrapz(self.dataarray, self.timearray)
+            self.timeaverage = mytrapz(self.dataarray, self.timearray)
 
     def get_minmaxtime(self):
         """ Return first and last time in the object

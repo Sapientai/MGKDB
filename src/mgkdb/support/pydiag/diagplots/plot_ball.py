@@ -9,8 +9,8 @@ from .baseplot import Plotting
 from ..data.slices import MomFieldSlice
 from ..utils.comm import DiagSpace
 
-import ..utils.averages as averages
-import ..utils.geom
+from ..utils.averages import mytrapz
+from ..utils.geom import Geometry
 
 
 class ModeStructure(object):
@@ -62,7 +62,7 @@ class ModeStructure(object):
     def calc_modestructure(self,species,rundatafiles,tavg):
         """ Calculate the mode structures"""
         momamps = self._fetch_moms(rundatafiles, species=species)
-        geom = pydiag.utils.geom.Geometry(self.cm)
+        geom = Geometry(self.cm)
         timerefvar = list(self.ballamps.keys())[0]  #TODO: NEED TO SET TO LOWEST TIME RES. VAR/FILE
         momamps[timerefvar].check_times()
         pos = momamps[timerefvar].calc_positions()
@@ -113,7 +113,7 @@ class ModeStructure(object):
 
         if tavg:
             for mom in self.ballamps:
-                self.ballamps[mom] = averages.mytrapz(self.ballamps[mom], self.timearray)
+                self.ballamps[mom] = mytrapz(self.ballamps[mom], self.timearray)
 
 
 class PlotModeStructure(Plotting):

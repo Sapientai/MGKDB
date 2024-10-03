@@ -1,10 +1,10 @@
 from os.path import getsize
 
 import numpy as np
-import .base_file
+from .base_file import BinaryFile
 
 
-class FieldFile(pydiag.data.base_file.BinaryFile):
+class FieldFile(BinaryFile):
     """ Class to parse binary field.dat diagnostic output of GENE
 
     :param filename: Should be "field.dat" or "field_fileextension"

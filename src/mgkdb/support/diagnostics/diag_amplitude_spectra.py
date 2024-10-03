@@ -3,7 +3,7 @@
 from tkinter import END
 import matplotlib.pyplot as plt
 import numpy as np
-import ..putils.averages as avg
+from ..putils.averages import mytrapz, xy_av3d
 from .baseplot import Plotting
 from .diagnostic import Diagnostic
 
@@ -67,7 +67,7 @@ class DiagAmplitudeSpectra(Diagnostic):
 
         amplitude_ky[0,:]=np.average(np.sum(np.abs(tmp)**2,axis=0), weights=run.geometry.jacobian, axis=-1)
         amplitude_kx[0,:]=np.average(kx_spectra(tmp), weights=run.geometry.jacobian, axis=-1)
-        amplitude_z[0,:] = avg.xy_av3d(abs(tmp)**2,run.geometry) 
+        amplitude_z[0,:] = xy_av3d(abs(tmp)**2,run.geometry) 
         amplitude_z_ky0[0,:] = np.sum(abs(tmp[:,0,:])**2,axis=0) 
         #plt.plot(self.z,amplitude_z[0,:])
         #plt.plot(self.z,amplitude_z_ky0[0,:])
@@ -78,14 +78,14 @@ class DiagAmplitudeSpectra(Diagnostic):
             tmp=data.field.A_par(step=steps['field'], extension=extensions['field'])
             amplitude_ky[1,:]=np.average(np.sum(np.abs(tmp)**2,axis=0), weights=run.geometry.jacobian, axis=-1)
             amplitude_kx[1,:]=np.average(kx_spectra(tmp), weights=run.geometry.jacobian, axis=-1)
-            amplitude_z[1,:] = avg.xy_av3d(abs(tmp)**2,run.geometry) 
+            amplitude_z[1,:] = xy_av3d(abs(tmp)**2,run.geometry) 
             amplitude_z_ky0[1,:] = np.sum(abs(tmp[:,0,:])**2,axis=0) 
             
         if self.n_fields>2:
             tmp=data.field.B_par(step=steps['field'], extension=extensions['field'])
             amplitude_ky[2,:]=np.average(np.sum(np.abs(tmp)**2,axis=0), weights=run.geometry.jacobian, axis=-1)
             amplitude_kx[2,:]=np.average(kx_spectra(tmp), weights=run.geometry.jacobian, axis=-1)
-            amplitude_z[2,:] = avg.xy_av3d(abs(tmp)**2,run.geometry) 
+            amplitude_z[2,:] = xy_av3d(abs(tmp)**2,run.geometry) 
             amplitude_z_ky0[2,:] = np.sum(abs(tmp[:,0,:])**2,axis=0) 
              
         for i_spec, spec in enumerate(run.parameters.specnames):
@@ -95,7 +95,7 @@ class DiagAmplitudeSpectra(Diagnostic):
                         np.sum(np.abs(tmp)**2,axis=0), weights=run.geometry.jacobian, axis=-1)
                 amplitude_kx[self.n_fields+len(self.specnames)*i_spec+i_quant,:]=np.average(
                         kx_spectra(tmp), weights=run.geometry.jacobian, axis=-1) 
-                amplitude_z[self.n_fields+len(self.specnames)*i_spec+i_quant,:] = avg.xy_av3d(abs(tmp)**2,run.geometry) 
+                amplitude_z[self.n_fields+len(self.specnames)*i_spec+i_quant,:] = xy_av3d(abs(tmp)**2,run.geometry) 
                 amplitude_z_ky0[self.n_fields+len(self.specnames)*i_spec+i_quant,:] = np.sum(abs(tmp[:,0,:])**2,axis=0) 
                 
         self.amplitude_spectra_ky.append(amplitude_ky)
@@ -149,8 +149,8 @@ class DiagAmplitudeSpectra(Diagnostic):
         ax_linlin_ky = fig.add_subplot(3, 2, 6)        
         for i_quant in np.arange(self.n_fields):
             if time_requested.size>1:
-                ampl_ky = avg.mytrapz(np.asarray(self.amplitude_spectra_ky)[:,i_quant,:], time_requested)
-                ampl_kx = avg.mytrapz(np.asarray(self.amplitude_spectra_kx)[:,i_quant,:], time_requested)
+                ampl_ky = mytrapz(np.asarray(self.amplitude_spectra_ky)[:,i_quant,:], time_requested)
+                ampl_kx = mytrapz(np.asarray(self.amplitude_spectra_kx)[:,i_quant,:], time_requested)
             else:
                 ampl_ky = np.asarray(self.amplitude_spectra_ky)[0,i_quant,:]
                 ampl_kx = np.asarray(self.amplitude_spectra_kx)[0,i_quant,:]
@@ -193,8 +193,8 @@ class DiagAmplitudeSpectra(Diagnostic):
             
             for i_quant in np.arange(self.n_fields,self.n_fields+self.n_moms):
                 if time_requested.size>1:
-                    ampl_kx = avg.mytrapz(np.asarray(self.amplitude_spectra_kx)[:,i_quant,:], time_requested)
-                    ampl_ky = avg.mytrapz(np.asarray(self.amplitude_spectra_ky)[:,i_quant,:], time_requested)
+                    ampl_kx = mytrapz(np.asarray(self.amplitude_spectra_kx)[:,i_quant,:], time_requested)
+                    ampl_ky = mytrapz(np.asarray(self.amplitude_spectra_ky)[:,i_quant,:], time_requested)
                 else:
                     ampl_kx = np.asarray(self.amplitude_spectra_kx)[0,i_quant,:]
                     ampl_ky = np.asarray(self.amplitude_spectra_ky)[0,i_quant,:]

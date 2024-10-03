@@ -1,7 +1,7 @@
 """ Module containing the Data class"""
 # -*- coding: utf-8 -*-
 
-from data.base_file import GENEfile
+from .base_file import GENEfile
 import numpy as np
 
 class Data:

@@ -5,14 +5,14 @@ import datetime
 import numpy as np
 import warnings
 from collections import OrderedDict
-import .geom
-import .comm
-import ..data.omega_eigenvalue as eigenvalue
+from  .geom import Geometry
+# import .comm
+from ..data.omega_eigenvalue import Eigenvaluedata
+from ..diagplots.plot_ball import ModeStructure
+
 import json
 #import .averages as averages
 import matplotlib.pyplot as plt #remove later
-import ..diagplots.plot_ball as ballooning
-#import ..data.nrgdata as nrg
 
 class GKDB_linear(object):
     """ GKDB class:
@@ -27,7 +27,7 @@ class GKDB_linear(object):
         self.creator = creator
         self.cm = common
 #        self.precheck()
-        self.geom = pydiag.utils.geom.Geometry(self.cm)
+        self.geom = Geometry(self.cm)
         self.fields = ["phi"]
         if common.electromagnetic:
             self.fields += ["apar"]
@@ -385,7 +385,7 @@ class GKDB_linear(object):
         ###########################################################################################################
         # Now starting outputs
 
-        eigendat = eigenvalue.Eigenvaluedata(self.cm)
+        eigendat = Eigenvaluedata(self.cm)
 
 #        print('======{}========'.format(eigendat.growth_rate))
         if len(eigendat.growth_rate)>1 and max(eigendat.growth_rate) <= 0.0:
@@ -403,11 +403,11 @@ class GKDB_linear(object):
                         "tpar" : "temperature_parallel",
                         "tperp" : "temperature_perpendicular"}
 
-        fieldmodestruct = ballooning.ModeStructure(self.cm, self.rundatafiles,tavg=False)
+        fieldmodestruct = ModeStructure(self.cm, self.rundatafiles,tavg=False)
         mommodestruct = []
         for spec in self.cm.specnames:
             ispec = self.cm.specnames.index(spec) #w/o +1
-            mommodestruct += [ballooning.ModeStructure(self.cm, self.rundatafiles, \
+            mommodestruct += [ModeStructure(self.cm, self.rundatafiles, \
                                 moms=list(newmomnames.keys()), species=spec,tavg=False)]
 
         eigenmodes = []
@@ -446,7 +446,7 @@ class GKDB_linear(object):
             eigenmode["moments_norm_rotating_frame"] = []
             for spec in self.cm.specnames:
                 ispec = self.cm.specnames.index(spec) #w/o +1
-#                mommodestruct = ballooning.ModeStructure(self.cm, self.rundatafiles, moms=list(newmomnames.keys()), \
+#                mommodestruct = ModeStructure(self.cm, self.rundatafiles, moms=list(newmomnames.keys()), \
 #                                                         species=spec,tavg=False)
                 spec_moments_norm_rotating_frame = {}
                 for var in newmomnames.keys():
@@ -512,7 +512,7 @@ class GKDB_nonlin(object):
         self.creator = creator
         self.cm = common
 #        self.precheck()
-        self.geom = pydiag.utils.geom.Geometry(self.cm)
+        self.geom = Geometry(self.cm)
         self.fields = ["phi"]
         if common.electromagnetic:
             self.fields += ["apar"]
@@ -870,7 +870,7 @@ class GKDB_nonlin(object):
         ###########################################################################################################
         # Now starting outputs
 
-#        eigendat = eigenvalue.Eigenvaluedata(self.cm)
+#        eigendat = Eigenvaluedata(self.cm)
 #
 #        if max(eigendat.growth_rate) <= 0.0:
 #            raise RuntimeError("No unstable growth rate found - skipping file")
@@ -887,11 +887,11 @@ class GKDB_nonlin(object):
                         "tpar" : "temperature_parallel",
                         "tperp" : "temperature_perpendicular"}
 
-        fieldmodestruct = ballooning.ModeStructure(self.cm, self.rundatafiles,tavg=False)
+        fieldmodestruct = ModeStructure(self.cm, self.rundatafiles,tavg=False)
         mommodestruct = []
         for spec in self.cm.specnames:
             ispec = self.cm.specnames.index(spec) #w/o +1
-            mommodestruct += [ballooning.ModeStructure(self.cm, self.rundatafiles, \
+            mommodestruct += [ModeStructure(self.cm, self.rundatafiles, \
                                 moms=list(newmomnames.keys()), species=spec,tavg=False)]
 
         eigenmodes = []
@@ -931,7 +931,7 @@ class GKDB_nonlin(object):
             eigenmode["moments_norm_rotating_frame"] = []
             for spec in self.cm.specnames:
                 ispec = self.cm.specnames.index(spec) #w/o +1
-#                mommodestruct = ballooning.ModeStructure(self.cm, self.rundatafiles, moms=list(newmomnames.keys()), \
+#                mommodestruct = ModeStructure(self.cm, self.rundatafiles, moms=list(newmomnames.keys()), \
 #                                                         species=spec,tavg=False)
                 spec_moments_norm_rotating_frame = {}
                 for var in newmomnames.keys():

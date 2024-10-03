@@ -1,5 +1,5 @@
 import numpy as np
-from interp import *
+from .interp import *
 
 def get_mat_fd_d1_o4(size,dx,plot_matrix=False):
     """Creates matrix for centered finite difference, first derivative, 4th order.

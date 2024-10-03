@@ -8,37 +8,36 @@
 
 import sys
 
-#from mgk_file_handling import *
 import numpy as np
 import optparse as op
 import matplotlib.pyplot as plt
-from .fieldlib import *
-from .ParIO import * 
-from .finite_differences import *
-
-
-# import mgkdb.support.pydiag.utils.comm as comm
-from .pydiag.utils import comm 
-
-from .pydiag.data import datafiles
-# import .pydiag.data.datafiles as datafiles
-from .pydiag.utils.gkdb import GKDB_linear, GKDB_nonlin
 
 from sys import path
 from sys import exit
 import os
 import base64
 
+from .fieldlib import fieldfile
+from .ParIO import Parameters
+# from .finite_differences import *
+# import mgkdb.support.pydiag.utils.comm as comm
+from .pydiag.utils import comm 
+from .pydiag.data import datafiles
 
-#
-#from utils.loader import Loader
-#from diagnostics.diag_flux_spectra import DiagFluxSpectra
-#from diagnostics.diag_amplitude_spectra import DiagAmplitudeSpectra
-#from diagnostics.diag_shearing_rate import DiagShearingRate
-#from diagnostics.diag_profiles import DiagProfiles 
-#
-#from data.data import Data
-#from utils.run import Simulation
+from .pydiag.utils.gkdb import GKDB_linear, GKDB_nonlin
+from .putils.loader import Loader
+from .data.data import Data
+#from .putils.geom import Geometry
+from .putils.run import Run
+from .putils.simulation import Simulation
+#from .putils.spatial_grid import SpatialGrid
+#from .putils.vsp_grid import VspGrid
+#from .data.base_file import createGENEfile
+
+from .diagnostics.diag_flux_spectra import DiagFluxSpectra
+from .diagnostics.diag_amplitude_spectra import DiagAmplitudeSpectra
+from .diagnostics.diag_field_mom_snapshots import DiagFieldMomSnapshots
+#=======================================================
 
 def get_nspec(out_dir,suffix):
     #grab parameters dictionary from ParIO.py - Parameters()
@@ -166,21 +165,6 @@ def get_gyrokinetics_from_run(out_dir, suffix, user, linear, tspan = None):
     os.chdir(current_pwd) # get back to original dir
     
     return tst.gkdict
-
-#from .putils.units import Units
-#from .putils.par_io import Parameters as Param
-from .putils.loader import Loader
-from .data.data import Data
-#from .putils.geom import Geometry
-from .putils.run import Run
-from .putils.simulation import Simulation
-#from .putils.spatial_grid import SpatialGrid
-#from .putils.vsp_grid import VspGrid
-#from .data.base_file import createGENEfile
-
-from .diagnostics.diag_flux_spectra import DiagFluxSpectra
-from .diagnostics.diag_amplitude_spectra import DiagAmplitudeSpectra
-from .diagnostics.diag_field_mom_snapshots import DiagFieldMomSnapshots
 
 def get_diag_from_run(out_dir, suffix, t_span = None):
 #    t_start = 0.0 # use start/end time in nrg files?

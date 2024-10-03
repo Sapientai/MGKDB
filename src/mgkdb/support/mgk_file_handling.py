@@ -37,13 +37,12 @@ import pickle
 from bson.binary import Binary
 
 from .pyro_gk import create_gk_dict_with_pyro
-from .mgk_post_processing import *
 from .ParIO import Parameters
 from .diag_plot import diag_plot
+from .mgk_post_processing import get_parsed_params, get_suffixes, get_diag_from_run
 
 #=======================================================
 
-    
 class Global_vars():
     '''
     Object to store global variables

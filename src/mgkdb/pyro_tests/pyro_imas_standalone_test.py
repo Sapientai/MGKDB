@@ -6,7 +6,8 @@ import idspy_toolkit as idspy
 from idspy_dictionaries import ids_gyrokinetics_local as gkids
 from pathlib import Path
 import os 
-# 
+
+
 def convert_to_json(obj,separate_real_imag = False):
     """
     This function to recursively goes through GyrokineticsLocal class, and writes to json compatible dictionary

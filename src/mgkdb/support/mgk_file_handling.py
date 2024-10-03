@@ -26,26 +26,19 @@ ToDO:
 '''
 
 import sys
-# sys.path.append('support')
 import numpy as np
-#from pymongo import MongoClient
 from bson.objectid import ObjectId
-#from bson import json_util
 import os
 from pathlib import Path
 import gridfs
-#import re
-#from sshtunnel import SSHTunnelForwarder
 import json
 from time import strftime
 import pickle
-
-import pickle
 from bson.binary import Binary
 
-from .pyro_gk import *
+from .pyro_gk import create_gk_dict_with_pyro
 from .mgk_post_processing import *
-from .ParIO import * 
+from .ParIO import Parameters
 from .diag_plot import diag_plot
 
 #=======================================================

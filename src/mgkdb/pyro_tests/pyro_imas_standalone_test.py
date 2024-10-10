@@ -187,9 +187,10 @@ if __name__=="__main__":
 
     # data_dir = "test_data/test_gene1_tracer_efit/"
     # data_dir = "test_data/test_gene2_miller_general/"
-    # suffix='_0001'
-    # fname = data_dir+'parameters{0}'.format(suffix)
-    # gkcode="GENE"
+    data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene1_tracer_efit/'
+    suffix='_0001'
+    fname = data_dir+'parameters{0}'.format(suffix)
+    gkcode="GENE"
 
     # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/upload_datasets/test_nonlin_gene_tracer_efit/"
     # suffix='_0001'
@@ -212,14 +213,13 @@ if __name__=="__main__":
     # fname = data_dir+'input.cgyro'
     # gkcode="CGYRO"
 
-    data_dir = "test_data/GS2_linear/run1_template/"
-    fname = data_dir+'gs2.in'
-    # data_dir = "test_data/GS2_linear/run2/"
-    # fname = data_dir+'gs2_cyc_ke_lin.in'
-    data_dir = "test_data/GS2_linear/run3/"
-    fname = data_dir+'gs2.in'
-    
-    gkcode="GS2"
+    # data_dir = "test_data/GS2_linear/run1_template/"
+    # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/GS2_linear/run1_template"
+    # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/GS2_linear/run2/"
+    # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/GS2_linear/run3_id33"
+    # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/GS2_linear/run4_id17"
+    # fname = data_dir+'gs2.in'
+    # gkcode="GS2"
 
     # data_dir = "test_data/TGLF/TGLF_linear/"
     # data_dir = "test_data/TGLF/TGLF_transport/"

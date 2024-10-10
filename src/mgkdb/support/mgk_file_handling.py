@@ -1125,13 +1125,7 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
             output_files += [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs_L if Qname]
         if extra_files:
             output_files += [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs_ex if Qname]
-            
-        '''
-        Adding files not subject to suffixes, non_suffix should be a list 
-        '''
-        if isinstance(run_shared,list):
-            output_files += [get_file_list(out_dir, ns) for ns in run_shared]
-            
+    
     elif sim_type in ['CGYRO','TGLF','GS2']:
 
         output_files = [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
@@ -1141,11 +1135,10 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
         if extra_files:
             output_files += [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs_ex if Qname]
             
-        '''
-        Adding files not subject to suffixes, non_suffix should be a list 
-        '''
-        if isinstance(run_shared,list):
-            output_files += [get_file_list(out_dir, ns) for ns in run_shared]
+    
+    ## Adding files not subject to suffixes, non_suffix should be a list 
+    if isinstance(run_shared,list):
+        output_files += [get_file_list(out_dir, ns) for ns in run_shared]
  
     output_files = set([item for sublist in output_files for item in sublist]) # flat the list and remove possible duplicates
     

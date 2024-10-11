@@ -917,11 +917,12 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
     update_option = input('Enter options for update:\n 0: Files shared by all runs, usually do not have a suffix. \n 1: Unique files used per run. Specify the keywords and suffixes. \n ')
     if update_option == '0':
         files_to_update = input('Please type FULL file names to update, separated by comma.\n').split(',')
+        keys_to_update = input('Please type key names for each file you typed, separated by comma.\n').split(',')
 
         updated = []
         print('Uploading files .......')
         # update the storage chunk
-        for doc in files_to_update:
+        for doc, field in zip(files_to_update, keys_to_update):
             
             file = os.path.join(out_dir, doc)
             assert os.path.exists(file), "File %s not found"%(file)
@@ -936,7 +937,7 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
             with open(file, 'rb') as f:
                 _id = fs.put(f, encoding='UTF-8', filepath=file, filename=file.split('/')[-1])
             
-            updated.append([doc, _id])
+            updated.append([field, _id])
         
         # update the summary dictionary  
         print('Updating Metadata')              
@@ -955,6 +956,7 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
         # affect_QoI = input('Will the file change QoIs/Diagnostics? (Y/N)')
         affect_QoI = True
 
+#        updated = []
         # update the storage chunk
         print('Uploading files .......')
         if len(runs_to_update[0]) != 0:

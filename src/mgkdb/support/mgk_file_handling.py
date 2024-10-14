@@ -918,72 +918,44 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
     if update_option == '0':
         files_to_update = input('Please type FULL file names to update, separated by comma.\n').split(',')
         keys_to_update = input('Please type key names for each file you typed, separated by comma.\n').split(',')
-        affect_QoI = input('Will the file change QoIs/Diagnostics? (Y/N)')
+
         updated = []
         print('Uploading files .......')
         # update the storage chunk
         for doc, field in zip(files_to_update, keys_to_update):
-            files = []
-            if sim_type=='GENE':
-                files = files + [get_file_list(out_dir, doc+s) for s in suffixes] # get file with path
-            elif sim_type in ['CGYRO','TGLF','GS2']:
-                files = files + [get_file_list(out_dir+'/%s/'%(s), doc) for s in suffixes] # get file with path
-
-            assert len(files), "Files specified not found!"
+            
+            file = os.path.join(out_dir, doc)
+            assert os.path.exists(file), "File %s not found"%(file)
+            
             # delete ALL history
-            for file in files:
-                grid_out = fs.find({'filepath': file})
-                for grid in grid_out:
-                    print('File with path tag:\n{}\n'.format(grid.filepath) )
-                    fs.delete(grid._id)
-                    print('deleted!')
+            grid_out = fs.find({'filepath': file})
+            for grid in grid_out:
+                print('File with path tag:\n{}\n'.format(grid.filepath) )
+                fs.delete(grid._id)
+                print('deleted!')
 
             with open(file, 'rb') as f:
                 _id = fs.put(f, encoding='UTF-8', filepath=file, filename=file.split('/')[-1])
-#            _id = str(_id)
+            
             updated.append([field, _id])
         
         # update the summary dictionary  
-        print('Updating summary dictionary .....')              
+        print('Updating Metadata')              
         for entry in updated:
-            manual_time_flag = True
-            for suffix in suffixes:
-                if affect_QoI in ['Y', 'y']:
-                    input_fname = f_get_input_fname(out_dir, suffix, sim_type)
-                    GK_dict, quasi_linear = create_gk_dict_with_pyro(input_fname, sim_type)
-
-                    if sim_type in ['CGYRO','TGLF','GS2']:
-                        Diag_dict = {}
-                    elif sim_type=='GENE': 
-                        Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
-
-                    run = runs_coll.find_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix})
-                    for key, val in run['Diagnostics'].items():
-                        if val != 'None':
-                            print((key, val))
-                            fs.delete(val)
-                            print('deleted!')
-                    
-                    for key, val in Diag_dict.items():
-                        Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
-
-                    runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, 
-                            { "$set": {'gyrokinetics': GK_dict, 'Diagnostics':Diag_dict}} 
-                                 )
-                    
+            for suffix in suffixes:                    
                 runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix}, 
                                  {"$set":{'Files.'+entry[0]: entry[1], 
                                           "Meta.last_updated": strftime("%y%m%d-%H%M%S")}}
                                  )
-        
         print("Update complete")
                 
     elif update_option == '1':
         files_to_update = input('Please type filenames (without suffixes) for files to update, separated by comma.\n').split(',')
-#        suffixes.sort()
         print("suffixes availables are:{}".format(suffixes))
         runs_to_update = input('Please type which suffixes to update, separated by comma. If you need to update all runs, just hit ENTER. \n').split(',')      
-        affect_QoI = input('Will the file change QoIs/Diagnostics? (Y/N)')
+        # affect_QoI = input('Will the file change QoIs/Diagnostics? (Y/N)')
+        affect_QoI = True
+
 #        updated = []
         # update the storage chunk
         print('Uploading files .......')
@@ -995,7 +967,7 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
         for doc in files_to_update:
             manual_time_flag = True
             for suffix in run_suffixes:
-                if affect_QoI in ['Y', 'y']:
+                if affect_QoI:
                     input_fname = f_get_input_fname(out_dir, suffix, sim_type)
                     GK_dict, quasi_linear = create_gk_dict_with_pyro(input_fname, sim_type)   
 
@@ -1007,9 +979,9 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
                     run = runs_coll.find_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix})
                     for key, val in run['Diagnostics'].items():
                         if val != 'None':
-                            print((key, val))
+                            # print((key, val))
                             fs.delete(val)
-                            print('deleted!')
+                            # print('deleted!')
 
                     for key, val in Diag_dict.items():
                         Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
@@ -1027,7 +999,7 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
                 
                 with open(file, 'rb') as f:
                     _id = fs.put(f, encoding='UTF-8', filepath=file, filename=file.split('/')[-1])
-#                _id = str(_id)
+
                 runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, 
                                  { "$set": {'Files.'+ doc: _id, "Meta.last_updated": strftime("%y%m%d-%H%M%S")} }
                                  )
@@ -1127,14 +1099,12 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
             output_files += [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs_ex if Qname]
     
     elif sim_type in ['CGYRO','TGLF','GS2']:
-
         output_files = [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
         
         if large_files:
             output_files += [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs_L if Qname]
         if extra_files:
             output_files += [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs_ex if Qname]
-            
     
     ## Adding files not subject to suffixes, non_suffix should be a list 
     if isinstance(run_shared,list):
@@ -1516,7 +1486,6 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, keywords, comments, s
         if isUploaded(out_dir, runs_coll):
             update = input('Folder tag:\n {} \n exists in database.  You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to skip this folder.\n'.format(out_dir))
             if update == '0':
-                #for now, delete and reupload instead of update - function under construction
                 remove_from_mongo(out_dir, db, runs_coll)   
                 upload_nonlin(db, out_dir, user, confidence,keywords, comments, sim_type, 
                               linked_id, suffixes, run_shared,

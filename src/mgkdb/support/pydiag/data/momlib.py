@@ -69,28 +69,28 @@ class MomFile(BinaryFile):
         return self.dens3d
 
     def tpar(self):
-        """ Return T_\parallel fluctuations"""
+        """ Return T_parallel fluctuations"""
         if not self.mtind[1] == self.tind:
             self.mtind[1] = self.tind
             self.tpar3d = self.readvar(1)
         return self.tpar3d
 
     def tperp(self):
-        """ Return T_\perp fluctuations"""
+        """ Return T_perp fluctuations"""
         if not self.mtind[2] == self.tind:
             self.mtind[2] = self.tind
             self.tperp3d = self.readvar(2)
         return self.tperp3d
 
     def qpar(self):
-        """ Return q_\parallel fluctuations"""
+        """ Return q_parallel fluctuations"""
         if not self.mtind[3] == self.tind:
             self.mtind[3] = self.tind
             self.qpar3d = self.readvar(3)
         return self.qpar3d
 
     def qperp(self):
-        """ Return q_\perp fluctuations"""
+        """ Return q_perp fluctuations"""
         if not self.mtind[4] == self.tind:
             self.mtind[4] = self.tind
             self.qperp3d = self.readvar(4)

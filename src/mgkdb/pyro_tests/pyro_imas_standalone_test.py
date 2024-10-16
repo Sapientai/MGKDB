@@ -128,8 +128,9 @@ def prune_imas_gk_dict(gk_dict, linear):
         keys_list = ['phi_potential_perturbed_norm','a_field_parallel_perturbed_norm','b_field_parallel_perturbed_norm']
         if gk_dict['linear']['wavevector'] !=[]: 
             for i in range(len(gk_dict['linear']['wavevector'][0]['eigenmode'])): ## For each particle species, delete fields
-                for key in keys_list:
-                    gk_dict['linear']['wavevector'][0]['eigenmode'][i]['fields'][key]=None
+                if gk_dict['linear']['wavevector'][0]['eigenmode'][0]['fields']: 
+                    for key in keys_list:
+                        gk_dict['linear']['wavevector'][0]['eigenmode'][i]['fields'][key]=None
 
     else: # If non-linear, drop  ['non_linear']['fields_4d]
         assert (gk_dict['linear']['wavevector']==[]),"wavevector field in linear is not empty"
@@ -191,6 +192,10 @@ if __name__=="__main__":
     suffix='_0001'
     fname = data_dir+'parameters{0}'.format(suffix)
     gkcode="GENE"
+    
+    data_dir='/Users/venkitesh_work/Downloads/downloaded_select_gene_NERSC/tracer_5f34a52cbafb0f9d07b05731/'
+    suffix = '_0002'    
+    fname= data_dir+'parameters{0}'.format(suffix)
 
     # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/upload_datasets/test_nonlin_gene_tracer_efit/"
     # suffix='_0001'

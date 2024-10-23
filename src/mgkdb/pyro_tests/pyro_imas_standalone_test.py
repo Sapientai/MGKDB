@@ -186,16 +186,17 @@ def create_gk_dict_with_pyro(fname,gkcode):
 
 if __name__=="__main__":
 
-    # data_dir = "test_data/test_gene1_tracer_efit/"
+    data_dir = "test_data/test_gene1_tracer_efit/"
     # data_dir = "test_data/test_gene2_miller_general/"
-    data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene1_tracer_efit/'
+    # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene1_tracer_efit/'
+    # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene2_miller_general'
     suffix='_0001'
     fname = data_dir+'parameters{0}'.format(suffix)
     gkcode="GENE"
     
-    data_dir='/Users/venkitesh_work/Downloads/downloaded_select_gene_NERSC/tracer_5f34a52cbafb0f9d07b05731/'
-    suffix = '_0002'    
-    fname= data_dir+'parameters{0}'.format(suffix)
+    # data_dir='/Users/venkitesh_work/Downloads/downloaded_select_gene_NERSC/tracer_5f34a52cbafb0f9d07b05731/'
+    # suffix = '_0002'    
+    # fname= data_dir+'parameters{0}'.format(suffix)
 
     # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/upload_datasets/test_nonlin_gene_tracer_efit/"
     # suffix='_0001'

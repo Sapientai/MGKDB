@@ -153,11 +153,17 @@ def main_upload(target, keywords, exclude, default, sim_type, extra, authenticat
         for r in global_vars.troubled_runs:
             print(r)
 
-## Runner 
-if __name__=="__main__":
+
+def main():
     
     ### Parse arguments 
     args = f_parse_args()
     print(args)
 
     main_upload(**vars(args))
+
+
+## Runner 
+if __name__=="__main__":
+    main()
+

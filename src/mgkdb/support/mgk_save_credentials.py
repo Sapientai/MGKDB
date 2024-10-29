@@ -12,9 +12,9 @@ import os
 from pymongo import MongoClient
 from .mgk_login import mgk_login
 
-### Main 
-if __name__=="__main__":
 
+### Main 
+def main():
     O2 = input("Please enter the server location, port, database name, username, password in order and separated by comma.\n").split(',')
     login = mgk_login(server= O2[0], port= O2[1], dbname=O2[2], user=O2[3], pwd = O2[4])
     O2_1 = input("Plese enter a target path to save the file in .pkl format. For example : ../db_credentials.pkl  \n")
@@ -25,4 +25,8 @@ if __name__=="__main__":
     print("Successfully connected to database")
     print("Following collections exist in database",database.list_collection_names())
     print("For upload and download, you can use the credential file with the -A argument as: -A <path_to_credentials.pkl>")
+
+
+if __name__=="__main__":
+    main()
 

@@ -70,12 +70,15 @@ def main_download(target, file, objectID, destination, saveas, query, authentica
         download_dir_by_name(database, collection_name, target, destination)
 
 
-
-
-if __name__=="__main__":
+def main():
 
     ### Parse arguments 
     args = f_parse_args()
     # print(args)
 
     main_download(**vars(args))
+
+
+if __name__=="__main__":
+    main()
+

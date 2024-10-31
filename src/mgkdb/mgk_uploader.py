@@ -17,8 +17,8 @@ import os
 import argparse
 from sys import exit
 
-from support.mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars, f_get_linked_oid
-from support.mgk_login import mgk_login,f_login_dbase
+from mgkdb.support.mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars, f_get_linked_oid
+from mgkdb.support.mgk_login import mgk_login,f_login_dbase
 
 def f_parse_args():
     #==========================================================

@@ -22,6 +22,12 @@ You can build and interact with the database via at least 3 methods:
 Please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/Local-MGKDB) for step-by-step instructions on building MGKDB locally
 
 ## Test DB on NERSC
+
+To access MGKDB at NERSC, you will need two sets of access credentials: 
+1. NERSC : Access to the NERSC computing infrastructure. NERSC account request can be placed using the instructions given [here](https://docs.nersc.gov/accounts/).
+2. MGKDB at NERSC: Access to the MGKDB database at NERSC. Please email michoski@oden.utexas.edu to request access.
+
+
 Users can interact with the database in 3 ways: 
 
 ### Using Command Line tools

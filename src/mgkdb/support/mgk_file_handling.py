@@ -689,7 +689,7 @@ def f_get_linked_oid(database, linked_id_file, linked_id_string):
     '''
 
     if ((linked_id_file is not None) and (linked_id_string is not None)): 
-        print("Both linked_id_file and lnked_id_string specified. Please choose any one and re-upload")
+        print("Both linked_id_file and linked_id_string specified. Please choose any one and re-upload")
         raise SystemError
 
     elif linked_id_file is not None:

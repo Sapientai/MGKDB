@@ -26,6 +26,11 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/Sapientai/MGKDB"
 
+[project.scripts]
+mgk_save_credentials = "mgkdb.support.mgk_save_credentials:main"
+mgk_download = "mgkdb.mgk_download:main"
+mgk_upload = "mgkdb.mgk_uploader:main"
+
 [tool.setuptools]
 
 [tool.setuptools.packages.find]

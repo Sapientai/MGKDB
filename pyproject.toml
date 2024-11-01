@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "MGKDB"
+version = "0.1.0"
+description = "Tools to acess MongoDB for nuclear fusion simulations"
+authors = [
+{name = "Craig Michoski", email = "michoski@gmail.com"},
+{name = "Venkitesh Ayyar", email = "venkiteshayyar@gmail.com"},
+{name = "Dongyang Kuang", email = "dykuangii@gmail.com"},
+{name = "David Hatch", email = "drdrhatch@googlemail.com"},
+]
+license = {text = "MIT"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    'numpy>=1.24.3', 
+    'h5py', 'pymongo'
+]
+
+[project.urls]
+Homepage = "https://github.com/Sapientai/MGKDB"
+
+[project.scripts]
+mgk_save_credentials = "mgkdb.support.mgk_save_credentials:main"
+mgk_download = "mgkdb.mgk_download:main"
+mgk_upload = "mgkdb.mgk_uploader:main"
+
+[tool.setuptools]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+

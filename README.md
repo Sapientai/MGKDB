@@ -22,13 +22,19 @@ You can build and interact with the database via at least 3 methods:
 Please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/Local-MGKDB) for step-by-step instructions on building MGKDB locally
 
 ## Test DB on NERSC
+
+To access MGKDB at NERSC, you will need two sets of access credentials: 
+1. NERSC : Access to the NERSC computing infrastructure. NERSC account request can be placed using the instructions given [here](https://docs.nersc.gov/accounts/).
+2. MGKDB at NERSC: Access to the MGKDB database at NERSC. Please email michoski@oden.utexas.edu to request access.
+
+
 Users can interact with the database in 3 ways: 
 
 ### Using Command Line tools
 Command line tools can be used to download data from the database and upload data to the database.
 
 1. Clone the repo : `git@github.com:Sapientai/MGKDB.git`  
-2. Load python3 :  `module load python3` 
+2. Load python :  `module load python` 
 
 ##### Supplying Credentials
 When using these command line scripts, users will need to provide credentials to access the database in one of two ways:  
@@ -43,7 +49,7 @@ Here is a sample string : (server location,port,database name,username,password)
 For downloads, users need to execute the script `mgk_download.py`. 
 
 * Save the file with tag ObjectId(5e150c312038695f1da2e956) to *directory/newname*  
-`python3 MGKDB/mgk_download.py -A <user_credentials.pkl> -OID 5e150c312038695f1da2e956 -D directory -S newname`  
+`python MGKDB/mgk_download.py -A <user_credentials.pkl> -OID 5e150c312038695f1da2e956 -D directory -S newname`  
 
 The directory will be created if it does not exist.
 
@@ -51,7 +57,7 @@ The directory will be created if it does not exist.
 For uploads, users need to execute the script `mgk_uploader.py`. 
 
 Run the uploader as \
-```python3 MGKDB/mgk_uploader.py -A <user_credentials.pkl> -T test_data/TGLF/ -SIM TGLF ```.  Option -T is for specifying your target folder. Use option --help to display other options.  
+```python MGKDB/mgk_uploader.py -A <user_credentials.pkl> -T test_data/TGLF/ -SIM TGLF ```.  Option -T is for specifying your target folder. Use option --help to display other options.  
 
 Please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/MGKDB-at-NERSC) for step-by-step instructions and further options.
 

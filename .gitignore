@@ -1,3 +1,6 @@
 __pycache__/
 *.ipynb_checkpoints
-pyro_tests/data
+src/mgkdb/pyro_tests/data
+scratchpad.py
+MGKDB.egg-info
+build

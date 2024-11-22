@@ -49,7 +49,7 @@ Here is a sample string : (server location,port,database name,username,password)
 For downloads, users need to execute the script `mgk_download.py`. 
 
 * Save the file with tag ObjectId(5e150c312038695f1da2e956) to *directory/newname*  
-`python MGKDB/mgk_download.py -A <user_credentials.pkl> -OID 5e150c312038695f1da2e956 -D directory -S newname`  
+`python MGKDB/src/mgkdb/mgk_download.py -A <user_credentials.pkl> -OID 5e150c312038695f1da2e956 -D directory -S newname`  
 
 The directory will be created if it does not exist.
 
@@ -57,7 +57,7 @@ The directory will be created if it does not exist.
 For uploads, users need to execute the script `mgk_uploader.py`. 
 
 Run the uploader as \
-```python MGKDB/mgk_uploader.py -A <user_credentials.pkl> -T test_data/TGLF/ -SIM TGLF ```.  Option -T is for specifying your target folder. Use option --help to display other options.  
+```python MGKDB/src/mgkdb/mgk_uploader.py -A <user_credentials.pkl> -T test_data/TGLF/ -SIM TGLF ```.  Option -T is for specifying your target folder. Use option --help to display other options.  
 
 Please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/MGKDB-at-NERSC) for step-by-step instructions and further options.
 

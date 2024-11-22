@@ -189,7 +189,8 @@ if __name__=="__main__":
     data_dir = "test_data/test_gene1_tracer_efit/"
     # data_dir = "test_data/test_gene2_miller_general/"
     # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene1_tracer_efit/'
-    # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene2_miller_general'
+    # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene2_miller_general/'
+    data_dir='/Users/venkitesh_work/Downloads/test_gene_non_st/'
     suffix='_0001'
     fname = data_dir+'parameters{0}'.format(suffix)
     gkcode="GENE"

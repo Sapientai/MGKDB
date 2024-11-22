@@ -10,7 +10,7 @@ On this page:
 ---
 
 ## Setting up the environment
-A conveninent method to access the database tools is using conda environments.
+A convenient method to access the database tools is using conda environments.
 You can find the instructions to build the conda environment in the wiki [here](https://github.com/Sapientai/MGKDB/wiki/Setting-up-the-environment).
 
 ## Test DB  locally

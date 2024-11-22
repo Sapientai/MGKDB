@@ -1,13 +1,4 @@
 # **MGKDB**
-========
-
-On this page:  
-
-* [Test DB locally](#markdown-test-db-locally)  
-
-* [Test DB on NERSC](#markdown-test-db-on-nersc)  
-
----
 
 ## Setting up the environment
 A convenient method to access the database tools is using conda environments.
@@ -28,7 +19,12 @@ To access MGKDB at NERSC, you will need two sets of access credentials:
 2. MGKDB at NERSC: Access to the MGKDB database at NERSC. Please email michoski@oden.utexas.edu to request access.
 
 Users can interact with the database in 3 ways: 
-### Directly using the terminal
+### 1. Using Command Line tools
+Command line tools can be used to download data from the database and upload data to the database.
+
+### 2. Using MongoDB Compass GUI
+
+### 3. Directly using the terminal
 Another method to interact with the database is directly from the terminal
 1. From a terminal, `ssh` to Perlmutter using \
    ```ssh -l <nersc_username> perlmutter.nersc.gov```
@@ -39,12 +35,7 @@ mongo -u <db_username> -p <db_password> mongodb03.nersc.gov/mgk_fusion
 ```
 3. Now, one can use `db` commands.
 
-### Using Command Line tools
-Command line tools can be used to download data from the database and upload data to the database.
-
-### Using MongoDB Compass GUI
-
-For the latter two approaches, please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/MGKDB-at-NERSC) for step-by-step instructions.
+For the former two approaches, please refer to this [Wiki](https://github.com/Sapientai/MGKDB/wiki/MGKDB-at-NERSC) for step-by-step instructions.
 
 ### Caution:
 * If you have Read/Write access to the database, be careful while using mongodb compass, you may accidently modify the database.  

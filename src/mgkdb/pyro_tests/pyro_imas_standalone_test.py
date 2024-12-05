@@ -162,6 +162,8 @@ def create_gk_dict_with_pyro(fname,gkcode):
         pyro.load_gk_output(load_fields=False)
 
     gkdict = gkids.GyrokineticsLocal()
+    gkdict.max_repr_length = 32 
+
     idspy.fill_default_values_ids(gkdict)
     gkdict = pyro_to_imas_mapping(
             pyro,
@@ -186,11 +188,12 @@ def create_gk_dict_with_pyro(fname,gkcode):
 
 if __name__=="__main__":
 
-    data_dir = "test_data/test_gene1_tracer_efit/"
+    # data_dir = "test_data/test_gene1_tracer_efit/"
     # data_dir = "test_data/test_gene2_miller_general/"
     # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene1_tracer_efit/'
     # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene2_miller_general/'
-    data_dir='/Users/venkitesh_work/Downloads/test_gene_non_st/'
+    data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene5_non_st_single_prec/'
+    # data_dir='/Users/venkitesh_work/Downloads/scanfiles0000/'
     suffix='_0001'
     fname = data_dir+'parameters{0}'.format(suffix)
     gkcode="GENE"
@@ -217,6 +220,7 @@ if __name__=="__main__":
     # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/CGYRO_nonlinear2/run1/"
     # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/CGYRO_nonlinear3_no_apar_saved/run1/"
     # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/CGYRO_nonlinear6_runs_multi_ebelli/d_lti00_ge00/"
+    # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/CGYRO_nonlinear7_oldversion_nov26_2024/run1/"
     # fname = data_dir+'input.cgyro'
     # gkcode="CGYRO"
 

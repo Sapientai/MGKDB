@@ -157,18 +157,13 @@ def prune_imas_gk_dict(gk_dict, pyro, linear):
 
 
     ## Setup max_repr_length
-
     if pyro._gk_code=='GENE':
         prec = pyro.gk_input.data["info"]["PRECISION"] 
+        prec_dict = {'SINGLE':32, 'DOUBLE':64}
+        max_repr_length = prec_dict[prec]
 
-        if prec =="SINGLE":
-            max_repr_length = 32 
-        elif prec =="DOUBLE":
-            max_repr_length = 64
-
-    update_key_values(gk_dict, 'max_repr_length', max_repr_length)
-
-
+        update_key_values(gk_dict, 'max_repr_length', max_repr_length)
+    
     return gk_dict 
 
 

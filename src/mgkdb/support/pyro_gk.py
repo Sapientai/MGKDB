@@ -55,8 +55,27 @@ def convert_to_json(obj,separate_real_imag = False):
     else:
         return obj
 
-def prune_imas_gk_dict(gk_dict, linear):
-    ''' Remove 4d files for linear and non-linear runs  '''
+def update_key_values(data, mod_key, new_value):
+    '''
+    Module to iteratively scan for entries in a dictionary or sub dictionaries or sublists
+    with a specific key and repalce it with a given value
+    '''
+    
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if key == mod_key:
+                data[key] = new_value
+            else:
+                update_key_values(value, mod_key, new_value)
+    elif isinstance(data, list):
+        for item in data:
+            update_key_values(item, mod_key, new_value)
+
+
+def prune_imas_gk_dict(gk_dict, pyro, linear):
+    ''' Remove 4d files for linear and non-linear runs  
+    Also set value of max_repr_length using input values 
+    '''
 
     if linear: # If linear, drop entries in ['linear']['wavevector'][0]['eigenmode'][i]['fields'][key] 
         if gk_dict['non_linear']['fields_4d'] is not None:   
@@ -74,6 +93,14 @@ def prune_imas_gk_dict(gk_dict, linear):
 
         gk_dict['non_linear']['fields_4d']=None
 
+    ## Setup max_repr_length
+    if pyro._gk_code=='GENE':
+        prec = pyro.gk_input.data["info"]["PRECISION"] 
+        prec_dict = {'SINGLE':32, 'DOUBLE':64}
+        max_repr_length = prec_dict[prec]
+
+        update_key_values(gk_dict, 'max_repr_length', max_repr_length)
+    
     return gk_dict
 
 def create_gk_dict_with_pyro(fname,gkcode):
@@ -109,7 +136,7 @@ def create_gk_dict_with_pyro(fname,gkcode):
         
         json_data = convert_to_json(gkdict)
 
-        json_data = prune_imas_gk_dict(json_data, linear)
+        json_data = prune_imas_gk_dict(json_data, pyro, linear)
 
         ## Confirm IMAS size is less than 2MB
         bson_data = bson.BSON.encode(json_data)

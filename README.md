@@ -15,7 +15,7 @@ To access MGKDB at NERSC, you will need two sets of access credentials:
 
 Users can interact with the database in 3 ways: 
 ### 1. Using Command Line tools
-Command line tools can be used to download data from the database and upload data to the database.
+This repository provides command line tools can be used to download data from the database and upload data to the database.
 
 ### 2. Using MongoDB Compass GUI
 

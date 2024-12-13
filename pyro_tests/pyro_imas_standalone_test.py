@@ -163,7 +163,7 @@ def prune_imas_gk_dict(gk_dict, pyro, linear):
         max_repr_length = prec_dict[prec]
 
         update_key_values(gk_dict, 'max_repr_length', max_repr_length)
-    
+
     return gk_dict 
 
 
@@ -218,12 +218,12 @@ if __name__=="__main__":
 
     # data_dir = "test_data/test_gene1_tracer_efit/"
     # data_dir = "test_data/test_gene2_miller_general/"
-    data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene1_tracer_efit/'
+    # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene1_tracer_efit/'
     # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene2_miller_general/'
     # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene5_non_st_single_prec/'
     # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene6_non_st_double_prec/'
-    # data_dir='/Users/venkitesh_work/Downloads/scanfiles0000/'
-    suffix='_0001'
+    data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene7_non_st_double_prec/'
+    suffix='_0003'
     fname = data_dir+'parameters{0}'.format(suffix)
     gkcode="GENE"
     

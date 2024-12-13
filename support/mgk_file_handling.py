@@ -1331,8 +1331,9 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
             GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear=True)
             
             ## Save IMAS for any potential tests 
-            # with open("gyrokinetics.json", "w") as json_file:
-            #     json.dump(GK_dict, json_file, indent=4)
+            with open("gyrokinetics.json", "w") as json_file:
+                json.dump(GK_dict, json_file, indent=4)
+
 
             for key, val in Diag_dict.items():
                 Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
@@ -1519,7 +1520,11 @@ def upload_nonlin(db, out_dir, user, confidence, input_heat, keywords, comments,
             print('='*60)
             print('\n Working on OMAS gyrokinetics dictionary using tspan detected from nrg file......\n')
             GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear=False)
-            
+
+            ## Save IMAS for any potential tests 
+            with open("gyrokinetics.json", "w") as json_file:
+                json.dump(GK_dict, json_file, indent=4)
+                    
             for key, val in Diag_dict.items():
                 Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
     

@@ -10,7 +10,7 @@ from mgkdb.support.mgk_login import mgk_login,f_login_dbase
 
 
 # Run this as : 
-# python template_download_all.py -A <.pkl> -C nonlinear -D <download_location>
+# python template_download_all_nonlinear.py -A <.pkl> -C nonlinear -D <download_location>
 
 
 if __name__=="__main__":

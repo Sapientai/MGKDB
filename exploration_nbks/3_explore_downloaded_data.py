@@ -17,7 +17,7 @@ if __name__=="__main__":
     
     ## Read .json file 
     top_dir = '<dir_name>'
-    fname = glob.glob(top_dir+'*.json')[0]
+    fname = glob.glob(top_dir+'mgkdb_summary_*.json')[0]
     print(fname)
     
     # Opening JSON file

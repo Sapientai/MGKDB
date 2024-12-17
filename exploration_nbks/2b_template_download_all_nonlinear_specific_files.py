@@ -14,7 +14,7 @@ from mgkdb.support.mgk_file_handling import get_oid_from_query, Str2Query, downl
 
 
 # Run this as : 
-# python template_download_all_nonlinear_specific_files.py -A <.pkl> -C nonlinear -D <download_location>
+# python 2b_template_download_all_nonlinear_specific_files.py -A <.pkl> -C nonlinear -D <download_location>
 
 
 if __name__=="__main__":

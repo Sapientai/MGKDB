@@ -14,7 +14,7 @@ from mgkdb.support.mgk_file_handling import get_oid_from_query, Str2Query, downl
 
 
 # Run this as : 
-# python template_download_all_nonlinear.py -A <.pkl> -C nonlinear -D <download_location>
+# python template_download_all_nonlinear_specific_files.py -A <.pkl> -C nonlinear -D <download_location>
 
 
 if __name__=="__main__":
@@ -64,9 +64,13 @@ if __name__=="__main__":
 
         ## Download IMAS dict
         record['_id'] = str(record['_id'])
-        modified_dict = {k:record[k] for k in ['_id','Meta','gyrokinetics']}
-        with open(os.path.join(destination, 'mgkdb_summary_for_run'+ suffix +'.json'), 'w') as f:
-            json.dump(modified_dict, f)
+        if 'gyrokinetics' in record.keys(): 
+            modified_dict = {k:record[k] for k in ['_id','Meta','gyrokinetics']}
+            with open(os.path.join(destination, 'mgkdb_summary_for_run'+ suffix +'.json'), 'w') as f:
+                json.dump(modified_dict, f)
+        else: 
+            print('No gyrokinetics found in IMAS for run %s'%(oid))
+
            
         print("Successfully downloaded run %s to the directory %s " % (oid,destination))
 

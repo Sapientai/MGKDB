@@ -56,9 +56,11 @@ if __name__=="__main__":
         print(record.keys())
 
         suffix = record['Meta']['run_suffix']
-        op_fname = 'nrg'+ suffix
-        file_id = record['Files']['nrg']
-        download_file_by_id(database, file_id, destination, op_fname, session = None)
+        ## Fix to save GENE specific input file 
+        if 'nrg' in record['Files'].keys(): 
+            op_fname = 'nrg'+ suffix
+            file_id = record['Files']['nrg']
+            download_file_by_id(database, file_id, destination, op_fname, session = None)
 
         ## Download IMAS dict
         record['_id'] = str(record['_id'])

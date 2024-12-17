@@ -23,7 +23,7 @@ class diag_plot():
         '''
         self.data = data_dict['Diagnostics']
         self._id = data_dict['_id']
-        self.meta = data_dict['Meta'] if 'Meta' in data_dict else None
+        self.meta = data_dict['Metadata'] if 'Metadata' in data_dict else None
         self.save_fig = save_fig
         self.save_dir = save_dir
 

@@ -476,7 +476,7 @@ def gridfs_put_npArray(db, value, filepath, filename, sim_type):
     return obj_id  
     
     
-def load(db, collection, query, projection={'Meta':1, 'gyrokinetics':1, 'Diagnostics':1}, getarrays=True):
+def load(db, collection, query, projection={'Metadata':1, 'gyrokineticsIMAS':1, 'Diagnostics':1}, getarrays=True):
     """Preforms a search using the presented query. For examples, see:
     See http://api.mongodb.org/python/2.0/tutorial.html
     The basic idea is to send in a dictionaries which key-value pairs like
@@ -523,7 +523,7 @@ def _loadNPArrays(db, document):
             document[key] = _loadNPArrays(db, value)
     return document
 
-def query_plot(db, collection, query, projection = {'Meta':1, 'Diagnostics':1}):
+def query_plot(db, collection, query, projection = {'Metadata':1, 'Diagnostics':1}):
     data_list = load(db, collection, query, projection)
     print('{} records found.'.format(len(data_list)))
     
@@ -614,14 +614,14 @@ def isUploaded(out_dir,runs_coll):
     check if out_dir appears in the database collection.
     Assuming out_dir will appear no more than once in the database
     '''
-    inDb = runs_coll.find({ "Meta.run_collection_name": out_dir })
+    inDb = runs_coll.find({ "Metadata.run_collection_name": out_dir })
 
     entries = list(inDb)
     uploaded = True if len(entries)>0 else False 
     
     # uploaded = False
     # for run in inDb:
-    #     if run["Meta"]["run_collection_name"] == out_dir: # seems redundent?
+    #     if run["Metadata"]["run_collection_name"] == out_dir: # seems redundent?
     #         uploaded = True
     #         break
     
@@ -650,7 +650,7 @@ def get_record(out_dir, runs_coll):
     '''
     Get a list of summary dictionary for 'out_dir' in the database
     '''
-    inDb = runs_coll.find({ "Meta.run_collection_name": out_dir })
+    inDb = runs_coll.find({ "Metadata.run_collection_name": out_dir })
     record = []
     for run in inDb:
 #        dic = dict()
@@ -760,7 +760,7 @@ def download_file_by_id(db, _id, destination, fname=None, session = None):
 def download_dir_by_name(db, runs_coll, dir_name, destination):  
     '''
     db: database name
-    dir_name: as appear in db.Meta['run_collection_name']
+    dir_name: as appear in db.Metadata['run_collection_name']
     destination: destination to place files
     '''
     path = os.path.join(destination, dir_name.split('/')[-1])
@@ -772,7 +772,7 @@ def download_dir_by_name(db, runs_coll, dir_name, destination):
             print ("Creation of the directory %s failed" % path)
     #else:
     fs = gridfs.GridFSBucket(db)
-    inDb = runs_coll.find({ "Meta.run_collection_name": dir_name })
+    inDb = runs_coll.find({ "Metadata.run_collection_name": dir_name })
 
     if 'generr' in inDb[0]['Files'].keys(): ## Fix for when 'generr' doesn't exist
         if inDb[0]['Files']['geneerr'] != 'None':    
@@ -811,7 +811,7 @@ def download_dir_by_name(db, runs_coll, dir_name, destination):
             pickle.dump(diag_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
                 
         record['_id'] = str(record['_id'])
-        with open(os.path.join(path, 'mgkdb_summary_for_run'+record['Meta']['run_suffix']+'.json'), 'w') as f:
+        with open(os.path.join(path, 'mgkdb_summary_for_run'+record['Metadata']['run_suffix']+'.json'), 'w') as f:
             json.dump(record, f)
            
     print ("Successfully downloaded to the directory %s " % path)
@@ -825,7 +825,7 @@ def download_runs_by_id(db, runs_coll, _id, destination):
     fs = gridfs.GridFSBucket(db)
     record = runs_coll.find_one({ "_id": _id })
     try:
-        dir_name = record['Meta']['run_collection_name']
+        dir_name = record['Metadata']['run_collection_name']
     except TypeError:
         print("Entry not found in database, please double check the id")
         raise SystemExit
@@ -871,7 +871,7 @@ def download_runs_by_id(db, runs_coll, _id, destination):
     #print(record)
     record['_id'] = str(_id)
 
-    with open(os.path.join(path, 'mgkdb_summary_for_run'+record['Meta']['run_suffix']+'.json'), 'w') as f:
+    with open(os.path.join(path, 'mgkdb_summary_for_run'+record['Metadata']['run_suffix']+'.json'), 'w') as f:
         json.dump(record, f)
     print("Successfully downloaded files in the collection {} to directory {}".format( record['_id'],path) )   
     
@@ -887,16 +887,16 @@ def update_Meta(out_dir, runs_coll, suffix):
     assert len(keys)==len(vals), 'Input number of keys and values does not match. Abort!'
     for key, val in zip(keys, vals):
     
-        runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix}, 
-                         {"$set":{'Meta.'+key: val, "Meta.last_updated": strftime("%y%m%d-%H%M%S")} }
+        runs_coll.update_one({ "Metadata.run_collection_name": out_dir, "Metadata.run_suffix": suffix}, 
+                         {"$set":{'Metadata.'+key: val, "Metadata.last_updated": strftime("%y%m%d-%H%M%S")} }
                          )    
-    print("Meta{} in {} updated correctly".format(suffix, out_dir))
+    print("Metadata{} in {} updated correctly".format(suffix, out_dir))
 
     
 #def update_Parameter(out_dir, runs_coll, suffix):
 #    
 #    param_dict = get_parsed_params(os.path.join(out_dir, 'parameters' + suffix) )
-#    runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix}, 
+#    runs_coll.update_one({ "Metadata.run_collection_name": out_dir, "Metadata.run_suffix": suffix}, 
 #                     {"$set":{'Parameters': param_dict}}
 #                     )
 #    
@@ -943,9 +943,9 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
         print('Updating Metadata')              
         for entry in updated:
             for suffix in suffixes:                    
-                runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix}, 
+                runs_coll.update_one({ "Metadata.run_collection_name": out_dir, "Metadata.run_suffix": suffix}, 
                                  {"$set":{'Files.'+entry[0]: entry[1], 
-                                          "Meta.last_updated": strftime("%y%m%d-%H%M%S")}}
+                                          "Metadata.last_updated": strftime("%y%m%d-%H%M%S")}}
                                  )
         print("Update complete")
                 
@@ -976,7 +976,7 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
                     elif sim_type=='GENE': 
                         Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
 
-                    run = runs_coll.find_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix})
+                    run = runs_coll.find_one({ "Metadata.run_collection_name": out_dir, "Metadata.run_suffix": suffix})
                     for key, val in run['Diagnostics'].items():
                         if val != 'None':
                             # print((key, val))
@@ -986,8 +986,8 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
                     for key, val in Diag_dict.items():
                         Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
 
-                    runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix },
-                            { "$set": {'gyrokinetics': GK_dict, 'Diagnostics':Diag_dict}}
+                    runs_coll.update_one({ "Metadata.run_collection_name": out_dir, "Metadata.run_suffix": suffix },
+                            { "$set": {'gyrokineticsIMAS': GK_dict, 'Diagnostics':Diag_dict}}
                                  )
 
                 file = os.path.join(out_dir, doc  + suffix)
@@ -1000,8 +1000,8 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
                 with open(file, 'rb') as f:
                     _id = fs.put(f, encoding='UTF-8', filepath=file, filename=file.split('/')[-1])
 
-                runs_coll.update_one({ "Meta.run_collection_name": out_dir, "Meta.run_suffix": suffix }, 
-                                 { "$set": {'Files.'+ doc: _id, "Meta.last_updated": strftime("%y%m%d-%H%M%S")} }
+                runs_coll.update_one({ "Metadata.run_collection_name": out_dir, "Metadata.run_suffix": suffix }, 
+                                 { "$set": {'Files.'+ doc: _id, "Metadata.last_updated": strftime("%y%m%d-%H%M%S")} }
                                  )
         print("Update complete")
     
@@ -1012,7 +1012,7 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
 def remove_from_mongo(out_dir, db, runs_coll):
     #find all documents containing collection name
         
-    inDb = runs_coll.find({ "Meta.run_collection_name": out_dir })        
+    inDb = runs_coll.find({ "Metadata.run_collection_name": out_dir })        
     fs = gridfs.GridFS(db)
     for run in inDb:
         # delete the gridfs storage:
@@ -1254,7 +1254,7 @@ def upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
                 Diag_dict['omega']['omega'] = omega_val[2]
 
 
-            run_data =  {'Meta': meta_dict, 'Files': files_dict, 'gyrokinetics': GK_dict, 'Diagnostics': Diag_dict}
+            run_data =  {'Metadata': meta_dict, 'Files': files_dict, 'gyrokineticsIMAS': GK_dict, 'Diagnostics': Diag_dict}
             runs_coll.insert_one(run_data).inserted_id  
             print('Files with suffix: {} in folder {} uploaded successfully'.format(suffix, out_dir))
             print('='*40)
@@ -1406,7 +1406,7 @@ def upload_nonlin(db, out_dir, user, confidence, keywords, comments, sim_type,
                     Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
 
             #combine dictionaries and upload
-            run_data =  {'Meta': meta_dict, 'Files': files_dict, 'gyrokinetics': GK_dict, 'Diagnostics': Diag_dict}
+            run_data =  {'Metadata': meta_dict, 'Files': files_dict, 'gyrokineticsIMAS': GK_dict, 'Diagnostics': Diag_dict}
             runs_coll.insert_one(run_data).inserted_id  
     
             print('Files with suffix: {} in folder {} uploaded successfully.'.format(suffix, out_dir))

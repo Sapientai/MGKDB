@@ -51,7 +51,7 @@ if __name__=="__main__":
             fs = gridfs.GridFSBucket(database)
             record = collection_name.find_one({ "_id": oid })
             print(record.keys())
-            suffix = record['Meta']['run_suffix']
+            suffix = record['Metadata']['run_suffix']
 
             ## Fix to save GENE specific input file 
             if 'nrg' in record['Files'].keys(): 
@@ -61,12 +61,12 @@ if __name__=="__main__":
 
             ## Download IMAS dict
             record['_id'] = str(record['_id'])
-            if 'gyrokinetics' in record.keys(): 
-                modified_dict = {k:record[k] for k in ['_id','Meta','gyrokinetics']}
+            if 'gyrokineticsIMAS' in record.keys(): 
+                modified_dict = {k:record[k] for k in ['_id','Metadata','gyrokineticsIMAS']}
                 with open(os.path.join(destination, 'mgkdb_summary_for_run'+ suffix +'.json'), 'w') as f:
                     json.dump(modified_dict, f)
             else: 
-                print('No gyrokinetics found in IMAS for run %s'%(oid))
+                print('No gyrokineticsIMAS field found for run %s'%(oid))
 
             print("Successfully downloaded run %s to the directory %s " % (oid,destination))
         except Exception as e: 

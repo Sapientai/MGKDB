@@ -40,37 +40,35 @@ if __name__=="__main__":
 
     # Loop over oids and download with download module
     for count,oid in enumerate(all_ids[:]):
-        
-        ### Create parent directory for each run. 
-        fldr = '%s_%s'%(count,str(oid))   # Add counter as prefix to folder name 
-        destination = os.path.join(args.destination,fldr)
-        os.makedirs(destination, exist_ok=True)
-        print(oid, destination)
-        
-        #### Download
-        # download_runs_by_id(database, collection_name, oid, destination)
+        try : 
+            ### Create parent directory for each run. 
+            fldr = '%s_%s'%(count,str(oid))   # Add counter as prefix to folder name 
+            destination = os.path.join(args.destination,fldr)
+            os.makedirs(destination, exist_ok=True)
+            print(oid, destination)
+            
+            ## Extract dictionary 
+            fs = gridfs.GridFSBucket(database)
+            record = collection_name.find_one({ "_id": oid })
+            print(record.keys())
+            suffix = record['Meta']['run_suffix']
 
-        ## Extract dictionary 
-        fs = gridfs.GridFSBucket(database)
-        record = collection_name.find_one({ "_id": oid })
-        print(record.keys())
+            ## Fix to save GENE specific input file 
+            if 'nrg' in record['Files'].keys(): 
+                op_fname = 'nrg'+ suffix
+                file_id = record['Files']['nrg']
+                download_file_by_id(database, file_id, destination, op_fname, session = None)
 
-        suffix = record['Meta']['run_suffix']
-        ## Fix to save GENE specific input file 
-        if 'nrg' in record['Files'].keys(): 
-            op_fname = 'nrg'+ suffix
-            file_id = record['Files']['nrg']
-            download_file_by_id(database, file_id, destination, op_fname, session = None)
+            ## Download IMAS dict
+            record['_id'] = str(record['_id'])
+            if 'gyrokinetics' in record.keys(): 
+                modified_dict = {k:record[k] for k in ['_id','Meta','gyrokinetics']}
+                with open(os.path.join(destination, 'mgkdb_summary_for_run'+ suffix +'.json'), 'w') as f:
+                    json.dump(modified_dict, f)
+            else: 
+                print('No gyrokinetics found in IMAS for run %s'%(oid))
 
-        ## Download IMAS dict
-        record['_id'] = str(record['_id'])
-        if 'gyrokinetics' in record.keys(): 
-            modified_dict = {k:record[k] for k in ['_id','Meta','gyrokinetics']}
-            with open(os.path.join(destination, 'mgkdb_summary_for_run'+ suffix +'.json'), 'w') as f:
-                json.dump(modified_dict, f)
-        else: 
-            print('No gyrokinetics found in IMAS for run %s'%(oid))
-
-           
-        print("Successfully downloaded run %s to the directory %s " % (oid,destination))
-
+            print("Successfully downloaded run %s to the directory %s " % (oid,destination))
+        except Exception as e: 
+            print(e)
+            print("unsuccessful for %s"%(oid))

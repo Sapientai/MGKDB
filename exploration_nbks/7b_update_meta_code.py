@@ -65,17 +65,21 @@ if __name__=="__main__":
         assert key_name in keys,f"Invalid input key {key_name}"
 
         ans = document.get('Metadata').get(key_name)
-        print("The existing entry for this key is %s"%(ans))
+        print("The existing entry for this key is:\t%s"%(ans))
         print("You will be resetting the entire value for this key. Please use caution")  
-        new_value = input('Please enter the new entry you want to append to %s. If you don\'t want to proceed, enter : none '%(key_name))
+        new_value = input('Please enter the new entry you want to append to %s. If you don\'t want to proceed, enter : none \n'%(key_name))
+        confirm = input(f'Confirm changing entry to {new_value}? Enter Y or N\n')
         
-        if new_value == 'none':
+              
+        if ((not confirm) or (new_value == 'none')):
             print('Received "none" string. Aborting update')
             raise SystemExit
             
         fltr = {"_id": oid}
         update = {"$set": {f"Metadata.{key_name}": new_value}}
         result = collection.update_one(fltr, update)
+
+        document = collection.find_one({"_id":oid},{'Metadata':1,'_id':0})
         print('Updated entry: %s '%(document.get('Metadata').get(key_name)))    
         print('test')
 

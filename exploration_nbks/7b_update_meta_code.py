@@ -14,14 +14,12 @@ from mgkdb.support.mgk_login import mgk_login,f_login_dbase
 # Run this as : 
 # python 2b_template_download_all_nonlinear_specific_files.py -A <.pkl> -C nonlinear -D <download_location>
 
-
-
 def f_parse_args():
     parser = argparse.ArgumentParser(description='Update Metadata entries')
 
     parser.add_argument('-C', '--collection', choices=['linear','nonlinear'], default='linear', type=str, help='collection name in the database')
     parser.add_argument('-OID', '--objectID', default = None, help = 'Object ID in the database')
-    parser.add_argument('-m', '--mode', type=int, choices=[1,2,3], default = 3, help = 'Choose mode of operation for updating Metadata. 1: Append to publication list.\n2: Append to comments.\n 3: Update any specific entry.')
+    parser.add_argument('-m', '--mode', type=int, choices=[1,2,3], default = 1, help = 'Choose mode of operation for updating Metadata. 1: Append to publication list.\n2: Append to comments.\n 3: Update any specific entry.')
     parser.add_argument('-A', '--authenticate', default = None, help='locally saved login info, a .pkl file')
 
     return parser.parse_args()
@@ -56,7 +54,22 @@ if __name__=="__main__":
 
     ### Options : Append to publications list, Append to comments, Update any specific entry
     if args.mode==1: 
-        pass
+        user_ip = input('Enter the value of the following entries, separated by commas: title, year, doi\n')
+        ip = ['' for _ in range(3)]
+        for idx,i in enumerate(user_ip.split(',')): ip[idx] = i
+        publication_to_add = {"article": {'title':ip[0],'year':ip[1]}, "doi": ip[2]}
+        
+        ## If entry is not a list, convert it to one with current entry as element 0 
+        entry_val = document['Metadata']['publications']
+        if not isinstance(entry_val,list): 
+            collection.update_one({"_id": oid},{"$set": {"Metadata.publications": [entry_val]}})
+        
+        fltr = {"_id": oid}
+        # Using $push to add to the list
+        update = {"$push": {"Metadata.publications": publication_to_add}}
+        result = collection.update_one(fltr, update)
+        print("Updated publication record")
+
     elif args.mode==2:
         pass
         
@@ -70,7 +83,6 @@ if __name__=="__main__":
         new_value = input('Please enter the new entry you want to append to %s. If you don\'t want to proceed, enter : none \n'%(key_name))
         confirm = input(f'Confirm changing entry to {new_value}? Enter Y or N\n')
         
-              
         if ((not confirm) or (new_value == 'none')):
             print('Received "none" string. Aborting update')
             raise SystemExit

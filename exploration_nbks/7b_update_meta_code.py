@@ -50,6 +50,16 @@ if __name__=="__main__":
     
     ### Extract document for this oid
     document = collection.find_one({"_id":oid},{'Metadata':1,'_id':0})
+
+    ### Check user credential
+    uname = login.login['user']
+    input_usr = document['Metadata']['user']
+
+    if uname!=input_usr:
+        cont = input(f"Data was input by another use {input_usr}. Do you wish to continue ? Y or N")
+        if not cont: 
+            raise SystemExit
+        
     keys = document.get('Metadata').keys()
 
     ### Options : Append to publications list, Append to comments, Update any specific entry

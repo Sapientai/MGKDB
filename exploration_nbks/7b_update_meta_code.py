@@ -15,11 +15,11 @@ from mgkdb.support.mgk_login import mgk_login,f_login_dbase
 # python 2b_template_download_all_nonlinear_specific_files.py -A <.pkl> -C nonlinear -D <download_location>
 
 def f_parse_args():
-    parser = argparse.ArgumentParser(description='Update Metadata entries')
+    parser = argparse.ArgumentParser(description='Update Metadata entries. 3 modes.  1: Append to publication list.\n2: Append to comments.\n 3: Update any specific entry. \n Modes 1 and 2 add entered values to existing entry.\nUse mode=3 with caution as you are rewriting previous entry.')
 
     parser.add_argument('-C', '--collection', choices=['linear','nonlinear'], default='linear', type=str, help='collection name in the database')
     parser.add_argument('-OID', '--objectID', default = None, help = 'Object ID in the database')
-    parser.add_argument('-m', '--mode', type=int, choices=[1,2,3], default = 1, help = 'Choose mode of operation for updating Metadata. 1: Append to publication list.\n2: Append to comments.\n 3: Update any specific entry.')
+    parser.add_argument('-m', '--mode', type=int, choices=[1,2,3], default = 2, help = 'Choose mode of operation for updating Metadata. 1: Append to publication list.\n2: Append to comments.\n 3: Update any specific entry.')
     parser.add_argument('-A', '--authenticate', default = None, help='locally saved login info, a .pkl file')
 
     return parser.parse_args()
@@ -80,8 +80,17 @@ if __name__=="__main__":
         result = collection.update_one(fltr, update)
         print("Updated publication record")
 
-    elif args.mode==2:
-        pass
+    elif args.mode==2: # Option to update comment string
+        old_comment = document['Metadata']['comments']
+        user_ip = input(f'Enter the string to append to current entry. Current entry is {old_comment} \n')
+        
+        assert isinstance(old_comment,str),f"Existing entry {old_comment} is not a string" 
+        
+        fltr = {"_id": oid}
+        # Using $push to add to the list
+        update = {"$set": {"Metadata.comments": old_comment+'.\n'+user_ip}}
+        result = collection.update_one(fltr, update)
+        print("Appended comment")
         
     elif args.mode==3: 
         key_name = input(f'Please enter the key in Metadata that you want to update. Allowed options are: \n {keys}\n')

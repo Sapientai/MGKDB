@@ -18,12 +18,64 @@ def f_parse_args():
     parser = argparse.ArgumentParser(description='Update Metadata entries. 3 modes.  1: Append to publication list.\n2: Append to comments.\n 3: Update any specific entry. \n Modes 1 and 2 add entered values to existing entry.\nUse mode=3 with caution as you are rewriting previous entry.')
 
     parser.add_argument('-C', '--collection', choices=['linear','nonlinear'], default='linear', type=str, help='collection name in the database')
-    parser.add_argument('-OID', '--objectID', default = None, help = 'Object ID in the database')
-    parser.add_argument('-m', '--mode', type=int, choices=[1,2,3], default = 2, help = 'Choose mode of operation for updating Metadata. 1: Append to publication list.\n2: Append to comments.\n 3: Update any specific entry.')
+    parser.add_argument('-OID', '--objectID', default = '675c746dc213a18e3243bef0', help = 'Object ID in the database')
+    parser.add_argument('-m', '--mode', type=int, choices=[1,2,3], default = 3, help = 'Choose mode of operation for updating Metadata. 1: Append to publication list.\n2: Append to comments.\n 3: Update any specific entry.')
     parser.add_argument('-A', '--authenticate', default = None, help='locally saved login info, a .pkl file')
 
     return parser.parse_args()
 
+
+def f_metadata_template():
+    ''' Create metadata dictionary template'''
+    code_tag_keys = ['sim_type','git_hash','platform','execution_date','workflow_type']
+    scenario_keys = ['NameOfActualOrHypotheticalExpt','shotOrTimeOrRunid']
+    publication_keys = ['papers','year','doi']
+    top_keys = ['scenario_tag','Code_tag','archive_location','publications', \
+                'user','run_suffix','run_collection_name','linked_objectID','confidence','comments','time_uploaded','last_updated']
+    
+    ## Warning : The code below assume two level dictionary only. For more levels, need to modify code ! 
+    dict_template = {} 
+    
+    for key in top_keys:
+        dict_template[key]={}
+        default = ''
+        if key =='Code_tag':
+            for k2 in code_tag_keys:
+                dict_template[key][k2] = default
+        elif key =='scenario_tag':
+            for k2 in scenario_keys:
+                dict_template[key][k2] = default
+        elif key =='publications':
+            for k2 in publication_keys:
+                dict_template[key][k2] = default
+                
+        else: 
+            dict_template[key] = None
+
+    return dict_template
+
+def f_update_metadata(data, key_name, template_d):
+
+    if isinstance(data,dict):
+        new_dict ={}
+        for key,value in data.items():
+            new_val = f_update_metadata(value, key, template_d)
+            new_dict[key] = new_val
+
+        return new_dict 
+    
+    elif isinstance(data, list):
+        ## Create dictionary using last value 
+        new_val = f_update_metadata(data[-1],key_name, template_d)
+        
+        return new_val
+
+    else:
+        print("The existing entry for this key is:\t%s"%(data))
+        ## if entry is string, just replace
+        new_value = input('Please enter the new entry you want for %s. If you don\'t want to proceed, enter : none \n'%(key_name))
+
+        return new_value
 
 if __name__=="__main__":
     
@@ -43,9 +95,12 @@ if __name__=="__main__":
     collection =  getattr(database,collection_dict[collection_ip])
     
     # Get Object IDs 
-    # oid = ObjectId(args.objectID)
     all_ids = [r['_id'] for r in collection.find({},{'id':1})]
-    oid = all_ids[0]
+    
+    oid = ObjectId(args.objectID)
+    ### Test code with oids read from full collection
+    # oid = all_ids[0]
+
     assert oid in all_ids,"Given oid entry %s doesn't exist in database"%(oid)
     
     ### Extract document for this oid
@@ -67,7 +122,7 @@ if __name__=="__main__":
         user_ip = input('Enter the value of the following entries, separated by commas: title, year, doi\n')
         ip = ['' for _ in range(3)]
         for idx,i in enumerate(user_ip.split(',')): ip[idx] = i
-        publication_to_add = {"article": {'title':ip[0],'year':ip[1]}, "doi": ip[2]}
+        publication_to_add = {'title':ip[0],'year':ip[1], "doi": ip[2]}
         
         ## If entry is not a list, convert it to one with current entry as element 0 
         entry_val = document['Metadata']['publications']
@@ -99,10 +154,17 @@ if __name__=="__main__":
         ans = document.get('Metadata').get(key_name)
         print("The existing entry for this key is:\t%s"%(ans))
         print("You will be resetting the entire value for this key. Please use caution")  
-        new_value = input('Please enter the new entry you want to append to %s. If you don\'t want to proceed, enter : none \n'%(key_name))
-        confirm = input(f'Confirm changing entry to {new_value}? Enter Y or N\n')
-        
-        if ((not confirm) or (new_value == 'none')):
+
+        dict_template = f_metadata_template()
+        data = dict_template[key_name]
+        new_value = f_update_metadata(data,key_name, dict_template)
+        confirm = input(f'Confirm changing entry to {new_value}? Enter Y or N\n').strip().upper()
+
+        ## Some entries need to be in  a list 
+        if key_name in ['publications']:
+            new_value = [new_value]
+
+        if (confirm=='N' or (new_value == 'none')):
             print('Received "none" string. Aborting update')
             raise SystemExit
             

@@ -12,7 +12,7 @@ from bson.objectid import ObjectId
 from mgkdb.support.mgk_login import mgk_login,f_login_dbase
 
 # Run this as : 
-# python 2b_template_download_all_nonlinear_specific_files.py -A <.pkl> -C nonlinear -D <download_location>
+# python exploration_nbks/7b_update_meta_code.py -A <fname.pkl> -C linear -m 3
 
 def f_parse_args():
     parser = argparse.ArgumentParser(description='Update Metadata entries. 3 modes.  1: Append to publication list.\n2: Append to comments.\n 3: Update any specific entry. \n Modes 1 and 2 add entered values to existing entry.\nUse mode=3 with caution as you are rewriting previous entry.')
@@ -80,14 +80,14 @@ if __name__=="__main__":
         result = collection.update_one(fltr, update)
         print("Updated publication record")
 
-    elif args.mode==2: # Option to update comment string
+    elif args.mode==2: # Option to append to comment string
         old_comment = document['Metadata']['comments']
         user_ip = input(f'Enter the string to append to current entry. Current entry is {old_comment} \n')
         
         assert isinstance(old_comment,str),f"Existing entry {old_comment} is not a string" 
         
         fltr = {"_id": oid}
-        # Using $push to add to the list
+        # Using $set to add appended string to comments
         update = {"$set": {"Metadata.comments": old_comment+'.\n'+user_ip}}
         result = collection.update_one(fltr, update)
         print("Appended comment")

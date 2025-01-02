@@ -137,7 +137,7 @@ if __name__=="__main__":
         # Using $push to add to the list
         update = {"$push": {"Metadata.publications": publication_to_add}}
         result = collection.update_one(fltr, update)
-        print("Updated publication record")
+        print("Appended publication record")
 
     elif args.mode==2: # Option to append to comment string
         old_comment = document['Metadata']['comments']

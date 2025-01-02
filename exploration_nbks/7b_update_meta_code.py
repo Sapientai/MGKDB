@@ -55,8 +55,12 @@ def f_metadata_template():
     return dict_template
 
 def f_update_metadata(data, key_name, template_d):
-
-    if isinstance(data,dict):
+    '''
+    Update the existing metadata key entry 
+    key_name : key to update 
+    template_d : dictionary containing template
+    '''
+    if isinstance(data, dict):
         new_dict ={}
         for key,value in data.items():
             new_val = f_update_metadata(value, key, template_d)
@@ -137,9 +141,8 @@ if __name__=="__main__":
 
     elif args.mode==2: # Option to append to comment string
         old_comment = document['Metadata']['comments']
+        # assert isinstance(old_comment,str),f"Existing entry {old_comment} is not a string" 
         user_ip = input(f'Enter the string to append to current entry. Current entry is {old_comment} \n')
-        
-        assert isinstance(old_comment,str),f"Existing entry {old_comment} is not a string" 
         
         fltr = {"_id": oid}
         # Using $set to add appended string to comments
@@ -164,8 +167,8 @@ if __name__=="__main__":
         if key_name in ['publications']:
             new_value = [new_value]
 
-        if (confirm=='N' or (new_value == 'none')):
-            print('Received "none" string. Aborting update')
+        if (confirm!='Y' or (new_value == 'none')):
+            print('Didn not receive confirmation. Aborting update')
             raise SystemExit
             
         fltr = {"_id": oid}
@@ -174,6 +177,5 @@ if __name__=="__main__":
 
         document = collection.find_one({"_id":oid},{'Metadata':1,'_id':0})
         print('Updated entry: %s '%(document.get('Metadata').get(key_name)))    
-        print('test')
 
 

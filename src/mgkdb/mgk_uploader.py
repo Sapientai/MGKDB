@@ -56,14 +56,8 @@ def main_upload(target, keywords, exclude, default, sim_type, extra, authenticat
         print('Scanning will skip specified folders:\n {}\n'.format(exclude_folders) )
     else:
         exclude_folders = []
-        
-    if default in ['T', 'True', '1', 't', 'true']:
-        default = True
-        manual_time_flag = False
-
-    else:
-        default = False
-        manual_time_flag = True
+    
+    manual_time_flag = not default
     
     ### Update global variables 
     global_vars = Global_vars(sim_type)    

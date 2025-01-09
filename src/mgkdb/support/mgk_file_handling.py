@@ -877,20 +877,20 @@ def download_runs_by_id(db, runs_coll, _id, destination):
     
 
 
-def update_Meta(out_dir, runs_coll, suffix):
+# def update_Meta(out_dir, runs_coll, suffix):
 
-    meta_list = ['user', 'run_collection_name', 'run_suffix', 'keywords', 'confidence']
-    print("Keys available for update are {}".format(meta_list.sort()))
+#     meta_list = ['user', 'run_collection_name', 'run_suffix', 'keywords', 'confidence']
+#     print("Keys available for update are {}".format(meta_list.sort()))
     
-    keys = input('What entries do you like to update? separate your input by comma.\n').split(',')
-    vals = input('type your values corresponding to those keys you typed. Separate each category by ; .\n').split(';')
-    assert len(keys)==len(vals), 'Input number of keys and values does not match. Abort!'
-    for key, val in zip(keys, vals):
+#     keys = input('What entries do you like to update? separate your input by comma.\n').split(',')
+#     vals = input('type your values corresponding to those keys you typed. Separate each category by ; .\n').split(';')
+#     assert len(keys)==len(vals), 'Input number of keys and values does not match. Abort!'
+#     for key, val in zip(keys, vals):
     
-        runs_coll.update_one({ "Metadata.run_collection_name": out_dir, "Metadata.run_suffix": suffix}, 
-                         {"$set":{'Metadata.'+key: val, "Metadata.last_updated": strftime("%y%m%d-%H%M%S")} }
-                         )    
-    print("Metadata{} in {} updated correctly".format(suffix, out_dir))
+#         runs_coll.update_one({ "Metadata.run_collection_name": out_dir, "Metadata.run_suffix": suffix}, 
+#                          {"$set":{'Metadata.'+key: val, "Metadata.last_updated": strftime("%y%m%d-%H%M%S")} }
+#                          )    
+#     print("Metadata{} in {} updated correctly".format(suffix, out_dir))
 
     
 #def update_Parameter(out_dir, runs_coll, suffix):
@@ -903,12 +903,15 @@ def update_Meta(out_dir, runs_coll, suffix):
 #    print("Parameters{} in {} updated correctly".format(suffix, out_dir))
     
 
+def update_mongo(db, metadata, out_dir, runs_coll, linear, suffixes=None):
 
-def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffixes=None):
     '''
     only update file related entries, no comparison made before update
-
     '''
+    
+    user = metadata['user']
+    linked_id = metadata['linked_id']
+    sim_type = metadata['CodeTag']['sim_type']
 
     fs = gridfs.GridFS(db)
     if suffixes is None:
@@ -1132,9 +1135,13 @@ def f_get_input_fname(out_dir, suffix, sim_type):
 
     return fname_dict[sim_type]
 
-def upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
-                  linked_id, suffixes = None, run_shared = None,
+def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
                   large_files=False, extra=False, verbose=True, manual_time_flag = True, global_vars=None):
+    
+    user = metadata['user']
+    confidence = metadata['confidence']
+    sim_type = metadata['CodeTag']['sim_type']
+
     #connect to linear collection
     runs_coll = db.LinearRuns
        
@@ -1223,19 +1230,28 @@ def upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
 
             #metadata dictonary
             time_upload = strftime("%y%m%d-%H%M%S")
-            meta_dict = {"user": user,
-                         "run_collection_name": out_dir,
-                         "run_suffix": '' + suffix,
-                         "keywords": keywords,
-                         "simulation_type": sim_type,
-                        #  "quasi_linear": quasi_linear,
-                         "linked_objectID":linked_id,
-                         "confidence": confidence,
-                         "comments": comments,
-                         "time_uploaded": time_upload,
-                         "last_updated": time_upload
-                        }  
-                   
+            # meta_dict = {"user": user,
+            #              "run_collection_name": out_dir,
+            #              "run_suffix": '' + suffix,
+            #              "keywords": keywords,
+            #              "simulation_type": sim_type,
+            #             #  "quasi_linear": quasi_linear,
+            #              "linked_objectID":linked_id,
+            #              "confidence": confidence,
+            #              "comments": comments,
+            #              "time_uploaded": time_upload,
+            #              "last_updated": time_upload
+            #             }
+            
+            metadata['run_collection_name'] = out_dir
+            metadata['run_suffix']=''+suffix
+            metadata['time_uploaded'] = time_upload
+            metadata['last_updated']  = time_upload
+            metadata['ScenarioTag']['linear'] = 'linear'
+            metadata['ScenarioTag']['quasi_linear'] = quasi_linear
+
+            meta_dict = metadata
+
             if sim_type in ['CGYRO','TGLF','GS2']:
                 Diag_dict = {}
             elif sim_type=='GENE': 
@@ -1294,9 +1310,14 @@ def upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
     global_vars.reset_docs_keys(sim_type)
         
         
-def upload_nonlin(db, out_dir, user, confidence, keywords, comments, sim_type,
-                  linked_id, suffixes = None, run_shared=None,
+def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
                   large_files=False, extra=False, verbose=True, manual_time_flag = True , global_vars=None):
+    
+    user = metadata['user']
+    confidence = metadata['confidence']
+    sim_type = metadata['CodeTag']['sim_type']
+
+
     #connect to nonlinear collection
     runs_coll = db.NonlinRuns
         
@@ -1382,18 +1403,29 @@ def upload_nonlin(db, out_dir, user, confidence, keywords, comments, sim_type,
     
            #metadata dictonary
             time_upload = strftime("%y%m%d-%H%M%S")
-            meta_dict = {"user": user,
-                         "run_collection_name": out_dir,
-                         "run_suffix": '' + suffix,
-                         "keywords": keywords,
-                         "simulation_type": sim_type,
-                        #  "quasi_linear": quasi_linear,
-                         "linked_objectID":linked_id,
-                         "confidence": confidence,
-                         "comments": comments,
-                         "time uploaded": time_upload,
-                         "last_updated": time_upload
-                        }
+            # meta_dict = {"user": user,
+            #              "run_collection_name": out_dir,
+            #              "run_suffix": '' + suffix,
+            #              "keywords": keywords,
+            #              "simulation_type": sim_type,
+            #             #  "quasi_linear": quasi_linear,
+            #              "linked_objectID":linked_id,
+            #              "confidence": confidence,
+            #              "comments": comments,
+            #              "time uploaded": time_upload,
+            #              "last_updated": time_upload
+            #             }
+            
+            metadata['run_collection_name'] = out_dir
+            metadata['run_suffix']=''+suffix
+            metadata['time_uploaded'] = time_upload
+            metadata['last_updated']  = time_upload
+            metadata['ScenarioTag']['linear'] = 'non_linear'
+            metadata['ScenarioTag']['quasi_linear'] = quasi_linear
+
+
+            meta_dict = metadata
+
             #data dictionary format for nonlinear runs
             if sim_type in ['CGYRO','TGLF','GS2']:
                 Diag_dict = {}
@@ -1449,8 +1481,7 @@ def upload_nonlin(db, out_dir, user, confidence, keywords, comments, sim_type,
     
     global_vars.reset_docs_keys(sim_type)
             
-def upload_to_mongo(db, out_dir, user, linear, confidence, keywords, comments, sim_type, 
-                    linked_id, suffixes = None, run_shared=None,
+def upload_to_mongo(db, linear, metadata, out_dir, suffixes = None, run_shared=None,
                     large_files = False, extra=False, verbose=True, manual_time_flag = True, global_vars=None):
     #print(linear)
     #for linear runs
@@ -1464,17 +1495,15 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, keywords, comments, s
             if update == '0':
                 #for now, delete and reupload instead of update - function under construction
                 remove_from_mongo(out_dir, db, runs_coll)   
-                upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
-                              linked_id, suffixes, run_shared,
+                upload_linear(db, metadata, out_dir, suffixes, run_shared,
                               large_files, extra, verbose, manual_time_flag, global_vars)
             elif update == '1':
-                update_mongo(out_dir, db, runs_coll, user, linear, sim_type, linked_id)
+                update_mongo(db, metadata, out_dir, runs_coll, linear)
             else:
                 print('Run collection \'' + out_dir + '\' skipped.')
         else:
             print('Folder tag:\n{}\n not detected, creating new.\n'.format(out_dir))
-            upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
-                          linked_id, suffixes, run_shared,
+            upload_linear(db, metadata, out_dir, suffixes, run_shared,
                           large_files, extra, verbose, manual_time_flag, global_vars)
                 
     #for nonlinear runs
@@ -1487,18 +1516,16 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, keywords, comments, s
             update = input('Folder tag:\n {} \n exists in database.  You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to skip this folder.\n'.format(out_dir))
             if update == '0':
                 remove_from_mongo(out_dir, db, runs_coll)   
-                upload_nonlin(db, out_dir, user, confidence,keywords, comments, sim_type, 
-                              linked_id, suffixes, run_shared,
+                upload_nonlin(db, metadata, out_dir, suffixes, run_shared,
                               large_files, extra, verbose,manual_time_flag, global_vars)
             elif update == '1':
-                update_mongo(out_dir, db, runs_coll, user, linear, sim_type, linked_id)
+                update_mongo(db, metadata, out_dir, runs_coll, linear)
 
             else:
                 print('Run collection \'' + out_dir + '\' skipped.')
         else:
             print('Folder tag:\n{}\n not detected, creating new.\n'.format(out_dir))
-            upload_nonlin(db, out_dir, user, confidence, keywords, comments, sim_type,
-                          linked_id, suffixes, run_shared,
+            upload_nonlin(db, metadata, out_dir, suffixes, run_shared,
                           large_files, extra, verbose,manual_time_flag, global_vars)
     else:
         exit('Cannot decide if the folder is subject to linear or nonlinear runs.')

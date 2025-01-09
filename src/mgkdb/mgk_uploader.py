@@ -20,6 +20,46 @@ from sys import exit
 from mgkdb.support.mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars, f_get_linked_oid
 from mgkdb.support.mgk_login import mgk_login,f_login_dbase
 
+
+
+
+def f_set_metadata(user=None,out_dir=None,suffix=None,keywords=None,confidence=None,comments=None,time_upload=None,\
+                   last_update=None, linked_ID=None, expt=None, shot_info=None, linear=None, quasiLinear=None, sim_type=None,\
+                   git_hash=None, platform=None, ex_date=None, workflow_type=None, archiv=None):
+
+    metadata={
+        'user': user,
+        'run_collection_name': out_dir,
+        'run_suffix': suffix,
+        'keywords':keywords,
+        'confidence': confidence,
+        'comments': comments,
+        'time_uploaded': time_upload,
+        'last_updated': last_update,
+        'linkedObjectID': linked_ID, 
+        'ScenarioTag': { 
+                    'Name of actual of hypothetical experiment': expt,
+                    'shot_and_time_runid': shot_info,
+                    'linear': linear,
+                    'quasi_linear': quasiLinear,
+            },
+        'CodeTag': { 
+                'sim_type': sim_type,
+                'git_hash': git_hash,
+                'platform': platform,
+                'execution_date': ex_date,
+                'workflow_type': workflow_type
+            },
+        'archiveLocation': archiv,
+        'Publications': { 
+                'papers': None,
+                'year': None, 
+                'doi': None 
+            }
+    }
+    
+    return metadata
+
 def f_parse_args():
     #==========================================================
     # argument parser
@@ -137,9 +177,12 @@ def main_upload(target, keywords, exclude, default, sim_type, extra, authenticat
                 comments = 'Uploaded with default settings.'
                 run_shared = None
             
+
+            ## Create metadata structure 
+            metadata = f_set_metadata(user=user, confidence=confidence, keywords=keywords, comments=comments, sim_type=sim_type,linked_ID=linked_id)
+
             # Send run to upload_to_mongo to be uploaded
-            upload_to_mongo(database, dirpath, user, linear, confidence, 
-                            keywords_lin, comments, sim_type, linked_id, suffixes, run_shared,
+            upload_to_mongo(database, linear, metadata, dirpath, suffixes, run_shared,
                             large_files, extra, verbose, manual_time_flag,global_vars)
 
     if len(global_vars.troubled_runs):

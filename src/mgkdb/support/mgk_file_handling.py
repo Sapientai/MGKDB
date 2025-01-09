@@ -614,7 +614,7 @@ def isUploaded(out_dir,runs_coll):
     check if out_dir appears in the database collection.
     Assuming out_dir will appear no more than once in the database
     '''
-    inDb = runs_coll.find({ "Metadata.run_collection_name": out_dir })
+    inDb = runs_coll.find({ "Metadata.DBtag.run_collection_name": out_dir })
 
     entries = list(inDb)
     uploaded = True if len(entries)>0 else False 
@@ -650,7 +650,7 @@ def get_record(out_dir, runs_coll):
     '''
     Get a list of summary dictionary for 'out_dir' in the database
     '''
-    inDb = runs_coll.find({ "Metadata.run_collection_name": out_dir })
+    inDb = runs_coll.find({ "Metadata.DBtag.run_collection_name": out_dir })
     record = []
     for run in inDb:
 #        dic = dict()
@@ -772,7 +772,7 @@ def download_dir_by_name(db, runs_coll, dir_name, destination):
             print ("Creation of the directory %s failed" % path)
     #else:
     fs = gridfs.GridFSBucket(db)
-    inDb = runs_coll.find({ "Metadata.run_collection_name": dir_name })
+    inDb = runs_coll.find({ "Metadata.DBtag.run_collection_name": dir_name })
 
     if 'generr' in inDb[0]['Files'].keys(): ## Fix for when 'generr' doesn't exist
         if inDb[0]['Files']['geneerr'] != 'None':    
@@ -887,8 +887,8 @@ def download_runs_by_id(db, runs_coll, _id, destination):
 #     assert len(keys)==len(vals), 'Input number of keys and values does not match. Abort!'
 #     for key, val in zip(keys, vals):
     
-#         runs_coll.update_one({ "Metadata.run_collection_name": out_dir, "Metadata.run_suffix": suffix}, 
-#                          {"$set":{'Metadata.'+key: val, "Metadata.last_updated": strftime("%y%m%d-%H%M%S")} }
+#         runs_coll.update_one({ "Metadata.DBtag.run_collection_name": out_dir, "Metadata.DBtag.run_suffix": suffix}, 
+#                          {"$set":{'Metadata.DBtag.'+key: val, "Metadata.DBtag.last_updated": strftime("%y%m%d-%H%M%S")} }
 #                          )    
 #     print("Metadata{} in {} updated correctly".format(suffix, out_dir))
 
@@ -896,7 +896,7 @@ def download_runs_by_id(db, runs_coll, _id, destination):
 #def update_Parameter(out_dir, runs_coll, suffix):
 #    
 #    param_dict = get_parsed_params(os.path.join(out_dir, 'parameters' + suffix) )
-#    runs_coll.update_one({ "Metadata.run_collection_name": out_dir, "Metadata.run_suffix": suffix}, 
+#    runs_coll.update_one({ "Metadata.DBtag.run_collection_name": out_dir, "Metadata.DBtag.run_suffix": suffix}, 
 #                     {"$set":{'Parameters': param_dict}}
 #                     )
 #    
@@ -909,8 +909,8 @@ def update_mongo(db, metadata, out_dir, runs_coll, linear, suffixes=None):
     only update file related entries, no comparison made before update
     '''
     
-    user = metadata['user']
-    linked_id = metadata['linked_id']
+    # user = metadata['DBtag']['user']
+    # linked_id = metadata['DBtag']['linkedObjectID']
     sim_type = metadata['CodeTag']['sim_type']
 
     fs = gridfs.GridFS(db)
@@ -946,9 +946,9 @@ def update_mongo(db, metadata, out_dir, runs_coll, linear, suffixes=None):
         print('Updating Metadata')              
         for entry in updated:
             for suffix in suffixes:                    
-                runs_coll.update_one({ "Metadata.run_collection_name": out_dir, "Metadata.run_suffix": suffix}, 
+                runs_coll.update_one({ "Metadata.DBtag.run_collection_name": out_dir, "Metadata.DBtag.run_suffix": suffix}, 
                                  {"$set":{'Files.'+entry[0]: entry[1], 
-                                          "Metadata.last_updated": strftime("%y%m%d-%H%M%S")}}
+                                          "Metadata.DBtag.last_updated": strftime("%y%m%d-%H%M%S")}}
                                  )
         print("Update complete")
                 
@@ -979,7 +979,7 @@ def update_mongo(db, metadata, out_dir, runs_coll, linear, suffixes=None):
                     elif sim_type=='GENE': 
                         Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
 
-                    run = runs_coll.find_one({ "Metadata.run_collection_name": out_dir, "Metadata.run_suffix": suffix})
+                    run = runs_coll.find_one({ "Metadata.DBtag.run_collection_name": out_dir, "Metadata.DBtag.run_suffix": suffix})
                     for key, val in run['Diagnostics'].items():
                         if val != 'None':
                             # print((key, val))
@@ -989,7 +989,7 @@ def update_mongo(db, metadata, out_dir, runs_coll, linear, suffixes=None):
                     for key, val in Diag_dict.items():
                         Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
 
-                    runs_coll.update_one({ "Metadata.run_collection_name": out_dir, "Metadata.run_suffix": suffix },
+                    runs_coll.update_one({ "Metadata.DBtag.run_collection_name": out_dir, "Metadata.DBtag.run_suffix": suffix },
                             { "$set": {'gyrokineticsIMAS': GK_dict, 'Diagnostics':Diag_dict}}
                                  )
 
@@ -1003,8 +1003,8 @@ def update_mongo(db, metadata, out_dir, runs_coll, linear, suffixes=None):
                 with open(file, 'rb') as f:
                     _id = fs.put(f, encoding='UTF-8', filepath=file, filename=file.split('/')[-1])
 
-                runs_coll.update_one({ "Metadata.run_collection_name": out_dir, "Metadata.run_suffix": suffix }, 
-                                 { "$set": {'Files.'+ doc: _id, "Metadata.last_updated": strftime("%y%m%d-%H%M%S")} }
+                runs_coll.update_one({ "Metadata.DBtag.run_collection_name": out_dir, "Metadata.DBtag.run_suffix": suffix }, 
+                                 { "$set": {'Files.'+ doc: _id, "Metadata.DBtag.last_updated": strftime("%y%m%d-%H%M%S")} }
                                  )
         print("Update complete")
     
@@ -1015,7 +1015,7 @@ def update_mongo(db, metadata, out_dir, runs_coll, linear, suffixes=None):
 def remove_from_mongo(out_dir, db, runs_coll):
     #find all documents containing collection name
         
-    inDb = runs_coll.find({ "Metadata.run_collection_name": out_dir })        
+    inDb = runs_coll.find({ "Metadata.DBtag.run_collection_name": out_dir })        
     fs = gridfs.GridFS(db)
     for run in inDb:
         # delete the gridfs storage:
@@ -1138,8 +1138,7 @@ def f_get_input_fname(out_dir, suffix, sim_type):
 def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
                   large_files=False, extra=False, verbose=True, manual_time_flag = True, global_vars=None):
     
-    user = metadata['user']
-    confidence = metadata['confidence']
+    # user = metadata['DBtag']['user']
     sim_type = metadata['CodeTag']['sim_type']
 
     #connect to linear collection
@@ -1230,23 +1229,11 @@ def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
 
             #metadata dictonary
             time_upload = strftime("%y%m%d-%H%M%S")
-            # meta_dict = {"user": user,
-            #              "run_collection_name": out_dir,
-            #              "run_suffix": '' + suffix,
-            #              "keywords": keywords,
-            #              "simulation_type": sim_type,
-            #             #  "quasi_linear": quasi_linear,
-            #              "linked_objectID":linked_id,
-            #              "confidence": confidence,
-            #              "comments": comments,
-            #              "time_uploaded": time_upload,
-            #              "last_updated": time_upload
-            #             }
             
-            metadata['run_collection_name'] = out_dir
-            metadata['run_suffix']=''+suffix
-            metadata['time_uploaded'] = time_upload
-            metadata['last_updated']  = time_upload
+            metadata['DBtag']['run_collection_name'] = out_dir
+            metadata['DBtag']['run_suffix']=''+ suffix
+            metadata['DBtag']['time_uploaded'] = time_upload
+            metadata['DBtag']['last_updated']  = time_upload
             metadata['ScenarioTag']['linear'] = 'linear'
             metadata['ScenarioTag']['quasi_linear'] = quasi_linear
 
@@ -1313,10 +1300,8 @@ def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
 def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
                   large_files=False, extra=False, verbose=True, manual_time_flag = True , global_vars=None):
     
-    user = metadata['user']
-    confidence = metadata['confidence']
+    # user = metadata['DBtag']['user']
     sim_type = metadata['CodeTag']['sim_type']
-
 
     #connect to nonlinear collection
     runs_coll = db.NonlinRuns
@@ -1403,18 +1388,6 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
     
            #metadata dictonary
             time_upload = strftime("%y%m%d-%H%M%S")
-            # meta_dict = {"user": user,
-            #              "run_collection_name": out_dir,
-            #              "run_suffix": '' + suffix,
-            #              "keywords": keywords,
-            #              "simulation_type": sim_type,
-            #             #  "quasi_linear": quasi_linear,
-            #              "linked_objectID":linked_id,
-            #              "confidence": confidence,
-            #              "comments": comments,
-            #              "time uploaded": time_upload,
-            #              "last_updated": time_upload
-            #             }
             
             metadata['run_collection_name'] = out_dir
             metadata['run_suffix']=''+suffix

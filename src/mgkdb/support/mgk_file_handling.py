@@ -100,6 +100,49 @@ class Global_vars():
         self.__init__(sim_type)
         print("File names and their key names are reset to default!")
 
+
+
+def f_set_metadata(user=None,out_dir=None,suffix=None,keywords=None,confidence=-1,comments='Uploaded with default settings.',time_upload=None,\
+                   last_update=None, linked_ID=None, expt=None, shot_info=None, linear=None, quasiLinear=None, sim_type=None,\
+                   git_hash=None, platform=None, ex_date=None, workflow_type=None, archive_loc=None):
+
+    metadata={
+        'DBtag': { 
+            'user': user,
+            'run_collection_name': out_dir,
+            'run_suffix': suffix,
+            'keywords':keywords,
+            'confidence': confidence,
+            'comments': comments,
+            'time_uploaded': time_upload,
+            'last_updated': last_update,
+            'linkedObjectID': linked_ID, 
+            'archiveLocation': archive_loc,
+        },
+        'ScenarioTag': { 
+                    'Name of actual of hypothetical experiment': expt,
+                    'shot_and_time_runid': shot_info,
+                    'linear': linear,
+                    'quasi_linear': quasiLinear,
+            },
+        'CodeTag': { 
+                'sim_type': sim_type,
+                'git_hash': git_hash,
+                'platform': platform,
+                'execution_date': ex_date,
+                'workflow_type': workflow_type
+            },
+        'Publications': [{ 
+                'firstAuthor': None,
+                'journal': None, 
+                'title': None, 
+                'year': None, 
+                'doi': None 
+            }]
+    }
+    
+    return metadata
+
 def get_omega(out_dir, suffix):
     try:
         with open(os.path.join(out_dir, 'omega'+suffix)) as f:

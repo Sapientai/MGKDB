@@ -17,7 +17,7 @@ import os
 import argparse
 from sys import exit
 
-from mgkdb.support.mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars, f_get_linked_oid
+from mgkdb.support.mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars, f_get_linked_oid, f_set_metadata
 from mgkdb.support.mgk_login import mgk_login,f_login_dbase
 
 def f_parse_args():
@@ -44,47 +44,6 @@ def f_parse_args():
 
     return parser.parse_args()
 
-
-
-def f_set_metadata(user=None,out_dir=None,suffix=None,keywords=None,confidence=-1,comments='Uploaded with default settings.',time_upload=None,\
-                   last_update=None, linked_ID=None, expt=None, shot_info=None, linear=None, quasiLinear=None, sim_type=None,\
-                   git_hash=None, platform=None, ex_date=None, workflow_type=None, archive_loc=None):
-
-    metadata={
-        'DBtag': { 
-            'user': user,
-            'run_collection_name': out_dir,
-            'run_suffix': suffix,
-            'keywords':keywords,
-            'confidence': confidence,
-            'comments': comments,
-            'time_uploaded': time_upload,
-            'last_updated': last_update,
-            'linkedObjectID': linked_ID, 
-            'archiveLocation': archive_loc,
-        },
-        'ScenarioTag': { 
-                    'Name of actual of hypothetical experiment': expt,
-                    'shot_and_time_runid': shot_info,
-                    'linear': linear,
-                    'quasi_linear': quasiLinear,
-            },
-        'CodeTag': { 
-                'sim_type': sim_type,
-                'git_hash': git_hash,
-                'platform': platform,
-                'execution_date': ex_date,
-                'workflow_type': workflow_type
-            },
-        'Publications': [{ 
-                'papers': None,
-                'year': None, 
-                'doi': None 
-            }]
-    }
-    
-    return metadata
-
 def f_user_input_metadata():
     '''
     Create a dictonary of user inputs for metadata
@@ -109,22 +68,22 @@ def f_user_input_metadata():
     archive = input('Is there a location where the data is archived? Press Enter to skip.\n')
     user_ip['archive_loc'] = archive
 
-    expt = input('Name of actual or hypothetical experiment?Press Enter to skip.\n')
+    expt = input('Name of actual or hypothetical experiment? Eg: diiid, iter, sparc, etc. Press Enter to skip.\n')
     user_ip['expt'] = expt
 
-    shot_id = input('Shot ID or time or runID?Press Enter to skip.\n')
-    user_ip['expt'] = shot_id
+    shot_id = input('Shot ID or time or runID? Eg: 129913.1500ms . Press Enter to skip.\n')
+    user_ip['shot_id'] = shot_id
 
     git_hash = input('Do you have git-hash to store?Press Enter to skip.\n')
     user_ip['git_hash'] = git_hash
 
-    platform = input('Platform on which this was run? Press Enter to skip.\n')
+    platform = input('Platform on which this was run? Eg: perlmutter, summit, engaging, pc . Press Enter to skip.\n')
     user_ip['platform'] = platform
 
     exec_date = input('Execution date?Press Enter to skip.\n')
     user_ip['ex_date'] = exec_date
 
-    workflow = input('Workflow type? Press Enter to skip.\n')
+    workflow = input('Workflow type? Eg: portals, smarts, standalone, etc. Press Enter to skip.\n')
     user_ip['workflow_type'] = workflow
 
     print("Publication information can be uploaded with a separate script")

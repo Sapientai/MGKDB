@@ -7,8 +7,7 @@ import pymongo
 
 # from mgkdb import mgk_download
 from mgkdb.support.mgk_login import mgk_login
-
-
+from mgkdb.support.mgk_file_handling import f_set_metadata
 
 def f_login_db(method,db_credentials=None,login_dict=None):
     
@@ -33,47 +32,6 @@ def f_login_db(method,db_credentials=None,login_dict=None):
         client.authenticate(login_dict['user'],login_dict['pwd'])
     
     return client
-
-def f_set_metadata(user=None,out_dir=None,suffix=None,keywords=None,confidence=-1,comments='Uploaded with default settings.',time_upload=None,\
-                   last_update=None, linked_ID=None, expt=None, shot_info=None, linear=None, quasiLinear=None, sim_type=None,\
-                   git_hash=None, platform=None, ex_date=None, workflow_type=None, archive_loc=None):
-
-    metadata={
-        'DBtag': { 
-            'user': user,
-            'run_collection_name': out_dir,
-            'run_suffix': suffix,
-            'keywords':keywords,
-            'confidence': confidence,
-            'comments': comments,
-            'time_uploaded': time_upload,
-            'last_updated': last_update,
-            'linkedObjectID': linked_ID, 
-            'archiveLocation': archive_loc,
-        },
-        'ScenarioTag': { 
-                    'Name of actual of hypothetical experiment': expt,
-                    'shot_and_time_runid': shot_info,
-                    'linear': linear,
-                    'quasi_linear': quasiLinear,
-            },
-        'CodeTag': { 
-                'sim_type': sim_type,
-                'git_hash': git_hash,
-                'platform': platform,
-                'execution_date': ex_date,
-                'workflow_type': workflow_type
-            },
-        'Publications': [{ 
-                'firstAuthor': None,
-                'journal': None, 
-                'title': None, 
-                'year': None, 
-                'doi': None 
-            }]
-    }
-    
-    return metadata
 
 if __name__=="__main__":
 
@@ -103,7 +61,6 @@ if __name__=="__main__":
         document = collection.find_one(fltr,{'Metadata':1,'_id':0})
         old_meta = document.get('Metadata')
         print(old_meta)
-    
 
         ## Fix for cases when time_uploaded doesn't have underscore (mostly for nonlinear runs)
         if old_meta.get('time uploaded')!=None:

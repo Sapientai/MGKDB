@@ -65,7 +65,9 @@ def f_set_metadata(user=None,out_dir=None,suffix=None,keywords=None,confidence=-
                 'workflow_type': workflow_type
             },
         'Publications': [{ 
-                'papers': None,
+                'firstAuthor': None,
+                'journal': None, 
+                'title': None, 
                 'year': None, 
                 'doi': None 
             }]
@@ -109,14 +111,14 @@ if __name__=="__main__":
         elif old_meta.get('time_uploaded')!=None:
             time_upload = old_meta.get('time_uploaded')
         else: time_upload = None
-        
+
         print(time_upload)
 
         # Create new metadata 
         new_meta = f_set_metadata(user=old_meta.get('user'), 
                     out_dir = old_meta.get('run_collection_name'),
                     suffix = old_meta.get('run_suffix'),
-                    keywords = old_meta.get('keywords'),
+                    # keywords = old_meta.get('keywords'),
                     confidence = old_meta.get('confidence'),
                     comments = old_meta.get('comments'),
                     time_upload = time_upload,

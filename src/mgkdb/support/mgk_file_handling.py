@@ -1436,7 +1436,7 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
             metadata['run_suffix']=''+suffix
             metadata['time_uploaded'] = time_upload
             metadata['last_updated']  = time_upload
-            metadata['ScenarioTag']['linear'] = 'non_linear'
+            metadata['ScenarioTag']['linear'] = 'nonlinear'
             metadata['ScenarioTag']['quasi_linear'] = quasi_linear
 
 

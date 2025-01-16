@@ -71,8 +71,8 @@ def f_user_input_metadata():
     expt = input('Name of actual or hypothetical experiment? Eg: diiid, iter, sparc, etc. Press Enter to skip.\n')
     user_ip['expt'] = expt
 
-    shot_id = input('Shot ID or time or runID? Eg: 129913.1500ms . Press Enter to skip.\n')
-    user_ip['shot_id'] = shot_id
+    shot_info = input('Shot ID or time or runID? Eg: 129913.1500ms . Press Enter to skip.\n')
+    user_ip['shot_info'] = shot_info
 
     git_hash = input('Do you have git-hash to store?Press Enter to skip.\n')
     user_ip['git_hash'] = git_hash

@@ -222,23 +222,24 @@ if __name__=="__main__":
     # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene2_miller_general/'
     # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene5_non_st_single_prec/'
     # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene6_non_st_double_prec/'
-    data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene7_non_st_double_prec/'
-    suffix='_0003'
-    fname = data_dir+'parameters{0}'.format(suffix)
-    gkcode="GENE"
+    # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene7_non_st_double_prec/'
+    # suffix='_0003'
+    # fname = data_dir+'parameters{0}'.format(suffix)
+    # gkcode="GENE"
     
     # data_dir='/Users/venkitesh_work/Downloads/downloaded_select_gene_NERSC/tracer_5f34a52cbafb0f9d07b05731/'
     # suffix = '_0002'    
     # fname= data_dir+'parameters{0}'.format(suffix)
 
+    # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/upload_datasets/non_lin_J78697_x985/"
     # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/upload_datasets/test_nonlin_gene_tracer_efit/"
     # suffix='_0001'
     # fname = data_dir+'parameters{0}'.format(suffix)
     # gkcode="GENE"
 
-    # data_dir = "test_data/test_cgyro_multi_runs/run1/"
-    # fname = data_dir+'input.cgyro'
-    # gkcode="CGYRO"
+    data_dir = "test_data/test_cgyro_multi_runs/run1/"
+    fname = data_dir+'input.cgyro'
+    gkcode="CGYRO"
 
     # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_cgyro_miller/KY_0.30_PX0_0.00/"
     # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/CGYRO_linear_scan/ky_0.10/"

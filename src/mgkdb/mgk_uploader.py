@@ -17,7 +17,7 @@ import os
 import argparse
 from sys import exit
 
-from mgkdb.support.mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars, f_get_linked_oid
+from mgkdb.support.mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars, f_get_linked_oid, f_set_metadata
 from mgkdb.support.mgk_login import mgk_login,f_login_dbase
 
 def f_parse_args():
@@ -44,11 +44,56 @@ def f_parse_args():
 
     return parser.parse_args()
 
+def f_user_input_metadata():
+    '''
+    Create a dictonary of user inputs for metadata
+    Used as keyword arguments to construct metadata dictionary
+    '''
+
+    user_ip = {} 
+    print("Please provide input for metadata. Press Enter to skip.\n")
+
+    confidence = input('What is your confidence (1-10) for the run? Press ENTER to use default value -1.0\n')
+    if len(confidence):
+        confidence = float(confidence)
+    else:
+        confidence = -1.0
+        print("Using default confidence -1.\n")
+
+    user_ip['confidence']= confidence 
+
+    comments = input('Any comments for data in this folder?Press Enter to skip.\n')
+    user_ip['comments'] = comments
+
+    archive = input('Is there a location where the data is archived? Press Enter to skip.\n')
+    user_ip['archive_loc'] = archive
+
+    expt = input('Name of actual or hypothetical experiment? Eg: diiid, iter, sparc, etc. Press Enter to skip.\n')
+    user_ip['expt'] = expt
+
+    scenario_id = input('Scenario ID : shot ID or time or runID? Eg: 129913.1500ms . Press Enter to skip.\n')
+    user_ip['scenario_runid'] = scenario_id
+
+    git_hash = input('Do you have git-hash to store?Press Enter to skip.\n')
+    user_ip['git_hash'] = git_hash
+
+    platform = input('Platform on which this was run? Eg: perlmutter, summit, engaging, pc . Press Enter to skip.\n')
+    user_ip['platform'] = platform
+
+    exec_date = input('Execution date?Press Enter to skip.\n')
+    user_ip['ex_date'] = exec_date
+
+    workflow = input('Workflow type? Eg: portals, smarts, standalone, etc. Press Enter to skip.\n')
+    user_ip['workflow_type'] = workflow
+
+    print("Publication information should be uploaded with a separate script")
+
+    return user_ip
+
 ### Main 
 def main_upload(target, keywords, exclude, default, sim_type, extra, authenticate, verbose, large_files, linked_id_file, linked_id_string):
     ### Initial setup 
     output_folder = os.path.abspath(target)
-    keywords = keywords
 
     if exclude is not None:
         exclude_folders = exclude.split(',')
@@ -94,14 +139,7 @@ def main_upload(target, keywords, exclude, default, sim_type, extra, authenticat
                     print('Folder skipped.')
                     continue
                 else:
-                    exit('Invalid input encountered!')            
-            if linear:
-                lin = ['linear']
-            else:
-                lin = ['nonlin']
-
-            #add linear/nonlin to keywords
-            keywords_lin = keywords.split('#') + lin                                 
+                    exit('Invalid input encountered!')                         
             
             if not default:
                 suffixes = get_suffixes(dirpath, sim_type)
@@ -115,31 +153,25 @@ def main_upload(target, keywords, exclude, default, sim_type, extra, authenticat
                     suffixes = suffixes.split(',')
                 else:
                     suffixes = None                              
-                                            
-                confidence = input('What is your confidence (1-10) for the run? Press ENTER to use default value -1.0\n')
-                if len(confidence):
-                    confidence = float(confidence)
-                else:
-                    confidence = -1.0
-                    print("Using default confidence -1.\n")
-
                 
-                comments = input('Any comments for data in this folder?Press Enter to skip.\n')
                 run_shared = input('Any other files to upload than the default? Separate them by comma. Press Enter to skip.\n')
                 if len(run_shared):
                     run_shared = run_shared.split(',')
                 else:
                     run_shared = None
-            
+                
+                ### Metadata inputs 
+                user_ip_dict = f_user_input_metadata()
+                metadata = f_set_metadata(**user_ip_dict,user=user, keywords = keywords, sim_type=sim_type, linked_ID=linked_id)
+
             else:
                 suffixes = None
-                confidence = -1
-                comments = 'Uploaded with default settings.'
                 run_shared = None
             
+                metadata = f_set_metadata(user=user, keywords=keywords, sim_type=sim_type,linked_ID=linked_id)
+
             # Send run to upload_to_mongo to be uploaded
-            upload_to_mongo(database, dirpath, user, linear, confidence, 
-                            keywords_lin, comments, sim_type, linked_id, suffixes, run_shared,
+            upload_to_mongo(database, linear, metadata, dirpath, suffixes, run_shared,
                             large_files, extra, verbose, manual_time_flag,global_vars)
 
     if len(global_vars.troubled_runs):

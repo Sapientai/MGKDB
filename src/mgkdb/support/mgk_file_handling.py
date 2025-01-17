@@ -100,6 +100,46 @@ class Global_vars():
         self.__init__(sim_type)
         print("File names and their key names are reset to default!")
 
+
+
+def f_set_metadata(user=None,out_dir=None,suffix=None,keywords=None,confidence=-1,comments='Uploaded with default settings.',time_upload=None,\
+                   last_update=None, linked_ID=None, expt=None, scenario_runid=None, linear=None, quasiLinear=None, has_1dflux = None, sim_type=None,\
+                   git_hash=None, platform=None, ex_date=None, workflow_type=None, archive_loc=None):
+
+    metadata={
+        'DBtag': { 
+            'user': user,
+            'run_collection_name': out_dir,
+            'run_suffix': suffix,
+            'keywords':keywords,
+            'confidence': confidence,
+            'comments': comments,
+            'time_uploaded': time_upload,
+            'last_updated': last_update,
+            'linkedObjectID': linked_ID, 
+            'archiveLocation': archive_loc,
+        },
+        'ScenarioTag': { 
+                    'Name of actual of hypothetical experiment': expt,
+                    'scenario_runid': scenario_runid,
+            },
+        'CodeTag': { 
+                'sim_type': sim_type,
+                'IsLinear': linear,
+                'quasi_linear': quasiLinear,
+                'Has1DFluxes': has_1dflux,
+                'git_hash': git_hash,
+                'platform': platform,
+                'execution_date': ex_date,
+                'workflow_type': workflow_type
+            },
+        'Publications': { 
+                'doi': [] 
+            }
+    }
+    
+    return metadata
+
 def get_omega(out_dir, suffix):
     try:
         with open(os.path.join(out_dir, 'omega'+suffix)) as f:
@@ -614,7 +654,7 @@ def isUploaded(out_dir,runs_coll):
     check if out_dir appears in the database collection.
     Assuming out_dir will appear no more than once in the database
     '''
-    inDb = runs_coll.find({ "Metadata.run_collection_name": out_dir })
+    inDb = runs_coll.find({ "Metadata.DBtag.run_collection_name": out_dir })
 
     entries = list(inDb)
     uploaded = True if len(entries)>0 else False 
@@ -650,7 +690,7 @@ def get_record(out_dir, runs_coll):
     '''
     Get a list of summary dictionary for 'out_dir' in the database
     '''
-    inDb = runs_coll.find({ "Metadata.run_collection_name": out_dir })
+    inDb = runs_coll.find({ "Metadata.DBtag.run_collection_name": out_dir })
     record = []
     for run in inDb:
 #        dic = dict()
@@ -772,7 +812,7 @@ def download_dir_by_name(db, runs_coll, dir_name, destination):
             print ("Creation of the directory %s failed" % path)
     #else:
     fs = gridfs.GridFSBucket(db)
-    inDb = runs_coll.find({ "Metadata.run_collection_name": dir_name })
+    inDb = runs_coll.find({ "Metadata.DBtag.run_collection_name": dir_name })
 
     if 'generr' in inDb[0]['Files'].keys(): ## Fix for when 'generr' doesn't exist
         if inDb[0]['Files']['geneerr'] != 'None':    
@@ -877,38 +917,41 @@ def download_runs_by_id(db, runs_coll, _id, destination):
     
 
 
-def update_Meta(out_dir, runs_coll, suffix):
+# def update_Meta(out_dir, runs_coll, suffix):
 
-    meta_list = ['user', 'run_collection_name', 'run_suffix', 'keywords', 'confidence']
-    print("Keys available for update are {}".format(meta_list.sort()))
+#     meta_list = ['user', 'run_collection_name', 'run_suffix', 'keywords', 'confidence']
+#     print("Keys available for update are {}".format(meta_list.sort()))
     
-    keys = input('What entries do you like to update? separate your input by comma.\n').split(',')
-    vals = input('type your values corresponding to those keys you typed. Separate each category by ; .\n').split(';')
-    assert len(keys)==len(vals), 'Input number of keys and values does not match. Abort!'
-    for key, val in zip(keys, vals):
+#     keys = input('What entries do you like to update? separate your input by comma.\n').split(',')
+#     vals = input('type your values corresponding to those keys you typed. Separate each category by ; .\n').split(';')
+#     assert len(keys)==len(vals), 'Input number of keys and values does not match. Abort!'
+#     for key, val in zip(keys, vals):
     
-        runs_coll.update_one({ "Metadata.run_collection_name": out_dir, "Metadata.run_suffix": suffix}, 
-                         {"$set":{'Metadata.'+key: val, "Metadata.last_updated": strftime("%y%m%d-%H%M%S")} }
-                         )    
-    print("Metadata{} in {} updated correctly".format(suffix, out_dir))
+#         runs_coll.update_one({ "Metadata.DBtag.run_collection_name": out_dir, "Metadata.DBtag.run_suffix": suffix}, 
+#                          {"$set":{'Metadata.DBtag.'+key: val, "Metadata.DBtag.last_updated": strftime("%y%m%d-%H%M%S")} }
+#                          )    
+#     print("Metadata{} in {} updated correctly".format(suffix, out_dir))
 
     
 #def update_Parameter(out_dir, runs_coll, suffix):
 #    
 #    param_dict = get_parsed_params(os.path.join(out_dir, 'parameters' + suffix) )
-#    runs_coll.update_one({ "Metadata.run_collection_name": out_dir, "Metadata.run_suffix": suffix}, 
+#    runs_coll.update_one({ "Metadata.DBtag.run_collection_name": out_dir, "Metadata.DBtag.run_suffix": suffix}, 
 #                     {"$set":{'Parameters': param_dict}}
 #                     )
 #    
 #    print("Parameters{} in {} updated correctly".format(suffix, out_dir))
     
 
+def update_mongo(db, metadata, out_dir, runs_coll, linear, suffixes=None):
 
-def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffixes=None):
     '''
     only update file related entries, no comparison made before update
-
     '''
+    
+    # user = metadata['DBtag']['user']
+    # linked_id = metadata['DBtag']['linkedObjectID']
+    sim_type = metadata['CodeTag']['sim_type']
 
     fs = gridfs.GridFS(db)
     if suffixes is None:
@@ -943,9 +986,9 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
         print('Updating Metadata')              
         for entry in updated:
             for suffix in suffixes:                    
-                runs_coll.update_one({ "Metadata.run_collection_name": out_dir, "Metadata.run_suffix": suffix}, 
+                runs_coll.update_one({ "Metadata.DBtag.run_collection_name": out_dir, "Metadata.DBtag.run_suffix": suffix}, 
                                  {"$set":{'Files.'+entry[0]: entry[1], 
-                                          "Metadata.last_updated": strftime("%y%m%d-%H%M%S")}}
+                                          "Metadata.DBtag.last_updated": strftime("%y%m%d-%H%M%S")}}
                                  )
         print("Update complete")
                 
@@ -976,7 +1019,7 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
                     elif sim_type=='GENE': 
                         Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
 
-                    run = runs_coll.find_one({ "Metadata.run_collection_name": out_dir, "Metadata.run_suffix": suffix})
+                    run = runs_coll.find_one({ "Metadata.DBtag.run_collection_name": out_dir, "Metadata.DBtag.run_suffix": suffix})
                     for key, val in run['Diagnostics'].items():
                         if val != 'None':
                             # print((key, val))
@@ -986,7 +1029,7 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
                     for key, val in Diag_dict.items():
                         Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
 
-                    runs_coll.update_one({ "Metadata.run_collection_name": out_dir, "Metadata.run_suffix": suffix },
+                    runs_coll.update_one({ "Metadata.DBtag.run_collection_name": out_dir, "Metadata.DBtag.run_suffix": suffix },
                             { "$set": {'gyrokineticsIMAS': GK_dict, 'Diagnostics':Diag_dict}}
                                  )
 
@@ -1000,8 +1043,8 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
                 with open(file, 'rb') as f:
                     _id = fs.put(f, encoding='UTF-8', filepath=file, filename=file.split('/')[-1])
 
-                runs_coll.update_one({ "Metadata.run_collection_name": out_dir, "Metadata.run_suffix": suffix }, 
-                                 { "$set": {'Files.'+ doc: _id, "Metadata.last_updated": strftime("%y%m%d-%H%M%S")} }
+                runs_coll.update_one({ "Metadata.DBtag.run_collection_name": out_dir, "Metadata.DBtag.run_suffix": suffix }, 
+                                 { "$set": {'Files.'+ doc: _id, "Metadata.DBtag.last_updated": strftime("%y%m%d-%H%M%S")} }
                                  )
         print("Update complete")
     
@@ -1012,7 +1055,7 @@ def update_mongo(out_dir, db, runs_coll, user, linear, sim_type,linked_id, suffi
 def remove_from_mongo(out_dir, db, runs_coll):
     #find all documents containing collection name
         
-    inDb = runs_coll.find({ "Metadata.run_collection_name": out_dir })        
+    inDb = runs_coll.find({ "Metadata.DBtag.run_collection_name": out_dir })        
     fs = gridfs.GridFS(db)
     for run in inDb:
         # delete the gridfs storage:
@@ -1132,9 +1175,12 @@ def f_get_input_fname(out_dir, suffix, sim_type):
 
     return fname_dict[sim_type]
 
-def upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
-                  linked_id, suffixes = None, run_shared = None,
+def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
                   large_files=False, extra=False, verbose=True, manual_time_flag = True, global_vars=None):
+    
+    # user = metadata['DBtag']['user']
+    sim_type = metadata['CodeTag']['sim_type']
+
     #connect to linear collection
     runs_coll = db.LinearRuns
        
@@ -1223,19 +1269,17 @@ def upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
 
             #metadata dictonary
             time_upload = strftime("%y%m%d-%H%M%S")
-            meta_dict = {"user": user,
-                         "run_collection_name": out_dir,
-                         "run_suffix": '' + suffix,
-                         "keywords": keywords,
-                         "simulation_type": sim_type,
-                        #  "quasi_linear": quasi_linear,
-                         "linked_objectID":linked_id,
-                         "confidence": confidence,
-                         "comments": comments,
-                         "time_uploaded": time_upload,
-                         "last_updated": time_upload
-                        }  
-                   
+            
+            metadata['DBtag']['run_collection_name'] = out_dir
+            metadata['DBtag']['run_suffix']=''+ suffix
+            metadata['DBtag']['time_uploaded'] = time_upload
+            metadata['DBtag']['last_updated']  = time_upload
+            metadata['CodeTag']['IsLinear'] = True
+            metadata['CodeTag']['quasi_linear'] = quasi_linear
+            metadata['CodeTag']['Has1DFluxes'] = GK_dict['non_linear']['fluxes_1d']['particles_phi_potential']!=0
+
+            meta_dict = metadata
+
             if sim_type in ['CGYRO','TGLF','GS2']:
                 Diag_dict = {}
             elif sim_type=='GENE': 
@@ -1294,9 +1338,12 @@ def upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
     global_vars.reset_docs_keys(sim_type)
         
         
-def upload_nonlin(db, out_dir, user, confidence, keywords, comments, sim_type,
-                  linked_id, suffixes = None, run_shared=None,
+def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
                   large_files=False, extra=False, verbose=True, manual_time_flag = True , global_vars=None):
+    
+    # user = metadata['DBtag']['user']
+    sim_type = metadata['CodeTag']['sim_type']
+
     #connect to nonlinear collection
     runs_coll = db.NonlinRuns
         
@@ -1382,18 +1429,17 @@ def upload_nonlin(db, out_dir, user, confidence, keywords, comments, sim_type,
     
            #metadata dictonary
             time_upload = strftime("%y%m%d-%H%M%S")
-            meta_dict = {"user": user,
-                         "run_collection_name": out_dir,
-                         "run_suffix": '' + suffix,
-                         "keywords": keywords,
-                         "simulation_type": sim_type,
-                        #  "quasi_linear": quasi_linear,
-                         "linked_objectID":linked_id,
-                         "confidence": confidence,
-                         "comments": comments,
-                         "time uploaded": time_upload,
-                         "last_updated": time_upload
-                        }
+            
+            metadata['DBtag']['run_collection_name'] = out_dir
+            metadata['DBtag']['run_suffix']=''+ suffix
+            metadata['DBtag']['time_uploaded'] = time_upload
+            metadata['DBtag']['last_updated']  = time_upload
+            metadata['CodeTag']['IsLinear'] = False
+            metadata['CodeTag']['quasi_linear'] = quasi_linear
+            metadata['CodeTag']['Has1DFluxes'] = GK_dict['non_linear']['fluxes_1d']['particles_phi_potential']!=0
+
+            meta_dict = metadata
+
             #data dictionary format for nonlinear runs
             if sim_type in ['CGYRO','TGLF','GS2']:
                 Diag_dict = {}
@@ -1449,8 +1495,7 @@ def upload_nonlin(db, out_dir, user, confidence, keywords, comments, sim_type,
     
     global_vars.reset_docs_keys(sim_type)
             
-def upload_to_mongo(db, out_dir, user, linear, confidence, keywords, comments, sim_type, 
-                    linked_id, suffixes = None, run_shared=None,
+def upload_to_mongo(db, linear, metadata, out_dir, suffixes = None, run_shared=None,
                     large_files = False, extra=False, verbose=True, manual_time_flag = True, global_vars=None):
     #print(linear)
     #for linear runs
@@ -1464,17 +1509,15 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, keywords, comments, s
             if update == '0':
                 #for now, delete and reupload instead of update - function under construction
                 remove_from_mongo(out_dir, db, runs_coll)   
-                upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
-                              linked_id, suffixes, run_shared,
+                upload_linear(db, metadata, out_dir, suffixes, run_shared,
                               large_files, extra, verbose, manual_time_flag, global_vars)
             elif update == '1':
-                update_mongo(out_dir, db, runs_coll, user, linear, sim_type, linked_id)
+                update_mongo(db, metadata, out_dir, runs_coll, linear)
             else:
                 print('Run collection \'' + out_dir + '\' skipped.')
         else:
             print('Folder tag:\n{}\n not detected, creating new.\n'.format(out_dir))
-            upload_linear(db, out_dir, user, confidence, keywords, comments, sim_type,
-                          linked_id, suffixes, run_shared,
+            upload_linear(db, metadata, out_dir, suffixes, run_shared,
                           large_files, extra, verbose, manual_time_flag, global_vars)
                 
     #for nonlinear runs
@@ -1487,18 +1530,16 @@ def upload_to_mongo(db, out_dir, user, linear, confidence, keywords, comments, s
             update = input('Folder tag:\n {} \n exists in database.  You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to skip this folder.\n'.format(out_dir))
             if update == '0':
                 remove_from_mongo(out_dir, db, runs_coll)   
-                upload_nonlin(db, out_dir, user, confidence,keywords, comments, sim_type, 
-                              linked_id, suffixes, run_shared,
+                upload_nonlin(db, metadata, out_dir, suffixes, run_shared,
                               large_files, extra, verbose,manual_time_flag, global_vars)
             elif update == '1':
-                update_mongo(out_dir, db, runs_coll, user, linear, sim_type, linked_id)
+                update_mongo(db, metadata, out_dir, runs_coll, linear)
 
             else:
                 print('Run collection \'' + out_dir + '\' skipped.')
         else:
             print('Folder tag:\n{}\n not detected, creating new.\n'.format(out_dir))
-            upload_nonlin(db, out_dir, user, confidence, keywords, comments, sim_type,
-                          linked_id, suffixes, run_shared,
+            upload_nonlin(db, metadata, out_dir, suffixes, run_shared,
                           large_files, extra, verbose,manual_time_flag, global_vars)
     else:
         exit('Cannot decide if the folder is subject to linear or nonlinear runs.')

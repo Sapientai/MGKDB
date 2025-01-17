@@ -4,3 +4,5 @@ src/mgkdb/pyro_tests/data
 scratchpad.py
 MGKDB.egg-info
 build
+pyro_tests/
+exploration_nbks/

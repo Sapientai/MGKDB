@@ -103,7 +103,7 @@ class Global_vars():
 
 
 def f_set_metadata(user=None,out_dir=None,suffix=None,keywords=None,confidence=-1,comments='Uploaded with default settings.',time_upload=None,\
-                   last_update=None, linked_ID=None, expt=None, scenario_runid=None, linear=None, quasiLinear=None, sim_type=None,\
+                   last_update=None, linked_ID=None, expt=None, scenario_runid=None, linear=None, quasiLinear=None, has_1dflux = None, sim_type=None,\
                    git_hash=None, platform=None, ex_date=None, workflow_type=None, archive_loc=None):
 
     metadata={
@@ -125,8 +125,9 @@ def f_set_metadata(user=None,out_dir=None,suffix=None,keywords=None,confidence=-
             },
         'CodeTag': { 
                 'sim_type': sim_type,
-                'linear': linear,
+                'IsLinear': linear,
                 'quasi_linear': quasiLinear,
+                'Has1DFluxes': has_1dflux,
                 'git_hash': git_hash,
                 'platform': platform,
                 'execution_date': ex_date,
@@ -1273,8 +1274,9 @@ def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
             metadata['DBtag']['run_suffix']=''+ suffix
             metadata['DBtag']['time_uploaded'] = time_upload
             metadata['DBtag']['last_updated']  = time_upload
-            metadata['CodeTag']['linear'] = 'linear'
+            metadata['CodeTag']['IsLinear'] = True
             metadata['CodeTag']['quasi_linear'] = quasi_linear
+            metadata['CodeTag']['Has1DFluxes'] = GK_dict['non_linear']['fluxes_1d']['particles_phi_potential']!=0
 
             meta_dict = metadata
 
@@ -1432,8 +1434,9 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
             metadata['DBtag']['run_suffix']=''+ suffix
             metadata['DBtag']['time_uploaded'] = time_upload
             metadata['DBtag']['last_updated']  = time_upload
-            metadata['CodeTag']['linear'] = 'nonlinear'
+            metadata['CodeTag']['IsLinear'] = False
             metadata['CodeTag']['quasi_linear'] = quasi_linear
+            metadata['CodeTag']['Has1DFluxes'] = GK_dict['non_linear']['fluxes_1d']['particles_phi_potential']!=0
 
             meta_dict = metadata
 

@@ -139,12 +139,7 @@ def main_upload(target, keywords, exclude, default, sim_type, extra, authenticat
                     print('Folder skipped.')
                     continue
                 else:
-                    exit('Invalid input encountered!')      
-                  
-            # if linear:
-            #     lin = ['linear']
-            # else:
-            #     lin = ['nonlin']                              
+                    exit('Invalid input encountered!')                         
             
             if not default:
                 suffixes = get_suffixes(dirpath, sim_type)

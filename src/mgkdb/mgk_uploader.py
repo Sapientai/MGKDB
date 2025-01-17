@@ -71,8 +71,8 @@ def f_user_input_metadata():
     expt = input('Name of actual or hypothetical experiment? Eg: diiid, iter, sparc, etc. Press Enter to skip.\n')
     user_ip['expt'] = expt
 
-    shot_info = input('Shot ID or time or runID? Eg: 129913.1500ms . Press Enter to skip.\n')
-    user_ip['shot_info'] = shot_info
+    scenario_id = input('Scenario ID : shot ID or time or runID? Eg: 129913.1500ms . Press Enter to skip.\n')
+    user_ip['scenario_runid'] = scenario_id
 
     git_hash = input('Do you have git-hash to store?Press Enter to skip.\n')
     user_ip['git_hash'] = git_hash
@@ -86,7 +86,7 @@ def f_user_input_metadata():
     workflow = input('Workflow type? Eg: portals, smarts, standalone, etc. Press Enter to skip.\n')
     user_ip['workflow_type'] = workflow
 
-    print("Publication information can be uploaded with a separate script")
+    print("Publication information should be uploaded with a separate script")
 
     return user_ip
 
@@ -139,11 +139,12 @@ def main_upload(target, keywords, exclude, default, sim_type, extra, authenticat
                     print('Folder skipped.')
                     continue
                 else:
-                    exit('Invalid input encountered!')            
-            if linear:
-                lin = ['linear']
-            else:
-                lin = ['nonlin']                              
+                    exit('Invalid input encountered!')      
+                  
+            # if linear:
+            #     lin = ['linear']
+            # else:
+            #     lin = ['nonlin']                              
             
             if not default:
                 suffixes = get_suffixes(dirpath, sim_type)

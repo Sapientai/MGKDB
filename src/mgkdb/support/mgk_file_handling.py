@@ -103,7 +103,7 @@ class Global_vars():
 
 
 def f_set_metadata(user=None,out_dir=None,suffix=None,keywords=None,confidence=-1,comments='Uploaded with default settings.',time_upload=None,\
-                   last_update=None, linked_ID=None, expt=None, shot_info=None, linear=None, quasiLinear=None, sim_type=None,\
+                   last_update=None, linked_ID=None, expt=None, scenario_runid=None, linear=None, quasiLinear=None, sim_type=None,\
                    git_hash=None, platform=None, ex_date=None, workflow_type=None, archive_loc=None):
 
     metadata={
@@ -121,24 +121,20 @@ def f_set_metadata(user=None,out_dir=None,suffix=None,keywords=None,confidence=-
         },
         'ScenarioTag': { 
                     'Name of actual of hypothetical experiment': expt,
-                    'shot_and_time_runid': shot_info,
-                    'linear': linear,
-                    'quasi_linear': quasiLinear,
+                    'scenario_runid': scenario_runid,
             },
         'CodeTag': { 
                 'sim_type': sim_type,
+                'linear': linear,
+                'quasi_linear': quasiLinear,
                 'git_hash': git_hash,
                 'platform': platform,
                 'execution_date': ex_date,
                 'workflow_type': workflow_type
             },
-        'Publications': [{ 
-                'firstAuthor': None,
-                'journal': None, 
-                'title': None, 
-                'year': None, 
-                'doi': None 
-            }]
+        'Publications': { 
+                'doi': [] 
+            }
     }
     
     return metadata
@@ -1277,8 +1273,8 @@ def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
             metadata['DBtag']['run_suffix']=''+ suffix
             metadata['DBtag']['time_uploaded'] = time_upload
             metadata['DBtag']['last_updated']  = time_upload
-            metadata['ScenarioTag']['linear'] = 'linear'
-            metadata['ScenarioTag']['quasi_linear'] = quasi_linear
+            metadata['CodeTag']['linear'] = 'linear'
+            metadata['CodeTag']['quasi_linear'] = quasi_linear
 
             meta_dict = metadata
 
@@ -1432,13 +1428,12 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
            #metadata dictonary
             time_upload = strftime("%y%m%d-%H%M%S")
             
-            metadata['run_collection_name'] = out_dir
-            metadata['run_suffix']=''+suffix
-            metadata['time_uploaded'] = time_upload
-            metadata['last_updated']  = time_upload
-            metadata['ScenarioTag']['linear'] = 'nonlinear'
-            metadata['ScenarioTag']['quasi_linear'] = quasi_linear
-
+            metadata['DBtag']['run_collection_name'] = out_dir
+            metadata['DBtag']['run_suffix']=''+ suffix
+            metadata['DBtag']['time_uploaded'] = time_upload
+            metadata['DBtag']['last_updated']  = time_upload
+            metadata['CodeTag']['linear'] = 'nonlinear'
+            metadata['CodeTag']['quasi_linear'] = quasi_linear
 
             meta_dict = metadata
 

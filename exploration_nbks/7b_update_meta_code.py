@@ -29,7 +29,7 @@ def f_parse_args():
 def f_metadata_template():
     ''' Create metadata dictionary template'''
     code_tag_keys = ['sim_type','git_hash','platform','execution_date','workflow_type']
-    scenario_keys = ['NameOfActualOrHypotheticalExpt','shotOrTimeOrRunid']
+    scenario_keys = ['NameOfActualOrHypotheticalExpt','scenario_runid']
     publication_keys = ['firstAuthor','journal','title','year','doi']
     top_keys = ['scenario_tag','Code_tag','archive_location','publications', \
                 'user','run_suffix','run_collection_name','linked_objectID','confidence','comments','time_uploaded','last_updated']

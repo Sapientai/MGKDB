@@ -35,7 +35,7 @@ def f_login_db(method,db_credentials=None,login_dict=None):
 
 if __name__=="__main__":
 
-    db_credentials='../../mgkdb_data/db_credentials/ayyarv.pkl'
+    db_credentials='../../credentials/login_ayyarv.pkl'
     client = f_login_db('login_file',db_credentials,None)
     ## Test extract 
     print("Collections",client.list_collection_names())
@@ -53,36 +53,26 @@ if __name__=="__main__":
         collection = client['NonlinRuns']
         
     all_ids = [r['_id'] for r in collection.find({},{'id':1})]
-    print(all_ids)
+    # print(all_ids)
     
-    for oid in all_ids[:]:
+    for oid in all_ids[:1]:
     
         fltr = {"_id":oid}
         document = collection.find_one(fltr,{'Metadata':1,'_id':0})
         old_meta = document.get('Metadata')
-        print(old_meta)
-
-        ## Fix for cases when time_uploaded doesn't have underscore (mostly for nonlinear runs)
-        if old_meta.get('time uploaded')!=None:
-            time_upload = old_meta.get('time uploaded')
-        elif old_meta.get('time_uploaded')!=None:
-            time_upload = old_meta.get('time_uploaded')
-        else: time_upload = None
-
-        print(time_upload)
 
         # Create new metadata 
         new_meta = f_set_metadata(user=old_meta.get('user'), 
                     out_dir = old_meta.get('run_collection_name'),
                     suffix = old_meta.get('run_suffix'),
-                    # keywords = old_meta.get('keywords'),
+                    keywords = old_meta.get('keywords'),
                     confidence = old_meta.get('confidence'),
                     comments = old_meta.get('comments'),
-                    time_upload = time_upload,
+                    time_upload = old_meta.get('time_uploaded'),
                     last_update = old_meta.get('last_updated'),
                     linked_ID = old_meta.get('linked_ID'),
                     expt = old_meta.get('expt'),
-                    shot_info = old_meta.get('shot_info'),
+                    scenario_runid = old_meta.get('scenario_runid'),
                     linear = linear,
                     quasiLinear = quasi_linear,
                     sim_type = old_meta.get('simulation_type'),
@@ -92,9 +82,20 @@ if __name__=="__main__":
                     workflow_type = old_meta.get('workflow_type'),
                     archive_loc = old_meta.get('archive_loc'),
                     )
-        
+
+
+        # print(old_meta)
+        for key,val in old_meta.items():
+            print(key,'\t',val)
+            
+        # print(new_meta)
+        for key,val in new_meta.items(): 
+            print(key)
+            for k2,v2 in val.items():
+                print('\t',k2,':', v2)
+
         # Update entry 
-        update = {"$set": {"Metadata": new_meta}}
+        # update = {"$set": {"Metadata": new_meta}}
         
         # # Perform the update
         # result = collection.update_one(fltr, update)

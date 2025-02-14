@@ -51,7 +51,7 @@ if __name__=="__main__":
             fs = gridfs.GridFSBucket(database)
             record = collection_name.find_one({ "_id": oid })
             print(record.keys())
-            suffix = record['Metadata']['run_suffix']
+            suffix = record['Metadata']['DBtag']['run_suffix']
 
             ## Fix to save GENE specific input file 
             if 'nrg' in record['Files'].keys(): 

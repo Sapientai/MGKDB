@@ -865,7 +865,7 @@ def download_runs_by_id(db, runs_coll, _id, destination):
     fs = gridfs.GridFSBucket(db)
     record = runs_coll.find_one({ "_id": _id })
     try:
-        dir_name = record['Metadata']['run_collection_name']
+        dir_name = record['Metadata']['DBtag']['run_collection_name']
     except TypeError:
         print("Entry not found in database, please double check the id")
         raise SystemExit
@@ -911,7 +911,7 @@ def download_runs_by_id(db, runs_coll, _id, destination):
     #print(record)
     record['_id'] = str(_id)
 
-    with open(os.path.join(path, 'mgkdb_summary_for_run'+record['Metadata']['run_suffix']+'.json'), 'w') as f:
+    with open(os.path.join(path, 'mgkdb_summary_for_run'+record['Metadata']['DBtag']['run_suffix']+'.json'), 'w') as f:
         json.dump(record, f)
     print("Successfully downloaded files in the collection {} to directory {}".format( record['_id'],path) )   
     

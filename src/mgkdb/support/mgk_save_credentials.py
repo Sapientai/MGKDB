@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Jan  7 14:39:26 2020
 
 @author: dykua, venkitesh ayyar
 
@@ -10,7 +9,7 @@ For downloading files from mgk_fusion in shell
 import sys
 import os
 from pymongo import MongoClient
-from .mgk_login import mgk_login
+from mgkdb.support.mgk_login import mgk_login
 
 
 ### Main 

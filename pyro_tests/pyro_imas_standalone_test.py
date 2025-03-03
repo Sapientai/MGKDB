@@ -114,7 +114,7 @@ def f_check_linear(fname,gkcode):
         print('Could not find \"USE_TRANSPORT_MODEL\" field in parameters file')
         raise SystemError
 
-    elif gkcode in ['GS2']:
+    elif gkcode in ['GS2','GX']:
         linear = True
         return linear
 
@@ -172,7 +172,7 @@ def create_gk_dict_with_pyro(fname,gkcode):
     Create gyrokinetics dictionary to be upload to database
     '''
 
-    assert gkcode in ['GENE','CGYRO','TGLF','GS2'], "invalid gkcode type %s"%(gkcode)
+    assert gkcode in ['GENE','CGYRO','TGLF','GS2', 'GX'], "invalid gkcode type %s"%(gkcode)
 
     pyro = Pyro(gk_file=fname, gk_code=gkcode)
     # linear = f_check_linear(fname,gkcode)
@@ -223,7 +223,7 @@ if __name__=="__main__":
     # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene5_non_st_single_prec/'
     # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene6_non_st_double_prec/'
     # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene7_non_st_double_prec/'
-    # suffix='_0003'
+    # suffix='_0001'
     # fname = data_dir+'parameters{0}'.format(suffix)
     # gkcode="GENE"
     
@@ -233,10 +233,10 @@ if __name__=="__main__":
 
     # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/upload_datasets/non_lin_J78697_x985/"
     # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/upload_datasets/test_nonlin_gene_tracer_efit/"
-    data_dir = "/Users/venkitesh_work/Downloads/test_data/scanfiles0000/"
-    suffix='_0001'
-    fname = data_dir+'parameters{0}'.format(suffix)
-    gkcode="GENE"
+    # data_dir = "/Users/venkitesh_work/Downloads/test_data/scanfiles0000/"
+    # suffix='_0001'
+    # fname = data_dir+'parameters{0}'.format(suffix)
+    # gkcode="GENE"
 
     # data_dir = "test_data/test_cgyro_multi_runs/run1/"
     # fname = data_dir+'input.cgyro'
@@ -255,6 +255,12 @@ if __name__=="__main__":
     # fname = data_dir+'input.cgyro'
     # gkcode="CGYRO"
 
+    # data_dir = "test_data/TGLF/TGLF_linear/"
+    # data_dir = "test_data/TGLF/TGLF_transport/"
+    # data_dir = "test_data/TGLF/TGLF_transport2/"
+    # fname = data_dir+'input.tglf'
+    # gkcode="TGLF"
+
     # data_dir = "test_data/GS2_linear/run1_template/"
     # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/GS2_linear/run1_template"
     # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/GS2_linear/run2/"
@@ -263,11 +269,13 @@ if __name__=="__main__":
     # fname = data_dir+'gs2.in'
     # gkcode="GS2"
 
-    # data_dir = "test_data/TGLF/TGLF_linear/"
-    # data_dir = "test_data/TGLF/TGLF_transport/"
-    # data_dir = "test_data/TGLF/TGLF_transport2/"
-    # fname = data_dir+'input.tglf'
-    # gkcode="TGLF"
+
+    # data_dir = '../pyrokinetics/src/pyrokinetics/templates/'
+    # fname = data_dir+'input.gx'
+
+    data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gx/1_gx/'
+    fname = data_dir + 'cyclone_base.in'
+    gkcode="GX"
 
     json_data, quasi_linear = create_gk_dict_with_pyro(fname,gkcode)
 

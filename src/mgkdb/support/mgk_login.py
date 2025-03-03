@@ -46,7 +46,7 @@ class mgk_login(object):
         # database = MongoClient(self.login['server'].strip(), int(self.login['port']) )[self.login['dbname'].strip()]
         # database.authenticate(self.login['user'].strip(), self.login['pwd'].strip())
 
-        client = pymongo.MongoClient('mongodb://{user}:{pwd}@{server}:{port}/{dbname}'.format(**self.login))
+        client = pymongo.MongoClient('mongodb://{user}:{pwd}@{server}:{port}/{dbname}'.format(**self.login),directConnection=True)
         database = client[self.login['dbname']]
         return database
         

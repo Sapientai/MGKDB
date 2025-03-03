@@ -252,6 +252,7 @@ if __name__=="__main__":
     # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/CGYRO_nonlinear3_no_apar_saved/run1/"
     # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/CGYRO_nonlinear6_runs_multi_ebelli/d_lti00_ge00/"
     # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/CGYRO_nonlinear7_oldversion_nov26_2024/run1/"
+    # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/CGYRO_nonlinear8_aaron_r_0.35_it_x/"
     # fname = data_dir+'input.cgyro'
     # gkcode="CGYRO"
 

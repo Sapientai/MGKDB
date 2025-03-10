@@ -8,7 +8,8 @@ dependencies:
 - pip:
     - numpy>=1.26.4
     - matplotlib>=3.9.2
+    - pandas
     - scipy>=1.13.1
     - h5py>=3.11.0
     - pymongo==4.8.0
-    - git+https://github.com/pyro-kinetics/pyrokinetics.git
+    - "git+ssh://git@github.com/pyro-kinetics/pyrokinetics.git"

@@ -1,14 +1,15 @@
-name: mgkdb
+name: mgkdb312
 channels: 
   - conda-forge
   - defaults
 dependencies:
-- python=3.9
+- python=3.12
 - pip
 - pip:
-    - numpy==1.24.3
-    - matplotlib==3.7.4
-    - scipy==1.10.1
-    - h5py==3.9.0
-    - pymongo==3.9.0
-    - git+https://github.com/pyro-kinetics/pyrokinetics.git
+    - numpy>=1.26.4
+    - matplotlib>=3.9.2
+    - pandas
+    - scipy>=1.13.1
+    - h5py>=3.11.0
+    - pymongo==4.8.0
+    - "git+ssh://git@github.com/pyro-kinetics/pyrokinetics.git"

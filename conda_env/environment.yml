@@ -1,4 +1,4 @@
-name: mgkdb312
+name: mgkdb
 channels: 
   - conda-forge
   - defaults

@@ -51,12 +51,12 @@ def f_user_input_metadata():
     '''
 
     user_ip = {} 
-    print("Please provide input for metadata. Press Enter to skip.\n")
-
-    skip_metadata = input("To skip entering Metadata, please enter 0 .\n")
+    print("Filling metadata.")
+    skip_metadata = input("To skip entering Metadata, please enter 0\n")
     if skip_metadata=='0': 
         return user_ip
 
+    print("Please provide input for metadata. Press Enter to skip that entry.\n")
     confidence = input('What is your confidence (1-10) for the run? Press ENTER to use default value -1.0\n')
     if len(confidence):
         confidence = float(confidence)

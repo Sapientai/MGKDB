@@ -106,7 +106,7 @@ def main_upload(target, keywords, exclude, default, sim_type, extra, authenticat
     else:
         exclude_folders = []
     
-    manual_time_flag = not default
+    # manual_time_flag = not default
     manual_time_flag = False
     
     ### Update global variables 

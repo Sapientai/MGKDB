@@ -159,7 +159,7 @@ def main_upload(target, keywords, exclude, default, sim_type, extra, authenticat
                 else:
                     suffixes = None                              
                 
-                run_shared = input('Do you want to upload any shared files to upload for all suffixes? Please specify path relative to parent folder.\n Separate them by comma. Press Enter to skip.\n')
+                run_shared = input('Do you want to upload any shared files for all suffixes? Please specify path relative to parent folder.\n Separate them by comma. Press Enter to skip.\n')
                 if len(run_shared):
                     run_shared = run_shared.split(',')
                 else:

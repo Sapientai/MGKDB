@@ -170,7 +170,8 @@ def main_upload(target, keywords, exclude, default, sim_type, extra, authenticat
             else:
                 suffixes = None
                 run_shared = None
-
+                user_ip_dict={}
+            
             if len(user_ip_dict)!=0: ## Metadata set with user input           
                 metadata = f_set_metadata(**user_ip_dict,user=user, keywords = keywords, sim_type=sim_type, linked_ID=linked_id)
             else: 

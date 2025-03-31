@@ -1135,7 +1135,14 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
 
     if sim_type=='GENE':
         output_files = [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
-        
+        ## For GENE runs, ensure omega file is not empty
+        for file in output_files:
+            if 'omega' in file[0].split('/')[-1]:
+                if os.path.getsize(file[0]) == 0:
+                    print("Omega file is empty for suffix {0}. Need it to computer Diagnostics. Skipping this run.".format(suffix))
+                    raise SystemError
+                    # return {}
+ 
         if large_files:
             output_files += [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs_L if Qname]
         if extra_files:
@@ -1204,7 +1211,8 @@ def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
             input_fname = f_get_input_fname(out_dir, suffix, sim_type)
             GK_dict, quasi_linear = create_gk_dict_with_pyro(input_fname, sim_type)
 
-            ### Upload files to DB 
+            ### Upload files to DB
+            id_copy = {}
             print('Uploading files ....')
             if count == 0:
                 object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, run_shared, global_vars)
@@ -1319,9 +1327,9 @@ def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
                 ex_dict['simulation_type']=sim_type
                 db.ex.Lin.insert_one(ex_dict)
               
-        except Exception as exception:
-            print(exception)
-            print("Skip suffix {} in \n {}. \n".format(suffix, out_dir))
+        except Exception as e1:
+            print(e1)
+            print("Skip suffix {} in \n {} \n".format(suffix, out_dir))
             global_vars.troubled_runs.append(out_dir + '##' + suffix)
             print('cleaning ......')
             fs = gridfs.GridFS(db)
@@ -1329,8 +1337,8 @@ def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
                 for _id, _ in id_copy.items():
                     fs.delete(_id)
                     print('{} deleted.'.format(_id))
-            except Exception as eee:
-                print(eee)
+            except Exception as e3:
+                print("Error deleting files from gridfs with exception {0}".format(e3))
                 pass
             
             continue
@@ -1367,6 +1375,7 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
             GK_dict, quasi_linear = create_gk_dict_with_pyro(input_fname, sim_type)
 
             ### Upload files to DB 
+            id_copy = {}
             print('Uploading files ....')
             if count == 0:
                 object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, run_shared, global_vars)
@@ -1477,8 +1486,8 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
                 ex_dict['simulation_type']=sim_type
                 db.ex.Nonlin.insert_one(ex_dict) 
                 
-        except Exception as exception:
-            print(exception)
+        except Exception as e1:
+            print(e1)
             print("Skip suffix {} in \n {}. \n".format(suffix, out_dir))
             global_vars.troubled_runs.append(out_dir + '##' + suffix)
             print('cleaning ......')
@@ -1487,11 +1496,12 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
                 for _id, _ in id_copy.items():
                     fs.delete(_id)
                     print('{} deleted.'.format(_id))
-            except Exception as eee:
-                print(eee)
+            except Exception as e3:
+                print("Error deleting files from gridfs with exception {0}".format(e3))
                 pass
                 
             continue
+
     
     global_vars.reset_docs_keys(sim_type)
             

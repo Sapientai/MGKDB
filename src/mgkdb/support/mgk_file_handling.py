@@ -1136,10 +1136,11 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
     if sim_type=='GENE':
         output_files = [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
         ## For GENE runs, ensure omega file is not empty
+        output_files = [file for file in output_files if file] ## Drop empty files 
         for file in output_files:
             if 'omega' in file[0].split('/')[-1]:
                 if os.path.getsize(file[0]) == 0:
-                    print("Omega file is empty for suffix {0}. Need it to computer Diagnostics. Skipping this run.".format(suffix))
+                    print("Omega file is empty for suffix {0}. Need it to compute Diagnostics. Skipping this run.".format(suffix))
                     raise SystemError
                     # return {}
  

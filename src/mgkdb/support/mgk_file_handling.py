@@ -1341,8 +1341,6 @@ def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
                 print("Error deleting files from gridfs with exception {0}".format(e3))
                 pass
             
-            continue
-                
     global_vars.reset_docs_keys(sim_type)
         
         
@@ -1500,9 +1498,6 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
                 print("Error deleting files from gridfs with exception {0}".format(e3))
                 pass
                 
-            continue
-
-    
     global_vars.reset_docs_keys(sim_type)
             
 def upload_to_mongo(db, linear, metadata, out_dir, suffixes = None, run_shared=None,

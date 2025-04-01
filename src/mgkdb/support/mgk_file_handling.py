@@ -618,7 +618,7 @@ def isLinear(folder_name, sim_type):
             assert linear is None, "Can not decide, please include linear/nonlin as the suffix of your data folder!"
         
     elif sim_type=='CGYRO':
-        fname=os.path.join(folder_name+'/{0}/input.cgyro'.format(suffix))
+        fname=os.path.join(folder_name, suffix, 'input.cgyro')
         assert os.path.isfile(fname),"File %s does not exist"%(fname)
 
         non_lin = None
@@ -634,7 +634,7 @@ def isLinear(folder_name, sim_type):
     
     elif sim_type=='TGLF':
 
-        fname=os.path.join(folder_name+'/{0}/input.tglf'.format(suffix))
+        fname = os.path.join(folder_name, suffix, 'input.tglf')
         assert os.path.isfile(fname),"File %s does not exist"%(fname)
 
         with open(fname,'r') as f:
@@ -656,10 +656,11 @@ def isLinear(folder_name, sim_type):
     
     elif sim_type=='GX':
 
-        in_files = [f for f in os.listdir(folder_name+'/{0}'.format(suffix)) if f.endswith('.in')]
-        if len(in_files) != 1:
+        in_files = [f for f in os.listdir(os.path.join(folder_name,suffix)) if f.endswith('.in')]
+        
+        if len(in_files) > 1:
             print("Expected exactly one .in file in the folder, found %d. Using first one."%(in_files))
-        fname=os.path.join(in_files[0])
+        fname=os.path.join(folder_name,suffix,in_files[0])
         assert os.path.isfile(fname),"File %s does not exist"%(fname)
 
         with open(fname,'r') as f:
@@ -1207,11 +1208,12 @@ def f_get_input_fname(out_dir, suffix, sim_type):
     ''''
     Get the name of the input file with suffix for the simluation type
     '''
-    fname_dict = {'CGYRO':out_dir+'/{0}/input.cgyro'.format(suffix),\
-                    'TGLF':out_dir+'/{0}/input.tglf'.format(suffix),\
-                    'GENE':out_dir+'/parameters{0}'.format(suffix),
-                    'GS2': out_dir+'/{0}/gs2.in'.format(suffix),
-                    'GSX': out_dir+'/{0}/gx.in'.format(suffix)
+
+    fname_dict = {'CGYRO':os.path.join(out_dir,suffix,'input.cgyro'),
+                    'TGLF':os.path.join(out_dir,suffix,'input.tglf'),
+                    'GENE':os.path.join(out_dir,'parameters{0}'.format(suffix)),
+                    'GS2': os.path.join(out_dir,suffix,'gs2.in'),
+                    'GX': os.path.join(out_dir,suffix,'gx.in')
                 }
 
     return fname_dict[sim_type]

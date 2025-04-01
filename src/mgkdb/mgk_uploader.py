@@ -131,7 +131,7 @@ def main_upload(target, keywords, exclude, default, sim_type, extra, authenticat
     print("Processing files for uploading ........")
     #scan through a directory for more than one run
     for count, (dirpath, dirnames, files) in enumerate(os.walk(output_folder)):
-        if ( ( sim_type in ['CGYRO','TGLF','GS2'] and count==0)  or (sim_type=='GENE' and str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1 and str(dirpath) not in exclude_folders) ):    
+        if ( ( sim_type in ['CGYRO','TGLF','GS2','GX'] and count==0)  or (sim_type=='GENE' and str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1 and str(dirpath) not in exclude_folders) ):    
             print('Scanning in {} *******************\n'.format( str(dirpath)) )
             linear = isLinear(dirpath, sim_type)
             if linear == None:

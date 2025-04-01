@@ -114,7 +114,23 @@ def f_check_linear(fname,gkcode):
         print('Could not find \"USE_TRANSPORT_MODEL\" field in parameters file')
         raise SystemError
 
-    elif gkcode in ['GS2','GX']:
+    elif gkcode in ['GX']:
+        with open(fname,'r') as f:
+            for line in f:
+                strg = line.strip().split('#')[0].split('=')
+                if (len(strg) == 2 and strg[0].strip() == 'nonlinear_mode'):
+                    val = strg[1].strip()
+                    if val in ['true','True','t','T']:
+                        linear = False
+                    elif val in ['false','False','f','F']:
+                        linear = True
+                    else : 
+                        print("Unknown entry in parameter file for field \"nonlinear_mode\" ",line)
+                        raise SystemError
+                    break
+        return linear
+    
+    elif gkcode in ['GS2']:
         linear = True
         return linear
 
@@ -176,12 +192,12 @@ def create_gk_dict_with_pyro(fname,gkcode):
 
     pyro = Pyro(gk_file=fname, gk_code=gkcode)
     # linear = f_check_linear(fname,gkcode)
+    linear = not pyro.numerics.nonlinear
 
     if gkcode=='TGLF':   
         quasi_linear = pyro.numerics.nonlinear
         linear = True
     else:      
-        linear = not pyro.numerics.nonlinear
         quasi_linear = False 
     
     if linear:
@@ -271,13 +287,13 @@ if __name__=="__main__":
     # gkcode="GS2"
 
 
-    # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gx/1_template_gx_linear/'
-    # fname = data_dir+'gx.in'
-    # gkcode="GX"
-
-    data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gx/2_nonlinear_gx/'
-    fname = data_dir + 'cyclone_base.in'
+    data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gx/1_template_gx_linear/'
+    fname = data_dir+'gx.in'
     gkcode="GX"
+
+    # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gx/2_nonlinear_gx/'
+    # fname = data_dir + 'cyclone_base.in'
+    # gkcode="GX"
 
     json_data, quasi_linear = create_gk_dict_with_pyro(fname,gkcode)
 

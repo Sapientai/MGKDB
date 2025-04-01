@@ -76,6 +76,15 @@ class Global_vars():
             self.Docs_L = []
             self.Keys_L = []
 
+        elif sim_type=='GX':
+
+            self.Docs = ['gx.in','gx.out.nc']    
+            self.Keys = ['gx_in','gx_out_nc']    
+
+            #Large files#
+            self.Docs_L = []
+            self.Keys_L = []
+
         elif sim_type=='GS2':
 
             self.Docs = ['gs2.in','gs2.out.nc']    
@@ -645,6 +654,29 @@ def isLinear(folder_name, sim_type):
                     break
         return linear
     
+    elif sim_type=='GX':
+
+        in_files = [f for f in os.listdir(folder_name+'/{0}'.format(suffix)) if f.endswith('.in')]
+        if len(in_files) != 1:
+            print("Expected exactly one .in file in the folder, found %d. Using first one."%(in_files))
+        fname=os.path.join(in_files[0])
+        assert os.path.isfile(fname),"File %s does not exist"%(fname)
+
+        with open(fname,'r') as f:
+            for line in f:
+                strg = line.strip().split('#')[0].split('=')
+                if (len(strg) == 2 and strg[0].strip() == 'nonlinear_mode'):
+                    val = strg[1].strip()
+                    if val in ['true','True','t','T']:
+                        linear = False
+                    elif val in ['false','False','f','F']:
+                        linear = True
+                    else : 
+                        print("Unknown entry in parameter file for field \"nonlinear_mode\" ",line)
+                        raise SystemError
+                    break
+        return linear
+    
     elif sim_type=='GS2':
         return True
     
@@ -1014,7 +1046,7 @@ def update_mongo(db, metadata, out_dir, runs_coll, linear, suffixes=None):
                     input_fname = f_get_input_fname(out_dir, suffix, sim_type)
                     GK_dict, quasi_linear = create_gk_dict_with_pyro(input_fname, sim_type)   
 
-                    if sim_type in ['CGYRO','TGLF','GS2']:
+                    if sim_type in ['CGYRO','TGLF','GS2','GX']:
                         Diag_dict = {}
                     elif sim_type=='GENE': 
                         Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
@@ -1149,7 +1181,7 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
         if extra_files:
             output_files += [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs_ex if Qname]
     
-    elif sim_type in ['CGYRO','TGLF','GS2']:
+    elif sim_type in ['CGYRO','TGLF','GS2','GX']:
         output_files = [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
         
         if large_files:
@@ -1178,7 +1210,8 @@ def f_get_input_fname(out_dir, suffix, sim_type):
     fname_dict = {'CGYRO':out_dir+'/{0}/input.cgyro'.format(suffix),\
                     'TGLF':out_dir+'/{0}/input.tglf'.format(suffix),\
                     'GENE':out_dir+'/parameters{0}'.format(suffix),
-                    'GS2': out_dir+'/{0}/gs2.in'.format(suffix)
+                    'GS2': out_dir+'/{0}/gs2.in'.format(suffix),
+                    'GSX': out_dir+'/{0}/gx.in'.format(suffix)
                 }
 
     return fname_dict[sim_type]
@@ -1242,7 +1275,7 @@ def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
             for _id, line in list(object_ids.items()):  # it is necessary because the dict changes size during loop.
                 for Q_name, Key in zip(_docs, _keys):
                     if sim_type=='GENE' :     fname = os.path.join(out_dir,Q_name+suffix)
-                    elif sim_type in ['CGYRO','TGLF','GS2'] :  fname = os.path.join(out_dir+'/%s/'%(suffix),Q_name)
+                    elif sim_type in ['CGYRO','TGLF','GS2','GX'] :  fname = os.path.join(out_dir,suffix,Q_name)
                     
                     if fname == line:
                         if '.' in Key:
@@ -1289,7 +1322,7 @@ def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
 
             meta_dict = metadata
 
-            if sim_type in ['CGYRO','TGLF','GS2']:
+            if sim_type in ['CGYRO','TGLF','GS2','GX']:
                 Diag_dict = {}
             elif sim_type=='GENE': 
                 print('='*60)
@@ -1402,7 +1435,7 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
             for _id, line in list(object_ids.items()):  
                 for Q_name, Key in zip(_docs, _keys):
                     if sim_type=='GENE' :  fname = os.path.join(out_dir,Q_name+suffix)
-                    elif sim_type in ['CGYRO','TGLF','GS2'] :  fname = os.path.join(out_dir+'/%s/'%(suffix),Q_name)
+                    elif sim_type in ['CGYRO','TGLF','GS2','GX'] :  fname = os.path.join(out_dir,suffix,Q_name)
                     
                     if fname == line:
                         if '.' in Key:
@@ -1449,7 +1482,7 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
             meta_dict = metadata
 
             #data dictionary format for nonlinear runs
-            if sim_type in ['CGYRO','TGLF','GS2']:
+            if sim_type in ['CGYRO','TGLF','GS2','GX']:
                 Diag_dict = {}
             elif sim_type=='GENE':
                 print('='*60)

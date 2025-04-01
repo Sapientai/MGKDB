@@ -128,7 +128,7 @@ def get_suffixes(out_dir, sim_type):
                 suffixes.append(suffix)
             elif name.lower().startswith('parameters.dat'):
                 suffixes = ['.dat']    
-    elif sim_type in ['CGYRO','TGLF','GS2']:
+    elif sim_type in ['CGYRO','TGLF','GS2','GX']:
         ## scan folders return as list 
         suffixes = next(os.walk(out_dir))[1]
 

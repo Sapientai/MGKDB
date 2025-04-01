@@ -108,7 +108,7 @@ def create_gk_dict_with_pyro(fname,gkcode):
     Create gyrokinetics dictionary to be upload to database
     '''
 
-    assert gkcode in ['GENE','CGYRO','TGLF','GS2'], "invalid gkcode type %s"%(gkcode)
+    assert gkcode in ['GENE','CGYRO','TGLF','GS2','GX'], "invalid gkcode type %s"%(gkcode)
     
     try: 
         pyro = Pyro(gk_file=fname, gk_code=gkcode)
@@ -118,7 +118,6 @@ def create_gk_dict_with_pyro(fname,gkcode):
             quasi_linear = pyro.numerics.nonlinear
             linear = True
         else:      
-            linear = not pyro.numerics.nonlinear
             quasi_linear = False 
 
         if linear: 

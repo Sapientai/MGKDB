@@ -33,7 +33,7 @@ def f_parse_args():
     parser.add_argument('-L', '--large_files', dest='large_files', default = False, action='store_true', help='whether or not to include large files')
                         
     parser.add_argument('-K', '--keywords', default = '-', help='relevant keywords for future references, separated by comma')
-    parser.add_argument('-SIM', '--sim_type', choices=['GENE','CGYRO','TGLF','GS2'], type=str, help='Type of simulation', required=True)
+    parser.add_argument('-SIM', '--sim_type', choices=['GENE','CGYRO','TGLF','GS2','GX'], type=str, help='Type of simulation', required=True)
     parser.add_argument('-A', '--authenticate', default = None, help='locally saved login info, a .pkl file')
     parser.add_argument('-X', '--exclude', default = None, help='folders to exclude')
     

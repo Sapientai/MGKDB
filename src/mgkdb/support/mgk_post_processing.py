@@ -132,6 +132,7 @@ def get_suffixes(out_dir, sim_type):
         ## scan folders return as list 
         suffixes = next(os.walk(out_dir))[1]
 
+    suffixes.sort()
     return suffixes
 
 def get_gyrokinetics_from_dir(out_dir,user, linear):

@@ -51,8 +51,12 @@ def f_user_input_metadata():
     '''
 
     user_ip = {} 
-    print("Please provide input for metadata. Press Enter to skip.\n")
+    print("Filling metadata.")
+    skip_metadata = input("To skip entering Metadata, please enter 0\n")
+    if skip_metadata=='0': 
+        return user_ip
 
+    print("Please provide input for metadata. Press Enter to skip that entry.\n")
     confidence = input('What is your confidence (1-10) for the run? Press ENTER to use default value -1.0\n')
     if len(confidence):
         confidence = float(confidence)
@@ -102,7 +106,8 @@ def main_upload(target, keywords, exclude, default, sim_type, extra, authenticat
     else:
         exclude_folders = []
     
-    manual_time_flag = not default
+    # manual_time_flag = not default
+    manual_time_flag = False
     
     ### Update global variables 
     global_vars = Global_vars(sim_type)    
@@ -154,20 +159,22 @@ def main_upload(target, keywords, exclude, default, sim_type, extra, authenticat
                 else:
                     suffixes = None                              
                 
-                run_shared = input('Any other files to upload than the default? Separate them by comma. Press Enter to skip.\n')
+                run_shared = input('Do you want to upload any shared files for all suffixes? Please specify path relative to parent folder.\n Separate them by comma. Press Enter to skip.\n')
                 if len(run_shared):
                     run_shared = run_shared.split(',')
                 else:
                     run_shared = None
                 
-                ### Metadata inputs 
+                ### Metadata inputs
                 user_ip_dict = f_user_input_metadata()
-                metadata = f_set_metadata(**user_ip_dict,user=user, keywords = keywords, sim_type=sim_type, linked_ID=linked_id)
-
             else:
                 suffixes = None
                 run_shared = None
+                user_ip_dict={}
             
+            if len(user_ip_dict)!=0: ## Metadata set with user input           
+                metadata = f_set_metadata(**user_ip_dict,user=user, keywords = keywords, sim_type=sim_type, linked_ID=linked_id)
+            else: 
                 metadata = f_set_metadata(user=user, keywords=keywords, sim_type=sim_type,linked_ID=linked_id)
 
             # Send run to upload_to_mongo to be uploaded

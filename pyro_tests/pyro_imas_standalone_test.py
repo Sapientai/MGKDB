@@ -271,10 +271,11 @@ if __name__=="__main__":
     # gkcode="GS2"
 
 
-    # data_dir = '../pyrokinetics/src/pyrokinetics/templates/'
-    # fname = data_dir+'input.gx'
+    # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gx/1_template_gx_linear/'
+    # fname = data_dir+'gx.in'
+    # gkcode="GX"
 
-    data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gx/1_gx/'
+    data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gx/2_nonlinear_gx/'
     fname = data_dir + 'cyclone_base.in'
     gkcode="GX"
 

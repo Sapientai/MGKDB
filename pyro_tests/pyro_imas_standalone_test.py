@@ -274,8 +274,8 @@ if __name__=="__main__":
     # data_dir = '../pyrokinetics/src/pyrokinetics/templates/'
     # fname = data_dir+'input.gx'
 
-    data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gx/1_gx/'
-    fname = data_dir + 'cyclone_base.in'
+    data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gx/1_template_gx_linear/'
+    fname = data_dir + 'gx.in'
     gkcode="GX"
 
     json_data, quasi_linear = create_gk_dict_with_pyro(fname,gkcode)

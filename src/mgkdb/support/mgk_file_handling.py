@@ -380,24 +380,17 @@ def get_file_list(out_dir, begin):
     # print('{} files found in {} beginning with {}.'.format(len(files_list), out_dir, begin) )
     return files_list     
 
-def gridfs_put(db, filepath,sim_type):
-    #set directory and filepath
-    file = open(filepath, 'rb')
+def gridfs_put(db, filepath, sim_type):
 
-    #upload file to 'fs.files' collection
     fs = gridfs.GridFS(db)
-    dbfile = fs.put(file, encoding='UTF-8', 
-                    filepath = filepath,
-                    filename = os.path.basename(filepath),
-                    simulation_type = sim_type,
-                    metadata = None)  # may also consider using upload_from_stream ?
-    file.close()
-    
-    #grab '_id' for uploaded file
-#    object_id = str(dbfile)  # why convert to string?
-#    return(object_id)
+    with open(filepath, 'rb') as file:
+        dbfile = fs.put(file, encoding='UTF-8', 
+                        filepath=filepath,
+                        filename=os.path.basename(filepath),
+                        simulation_type=sim_type,
+                        metadata=None)
+
     return dbfile
-    
     
 def gridfs_read(db, query):
     #connect to 'ETG' database
@@ -543,11 +536,22 @@ def _binary2npArray(binary):
     return pickle.loads(binary)
 
 def gridfs_put_npArray(db, value, filepath, filename, sim_type):
+    '''
+    Write numpy array to file and then to DB
+    '''
+    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB limit
+
     fs = gridfs.GridFS(db)
-    obj_id=fs.put(_npArray2Binary(value),encoding='UTF-8',
+    binary_data = _npArray2Binary(value)
+    
+    if len(binary_data) > MAX_FILE_SIZE: ## Ensure file is not too big
+        raise ValueError(f"Binary data for '{filename}' exceeds size limit of {MAX_FILE_SIZE / (1024 * 1024)} MB")
+
+    obj_id=fs.put(binary_data,encoding='UTF-8',
                   filename = filename,
                   simulation_type = sim_type,
                   filepath = filepath)
+    
     return obj_id  
     
     
@@ -1149,6 +1153,9 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
     This function does the actual uploading of gridfs chunks and
     returns object_ids for the chunk.
     '''
+    
+    MAX_FILE_SIZE = 10 * 1024 * 1024 # 10 MB limit 
+
 
     if sim_type=='GENE': 
         if suffix is not None:
@@ -1225,6 +1232,12 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
     object_ids = {}
     for file in output_files:
         if os.path.isfile(file):
+            ## Ensure file is not too big
+            file_size = os.path.getsize(file)
+
+            if file_size > MAX_FILE_SIZE: ## Ensure file is not too big
+                raise ValueError("Size of the file %s is %s MB and it exceeds size limit of %s MB" %(file, file_size/(1024*1024), MAX_FILE_SIZE/(1024*1024)))
+
             _id = gridfs_put(db, file, sim_type)
             object_ids[_id] = file
             

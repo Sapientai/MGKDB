@@ -51,8 +51,10 @@ class Global_vars():
 
         if sim_type=="GENE":
 
+            self.required_files =  ['field', 'nrg', 'omega','parameters']
             self.Docs = ['autopar', 'nrg', 'omega','parameters']
             self.Keys = ['autopar', 'nrg', 'omega','parameters']
+
 
             #Large files#
             self.Docs_L = ['field', 'mom', 'vsp']
@@ -60,6 +62,8 @@ class Global_vars():
 
         elif sim_type=='CGYRO':
 
+            self.required_files =  ['input.cgyro', "out.cgyro.time","out.cgyro.grids","out.cgyro.equilibrium", "bin.cgyro.geo"]
+            
             self.Docs = ['input.cgyro', 'input.cgyro.gen', 'input.gacode', 'out.cgyro.info']    
             self.Keys = ['input_cgyro', 'input_cgyro_gen', 'input_gacode', 'out_cgyro_info']  
 
@@ -68,6 +72,7 @@ class Global_vars():
             self.Keys_L = []
 
         elif sim_type=='TGLF':
+            self.required_files = ['input.tglf', 'out.tglf.run']    
 
             self.Docs = ['input.tglf', 'input.tglf.gen', 'out.tglf.run']    
             self.Keys = ['input_tglf', 'input_tglf_gen', 'out_tglf_run']    
@@ -78,17 +83,20 @@ class Global_vars():
 
         elif sim_type=='GX':
 
-            self.Docs = ['gx.in','gx.out.nc']    
-            self.Keys = ['gx_in','gx_out_nc']    
+            self.required_files = ['gx.in','gx.out.nc']    
+
+            self.Docs = ['gx.in']    
+            self.Keys = ['gx_in']    
 
             #Large files#
             self.Docs_L = []
             self.Keys_L = []
 
         elif sim_type=='GS2':
+            self.required_files = ['gs2.in','gs2.out.nc']    
 
-            self.Docs = ['gs2.in','gs2.out.nc']    
-            self.Keys = ['gs2_in','gs2_out_nc']    
+            self.Docs = ['gs2.in']    
+            self.Keys = ['gs2_in']    
 
             #Large files#
             self.Docs_L = []
@@ -109,7 +117,25 @@ class Global_vars():
         self.__init__(sim_type)
         print("File names and their key names are reset to default!")
 
+def f_check_required_files(global_vars, fldr, suffix, sim_type):
 
+    files_exist=True 
+    if sim_type=='GENE':
+        for fname in global_vars.required_files:
+            file = os.path.join(fldr,fname+suffix)
+            if not os.path.isfile(file):
+                print('Necessary file %s does not exist for suffix %s in folder %s. Skipping this folder'%(file,suffix,fldr))
+                files_exist = False
+                break
+    else : 
+        for fname in global_vars.required_files:
+            file = os.path.join(fldr,suffix,fname)
+            if not os.path.isfile(file):
+                print('Necessary file %s does not exist in folder %s. Skipping this folder'%(file,os.path.join(fldr,suffix)))
+                files_exist = False
+                break
+    
+    return files_exist
 
 def f_set_metadata(user=None,out_dir=None,suffix=None,keywords=None,confidence=-1,comments='Uploaded with default settings.',time_upload=None,\
                    last_update=None, linked_ID=None, expt=None, scenario_runid=None, linear=None, quasiLinear=None, has_1dflux = None, sim_type=None,\
@@ -1241,6 +1267,10 @@ def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
         try:
             print('='*40)
             print('Working on files with suffix: {} in folder {}.......'.format(suffix, out_dir))           
+            id_copy = {}
+
+            files_exist = f_check_required_files(global_vars, out_dir, suffix, sim_type)
+            assert files_exist,"Required files don't exist. Skipping folder"
 
             ### First compute gyrokinetics IMAS using pyrokinetics package
             print("Computing gyrokinetics IMAS using pyrokinetics")
@@ -1248,7 +1278,6 @@ def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
             GK_dict, quasi_linear = create_gk_dict_with_pyro(input_fname, sim_type)
 
             ### Upload files to DB
-            id_copy = {}
             print('Uploading files ....')
             if count == 0:
                 object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, run_shared, global_vars)
@@ -1374,7 +1403,7 @@ def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
                     fs.delete(_id)
                     print('{} deleted.'.format(_id))
             except Exception as e3:
-                print("Error deleting files from gridfs with exception {0}".format(e3))
+                print("Error deleting files from gridfs with exception:\t {0}".format(e3))
                 pass
             
     global_vars.reset_docs_keys(sim_type)
@@ -1402,6 +1431,10 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
         try:
             print('='*40)
             print('Working on files with suffix: {} in folder {}.......'.format(suffix, out_dir))
+            id_copy = {}
+
+            files_exist = f_check_required_files(global_vars, out_dir, suffix, sim_type)
+            assert files_exist,"Required files don't exist. Skipping folder"
 
             ### First compute gyrokinetics IMAS using pyrokinetics package
             print("Computing gyrokinetics IMAS using pyrokinetics")
@@ -1409,7 +1442,6 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
             GK_dict, quasi_linear = create_gk_dict_with_pyro(input_fname, sim_type)
 
             ### Upload files to DB 
-            id_copy = {}
             print('Uploading files ....')
             if count == 0:
                 object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, run_shared, global_vars)
@@ -1531,7 +1563,7 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
                     fs.delete(_id)
                     print('{} deleted.'.format(_id))
             except Exception as e3:
-                print("Error deleting files from gridfs with exception {0}".format(e3))
+                print("Error deleting files from gridfs with exception:\t {0}".format(e3))
                 pass
                 
     global_vars.reset_docs_keys(sim_type)

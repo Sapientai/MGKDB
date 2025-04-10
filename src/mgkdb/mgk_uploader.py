@@ -121,65 +121,66 @@ def main_upload(target, keywords, exclude, default, sim_type, extra, authenticat
 
     ### Connect to database 
     login = f_login_dbase(authenticate)
-    database = login.connect()
-    user = login.login['user']
+    client, database = login.connect()
+    with client:
+        user = login.login['user']
 
-    linked_id = f_get_linked_oid(database, linked_id_file, linked_id_string)
+        linked_id = f_get_linked_oid(database, linked_id_file, linked_id_string)
 
-    ### Run uploader 
-    #######################################################################
-    print("Processing files for uploading ........")
-    #scan through a directory for more than one run
-    for count, (dirpath, dirnames, files) in enumerate(os.walk(output_folder)):
-        if ( ( sim_type in ['CGYRO','TGLF','GS2','GX'] and count==0)  or (sim_type=='GENE' and str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1 and str(dirpath) not in exclude_folders) ):    
-            print('Scanning in {} *******************\n'.format( str(dirpath)) )
-            linear = isLinear(dirpath, sim_type)
-            if linear == None:
-                linear_input = input('Cannot decide if this folder is a linear run or not. Please make the selection manually by typing:\n 1: Linear\n 2: Nonlinear \n 3: Skip this folder \n')
-                if linear_input.strip() == '1':
-                    linear = True
-                elif linear_input.strip() == '2':
-                    linear = False
-                elif linear_input.strip() == '3':
-                    print('Folder skipped.')
-                    continue
-                else:
-                    exit('Invalid input encountered!')                         
-            
-            if not default:
-                suffixes = get_suffixes(dirpath, sim_type)
-                print("Found in {} these suffixes:\n {}".format(dirpath, suffixes))
+        ### Run uploader 
+        #######################################################################
+        print("Processing files for uploading ........")
+        #scan through a directory for more than one run
+        for count, (dirpath, dirnames, files) in enumerate(os.walk(output_folder)):
+            if ( ( sim_type in ['CGYRO','TGLF','GS2','GX'] and count==0)  or (sim_type=='GENE' and str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1 and str(dirpath) not in exclude_folders) ):    
+                print('Scanning in {} *******************\n'.format( str(dirpath)) )
+                linear = isLinear(dirpath, sim_type)
+                if linear == None:
+                    linear_input = input('Cannot decide if this folder is a linear run or not. Please make the selection manually by typing:\n 1: Linear\n 2: Nonlinear \n 3: Skip this folder \n')
+                    if linear_input.strip() == '1':
+                        linear = True
+                    elif linear_input.strip() == '2':
+                        linear = False
+                    elif linear_input.strip() == '3':
+                        print('Folder skipped.')
+                        continue
+                    else:
+                        exit('Invalid input encountered!')                         
                 
-                suffixes = input('Which run do you want to upload? Separate them by comma. \n Press q to skip. Press ENTER to upload ALL.\n')
-                if suffixes == 'q':
-                    print("Skipping the folder {}.".format(dirpath))
-                    continue
-                elif len(suffixes):
-                    suffixes = suffixes.split(',')
+                if not default:
+                    suffixes = get_suffixes(dirpath, sim_type)
+                    print("Found in {} these suffixes:\n {}".format(dirpath, suffixes))
+                    
+                    suffixes = input('Which run do you want to upload? Separate them by comma. \n Press q to skip. Press ENTER to upload ALL.\n')
+                    if suffixes == 'q':
+                        print("Skipping the folder {}.".format(dirpath))
+                        continue
+                    elif len(suffixes):
+                        suffixes = suffixes.split(',')
+                    else:
+                        suffixes = None                              
+                    
+                    run_shared = input('Do you want to upload any shared files for all suffixes? Please specify path relative to parent folder.\n Separate them by comma. Press Enter to skip.\n')
+                    if len(run_shared):
+                        run_shared = run_shared.split(',')
+                    else:
+                        run_shared = None
+                    
+                    ### Metadata inputs
+                    user_ip_dict = f_user_input_metadata()
                 else:
-                    suffixes = None                              
-                
-                run_shared = input('Do you want to upload any shared files for all suffixes? Please specify path relative to parent folder.\n Separate them by comma. Press Enter to skip.\n')
-                if len(run_shared):
-                    run_shared = run_shared.split(',')
-                else:
+                    suffixes = None
                     run_shared = None
+                    user_ip_dict={}
                 
-                ### Metadata inputs
-                user_ip_dict = f_user_input_metadata()
-            else:
-                suffixes = None
-                run_shared = None
-                user_ip_dict={}
-            
-            if len(user_ip_dict)!=0: ## Metadata set with user input           
-                metadata = f_set_metadata(**user_ip_dict,user=user, keywords = keywords, sim_type=sim_type, linked_ID=linked_id)
-            else: 
-                metadata = f_set_metadata(user=user, keywords=keywords, sim_type=sim_type,linked_ID=linked_id)
+                if len(user_ip_dict)!=0: ## Metadata set with user input           
+                    metadata = f_set_metadata(**user_ip_dict,user=user, keywords = keywords, sim_type=sim_type, linked_ID=linked_id)
+                else: 
+                    metadata = f_set_metadata(user=user, keywords=keywords, sim_type=sim_type,linked_ID=linked_id)
 
-            # Send run to upload_to_mongo to be uploaded
-            upload_to_mongo(database, linear, metadata, dirpath, suffixes, run_shared,
-                            large_files, extra, verbose, manual_time_flag,global_vars)
+                # Send run to upload_to_mongo to be uploaded
+                upload_to_mongo(database, linear, metadata, dirpath, suffixes, run_shared,
+                                large_files, extra, verbose, manual_time_flag,global_vars)
 
     if len(global_vars.troubled_runs):
         print("The following runs are skipped due to exceptions.")

@@ -239,12 +239,14 @@ if __name__=="__main__":
     # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene5_non_st_single_prec/'
     # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene6_non_st_double_prec/'
     # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gene7_non_st_double_prec/'
-    # suffix='_0001'
-    # fname = data_dir+'parameters{0}'.format(suffix)
-    # gkcode="GENE"
+    data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/GENE_fingerprints_march_2025/pscans_hask/scanfiles0002/'
+    # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/GENE_fingerprints_march_2025/test/'
+    suffix='_0008'
+    fname = data_dir+'parameters{0}'.format(suffix)
+    gkcode="GENE"
     
     # data_dir='/Users/venkitesh_work/Downloads/downloaded_select_gene_NERSC/tracer_5f34a52cbafb0f9d07b05731/'
-    # suffix = '_0002'    
+    # suffix = '_0002'
     # fname= data_dir+'parameters{0}'.format(suffix)
 
     # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/upload_datasets/non_lin_J78697_x985/"
@@ -280,16 +282,14 @@ if __name__=="__main__":
 
     # data_dir = "test_data/GS2_linear/run1_template/"
     # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/GS2_linear/run1_template"
-    # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/GS2_linear/run2/"
-    # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/GS2_linear/run3_id33"
     # data_dir = "/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/GS2_linear/run4_id17"
     # fname = data_dir+'gs2.in'
     # gkcode="GS2"
 
 
-    data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gx/1_template_gx_linear/'
-    fname = data_dir+'gx.in'
-    gkcode="GX"
+    # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gx/1_template_gx_linear/'
+    # fname = data_dir+'gx.in'
+    # gkcode="GX"
 
     # data_dir = '/Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/pyro_tests_data/data/test_gx/2_nonlinear_gx/'
     # fname = data_dir + 'cyclone_base.in'

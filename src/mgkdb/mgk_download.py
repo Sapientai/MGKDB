@@ -43,31 +43,31 @@ def main_download(target, file, objectID, destination, saveas, query, authentica
 
     ### Connect to database 
     login = f_login_dbase(authenticate)
-    database = login.connect()
+    client, database = login.connect()
+    with client:
+        ## Dict to convert from argument to collection name in database
+        collection_dict={'linear':'LinearRuns','nonlinear':'NonlinRuns','files':'fs.files'}
+        collection_name =  getattr(database,collection_dict[collection])
 
-    ## Dict to convert from argument to collection name in database
-    collection_dict={'linear':'LinearRuns','nonlinear':'NonlinRuns','files':'fs.files'}
-    collection_name =  getattr(database,collection_dict[collection])
+        if query:
+            print("working on query: {} ......".format(query))
+            found = get_oid_from_query(database, collection_name, Str2Query(query))
+            for oid in found:
+                download_runs_by_id(database, collection_name, oid, destination)
 
-    if query:
-        print("working on query: {} ......".format(query))
-        found = get_oid_from_query(database, collection_name, Str2Query(query))
-        for oid in found:
-            download_runs_by_id(database, collection_name, oid, destination)
-
-    elif file:
-        download_file_by_path(database, file, destination, revision=-1, session=None)   
-        
-    elif OID:
-        if collection=='files': 
-            download_file_by_id(database, ObjectId(OID), destination, op_fname, session = None)
-        elif collection in ['linear','nonlinear']:
-            download_runs_by_id(database, collection_name, ObjectId(OID), destination)
-        else : 
-            print("Invalid option for collection for OID",collection)
-            raise SystemError
-    elif target:
-        download_dir_by_name(database, collection_name, target, destination)
+        elif file:
+            download_file_by_path(database, file, destination, revision=-1, session=None)   
+            
+        elif OID:
+            if collection=='files': 
+                download_file_by_id(database, ObjectId(OID), destination, op_fname, session = None)
+            elif collection in ['linear','nonlinear']:
+                download_runs_by_id(database, collection_name, ObjectId(OID), destination)
+            else : 
+                print("Invalid option for collection for OID",collection)
+                raise SystemError
+        elif target:
+            download_dir_by_name(database, collection_name, target, destination)
 
 
 def main():

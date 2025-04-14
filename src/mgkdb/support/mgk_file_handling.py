@@ -51,8 +51,10 @@ class Global_vars():
 
         if sim_type=="GENE":
 
+            self.required_files =  ['field', 'nrg', 'omega','parameters']
             self.Docs = ['autopar', 'nrg', 'omega','parameters']
             self.Keys = ['autopar', 'nrg', 'omega','parameters']
+
 
             #Large files#
             self.Docs_L = ['field', 'mom', 'vsp']
@@ -60,6 +62,8 @@ class Global_vars():
 
         elif sim_type=='CGYRO':
 
+            self.required_files =  ['input.cgyro', "out.cgyro.time","out.cgyro.grids","out.cgyro.equilibrium", "bin.cgyro.geo"]
+            
             self.Docs = ['input.cgyro', 'input.cgyro.gen', 'input.gacode', 'out.cgyro.info']    
             self.Keys = ['input_cgyro', 'input_cgyro_gen', 'input_gacode', 'out_cgyro_info']  
 
@@ -68,6 +72,7 @@ class Global_vars():
             self.Keys_L = []
 
         elif sim_type=='TGLF':
+            self.required_files = ['input.tglf', 'out.tglf.run']    
 
             self.Docs = ['input.tglf', 'input.tglf.gen', 'out.tglf.run']    
             self.Keys = ['input_tglf', 'input_tglf_gen', 'out_tglf_run']    
@@ -76,10 +81,22 @@ class Global_vars():
             self.Docs_L = []
             self.Keys_L = []
 
-        elif sim_type=='GS2':
+        elif sim_type=='GX':
 
-            self.Docs = ['gs2.in','gs2.out.nc']    
-            self.Keys = ['gs2_in','gs2_out_nc']    
+            self.required_files = ['gx.in','gx.out.nc']    
+
+            self.Docs = ['gx.in']    
+            self.Keys = ['gx_in']    
+
+            #Large files#
+            self.Docs_L = []
+            self.Keys_L = []
+
+        elif sim_type=='GS2':
+            self.required_files = ['gs2.in','gs2.out.nc']    
+
+            self.Docs = ['gs2.in']    
+            self.Keys = ['gs2_in']    
 
             #Large files#
             self.Docs_L = []
@@ -100,7 +117,25 @@ class Global_vars():
         self.__init__(sim_type)
         print("File names and their key names are reset to default!")
 
+def f_check_required_files(global_vars, fldr, suffix, sim_type):
 
+    files_exist=True 
+    if sim_type=='GENE':
+        for fname in global_vars.required_files:
+            file = os.path.join(fldr,fname+suffix)
+            if not os.path.isfile(file):
+                print('Necessary file %s does not exist for suffix %s in folder %s. Skipping this folder'%(file,suffix,fldr))
+                files_exist = False
+                break
+    else : 
+        for fname in global_vars.required_files:
+            file = os.path.join(fldr,suffix,fname)
+            if not os.path.isfile(file):
+                print('Necessary file %s does not exist in folder %s. Skipping this folder'%(file,os.path.join(fldr,suffix)))
+                files_exist = False
+                break
+    
+    return files_exist
 
 def f_set_metadata(user=None,out_dir=None,suffix=None,keywords=None,confidence=-1,comments='Uploaded with default settings.',time_upload=None,\
                    last_update=None, linked_ID=None, expt=None, scenario_runid=None, linear=None, quasiLinear=None, has_1dflux = None, sim_type=None,\
@@ -345,24 +380,17 @@ def get_file_list(out_dir, begin):
     # print('{} files found in {} beginning with {}.'.format(len(files_list), out_dir, begin) )
     return files_list     
 
-def gridfs_put(db, filepath,sim_type):
-    #set directory and filepath
-    file = open(filepath, 'rb')
+def gridfs_put(db, filepath, sim_type):
 
-    #upload file to 'fs.files' collection
     fs = gridfs.GridFS(db)
-    dbfile = fs.put(file, encoding='UTF-8', 
-                    filepath = filepath,
-                    filename = os.path.basename(filepath),
-                    simulation_type = sim_type,
-                    metadata = None)  # may also consider using upload_from_stream ?
-    file.close()
-    
-    #grab '_id' for uploaded file
-#    object_id = str(dbfile)  # why convert to string?
-#    return(object_id)
+    with open(filepath, 'rb') as file:
+        dbfile = fs.put(file, encoding='UTF-8', 
+                        filepath=filepath,
+                        filename=os.path.basename(filepath),
+                        simulation_type=sim_type,
+                        metadata=None)
+
     return dbfile
-    
     
 def gridfs_read(db, query):
     #connect to 'ETG' database
@@ -508,11 +536,22 @@ def _binary2npArray(binary):
     return pickle.loads(binary)
 
 def gridfs_put_npArray(db, value, filepath, filename, sim_type):
+    '''
+    Write numpy array to file and then to DB
+    '''
+    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB limit
+
     fs = gridfs.GridFS(db)
-    obj_id=fs.put(_npArray2Binary(value),encoding='UTF-8',
+    binary_data = _npArray2Binary(value)
+    
+    if len(binary_data) > MAX_FILE_SIZE: ## Ensure file is not too big
+        raise ValueError(f"Binary data for '{filename}' exceeds size limit of {MAX_FILE_SIZE / (1024 * 1024)} MB")
+
+    obj_id=fs.put(binary_data,encoding='UTF-8',
                   filename = filename,
                   simulation_type = sim_type,
                   filepath = filepath)
+    
     return obj_id  
     
     
@@ -609,7 +648,7 @@ def isLinear(folder_name, sim_type):
             assert linear is None, "Can not decide, please include linear/nonlin as the suffix of your data folder!"
         
     elif sim_type=='CGYRO':
-        fname=os.path.join(folder_name+'/{0}/input.cgyro'.format(suffix))
+        fname=os.path.join(folder_name, suffix, 'input.cgyro')
         assert os.path.isfile(fname),"File %s does not exist"%(fname)
 
         non_lin = None
@@ -625,7 +664,7 @@ def isLinear(folder_name, sim_type):
     
     elif sim_type=='TGLF':
 
-        fname=os.path.join(folder_name+'/{0}/input.tglf'.format(suffix))
+        fname = os.path.join(folder_name, suffix, 'input.tglf')
         assert os.path.isfile(fname),"File %s does not exist"%(fname)
 
         with open(fname,'r') as f:
@@ -641,6 +680,30 @@ def isLinear(folder_name, sim_type):
                         linear = True 
                     else : 
                         print("Unknown entry in parameter file for field \"USE_TRANSPORT_MODEL\" ",line)
+                        raise SystemError
+                    break
+        return linear
+    
+    elif sim_type=='GX':
+
+        in_files = [f for f in os.listdir(os.path.join(folder_name,suffix)) if f.endswith('.in')]
+        
+        if len(in_files) > 1:
+            print("Expected exactly one .in file in the folder, found %d. Using first one."%(in_files))
+        fname=os.path.join(folder_name,suffix,in_files[0])
+        assert os.path.isfile(fname),"File %s does not exist"%(fname)
+
+        with open(fname,'r') as f:
+            for line in f:
+                strg = line.strip().split('#')[0].split('=')
+                if (len(strg) == 2 and strg[0].strip() == 'nonlinear_mode'):
+                    val = strg[1].strip()
+                    if val in ['true','True','t','T']:
+                        linear = False
+                    elif val in ['false','False','f','F']:
+                        linear = True
+                    else : 
+                        print("Unknown entry in parameter file for field \"nonlinear_mode\" ",line)
                         raise SystemError
                     break
         return linear
@@ -1014,7 +1077,7 @@ def update_mongo(db, metadata, out_dir, runs_coll, linear, suffixes=None):
                     input_fname = f_get_input_fname(out_dir, suffix, sim_type)
                     GK_dict, quasi_linear = create_gk_dict_with_pyro(input_fname, sim_type)   
 
-                    if sim_type in ['CGYRO','TGLF','GS2']:
+                    if sim_type in ['CGYRO','TGLF','GS2','GX']:
                         Diag_dict = {}
                     elif sim_type=='GENE': 
                         Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
@@ -1090,6 +1153,9 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
     This function does the actual uploading of gridfs chunks and
     returns object_ids for the chunk.
     '''
+    
+    MAX_FILE_SIZE = 10 * 1024 * 1024 # 10 MB limit 
+
 
     if sim_type=='GENE': 
         if suffix is not None:
@@ -1149,7 +1215,7 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
         if extra_files:
             output_files += [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs_ex if Qname]
     
-    elif sim_type in ['CGYRO','TGLF','GS2']:
+    elif sim_type in ['CGYRO','TGLF','GS2','GX']:
         output_files = [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
         
         if large_files:
@@ -1166,6 +1232,12 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
     object_ids = {}
     for file in output_files:
         if os.path.isfile(file):
+            ## Ensure file is not too big
+            file_size = os.path.getsize(file)
+
+            if file_size > MAX_FILE_SIZE: ## Ensure file is not too big
+                raise ValueError("Size of the file %s is %s MB and it exceeds size limit of %s MB" %(file, file_size/(1024*1024), MAX_FILE_SIZE/(1024*1024)))
+
             _id = gridfs_put(db, file, sim_type)
             object_ids[_id] = file
             
@@ -1175,10 +1247,12 @@ def f_get_input_fname(out_dir, suffix, sim_type):
     ''''
     Get the name of the input file with suffix for the simluation type
     '''
-    fname_dict = {'CGYRO':out_dir+'/{0}/input.cgyro'.format(suffix),\
-                    'TGLF':out_dir+'/{0}/input.tglf'.format(suffix),\
-                    'GENE':out_dir+'/parameters{0}'.format(suffix),
-                    'GS2': out_dir+'/{0}/gs2.in'.format(suffix)
+
+    fname_dict = {'CGYRO':os.path.join(out_dir,suffix,'input.cgyro'),
+                    'TGLF':os.path.join(out_dir,suffix,'input.tglf'),
+                    'GENE':os.path.join(out_dir,'parameters{0}'.format(suffix)),
+                    'GS2': os.path.join(out_dir,suffix,'gs2.in'),
+                    'GX': os.path.join(out_dir,suffix,'gx.in')
                 }
 
     return fname_dict[sim_type]
@@ -1206,6 +1280,10 @@ def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
         try:
             print('='*40)
             print('Working on files with suffix: {} in folder {}.......'.format(suffix, out_dir))           
+            id_copy = {}
+
+            files_exist = f_check_required_files(global_vars, out_dir, suffix, sim_type)
+            assert files_exist,"Required files don't exist. Skipping folder"
 
             ### First compute gyrokinetics IMAS using pyrokinetics package
             print("Computing gyrokinetics IMAS using pyrokinetics")
@@ -1213,7 +1291,6 @@ def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
             GK_dict, quasi_linear = create_gk_dict_with_pyro(input_fname, sim_type)
 
             ### Upload files to DB
-            id_copy = {}
             print('Uploading files ....')
             if count == 0:
                 object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, run_shared, global_vars)
@@ -1242,7 +1319,7 @@ def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
             for _id, line in list(object_ids.items()):  # it is necessary because the dict changes size during loop.
                 for Q_name, Key in zip(_docs, _keys):
                     if sim_type=='GENE' :     fname = os.path.join(out_dir,Q_name+suffix)
-                    elif sim_type in ['CGYRO','TGLF','GS2'] :  fname = os.path.join(out_dir+'/%s/'%(suffix),Q_name)
+                    elif sim_type in ['CGYRO','TGLF','GS2','GX'] :  fname = os.path.join(out_dir,suffix,Q_name)
                     
                     if fname == line:
                         if '.' in Key:
@@ -1289,7 +1366,7 @@ def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
 
             meta_dict = metadata
 
-            if sim_type in ['CGYRO','TGLF','GS2']:
+            if sim_type in ['CGYRO','TGLF','GS2','GX']:
                 Diag_dict = {}
             elif sim_type=='GENE': 
                 print('='*60)
@@ -1339,7 +1416,7 @@ def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
                     fs.delete(_id)
                     print('{} deleted.'.format(_id))
             except Exception as e3:
-                print("Error deleting files from gridfs with exception {0}".format(e3))
+                print("Error deleting files from gridfs with exception:\t {0}".format(e3))
                 pass
             
     global_vars.reset_docs_keys(sim_type)
@@ -1367,6 +1444,10 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
         try:
             print('='*40)
             print('Working on files with suffix: {} in folder {}.......'.format(suffix, out_dir))
+            id_copy = {}
+
+            files_exist = f_check_required_files(global_vars, out_dir, suffix, sim_type)
+            assert files_exist,"Required files don't exist. Skipping folder"
 
             ### First compute gyrokinetics IMAS using pyrokinetics package
             print("Computing gyrokinetics IMAS using pyrokinetics")
@@ -1374,7 +1455,6 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
             GK_dict, quasi_linear = create_gk_dict_with_pyro(input_fname, sim_type)
 
             ### Upload files to DB 
-            id_copy = {}
             print('Uploading files ....')
             if count == 0:
                 object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, run_shared, global_vars)
@@ -1402,7 +1482,7 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
             for _id, line in list(object_ids.items()):  
                 for Q_name, Key in zip(_docs, _keys):
                     if sim_type=='GENE' :  fname = os.path.join(out_dir,Q_name+suffix)
-                    elif sim_type in ['CGYRO','TGLF','GS2'] :  fname = os.path.join(out_dir+'/%s/'%(suffix),Q_name)
+                    elif sim_type in ['CGYRO','TGLF','GS2','GX'] :  fname = os.path.join(out_dir,suffix,Q_name)
                     
                     if fname == line:
                         if '.' in Key:
@@ -1449,7 +1529,7 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
             meta_dict = metadata
 
             #data dictionary format for nonlinear runs
-            if sim_type in ['CGYRO','TGLF','GS2']:
+            if sim_type in ['CGYRO','TGLF','GS2','GX']:
                 Diag_dict = {}
             elif sim_type=='GENE':
                 print('='*60)
@@ -1496,7 +1576,7 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
                     fs.delete(_id)
                     print('{} deleted.'.format(_id))
             except Exception as e3:
-                print("Error deleting files from gridfs with exception {0}".format(e3))
+                print("Error deleting files from gridfs with exception:\t {0}".format(e3))
                 pass
                 
     global_vars.reset_docs_keys(sim_type)

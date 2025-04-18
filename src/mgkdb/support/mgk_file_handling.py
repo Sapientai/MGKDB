@@ -123,14 +123,14 @@ def f_check_required_files(global_vars, fldr, suffix, sim_type):
     if sim_type=='GENE':
         for fname in global_vars.required_files:
             file = os.path.join(fldr,fname+suffix)
-            if not os.path.isfile(file):
-                print('Necessary file %s does not exist for suffix %s in folder %s. Skipping this folder'%(file,suffix,fldr))
+            if ( (not os.path.isfile(file)) or (os.path.getsize(file) == 0)):
+                print('Necessary file %s does not exist for suffix %s in folder %s, or is empty. Skipping this suffix'%(file,suffix,fldr))
                 files_exist = False
                 break
     else : 
         for fname in global_vars.required_files:
             file = os.path.join(fldr,suffix,fname)
-            if not os.path.isfile(file):
+            if ( (not os.path.isfile(file)) or (os.path.getsize(file) == 0)):
                 print('Necessary file %s does not exist in folder %s. Skipping this folder'%(file,os.path.join(fldr,suffix)))
                 files_exist = False
                 break

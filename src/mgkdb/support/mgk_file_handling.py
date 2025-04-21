@@ -121,6 +121,17 @@ def f_check_required_files(global_vars, fldr, suffix, sim_type):
 
     files_exist=True 
 
+    if sim_type=='GENE': ## Add geometry file for GENE 
+        par = Parameters()
+        par_file = os.path.join(fldr,'parameters'+suffix)
+        par.Read_Pars(par_file)
+        pars = par.pardict
+        ## Get geometry from parameters file and add that to list of files to save
+        if 'magn_geometry' in pars:
+            geom_file = pars['magn_geometry'][1:-1]
+            global_vars.required_files.append(geom_file)
+
+    
     for fname in global_vars.required_files:
         file = os.path.join(fldr,fname+suffix) if sim_type=='GENE' else os.path.join(fldr,suffix,fname)
 

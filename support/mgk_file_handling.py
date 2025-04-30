@@ -1331,7 +1331,7 @@ def upload_linear(db, out_dir, user, confidence, input_heat, keywords, comments,
             GK_dict = get_gyrokinetics_from_run(out_dir,suffix, user, linear=True)
             
             ## Save IMAS for any potential tests 
-            with open("gyrokinetics.json", "w") as json_file:
+            with open(out_dir+ "/gyrokinetics.json", "w") as json_file:
                 json.dump(GK_dict, json_file, indent=4)
 
 

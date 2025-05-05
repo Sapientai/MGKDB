@@ -72,18 +72,15 @@ def f_user_input_metadata():
     archive = input('Is there a location where the data is archived? Press Enter to skip.\n')
     user_ip['archive_loc'] = archive
 
-    restart = input('Is this run a restart fr? For yes -> Y .\n')
-    
-    if restart=='Y':
-        restart_timestep = input('What was the timestep of the previous run used to start this run?')
-        initial_run_oid = input('Has the initial run been uploaded to this database. If so, please enter the ObjectID for that run. If not ')
-    else: 
-        timestep = 0 
-        initial_run_oid = None
-    
-    restart_flag= (restart=='Y')
-    user_ip['IsRestart'] = {'':restart_flag,'Timestep':restart_timestep ,'InitObjectId':initial_run_oid}
+    restart = input('Is this run a restart starting from a different run? For yes -> Y .\n')
 
+    user_ip['restart'] = (restart=='Y')
+
+    if restart=='Y':
+        user_ip['restart_timestep'] = input('What was the timestep of the previous run used to start this run? \n')
+        initial_run_info = input('Has the initial run been uploaded to this database. For yes -> Y .\n')
+        user_ip['initial_run_oid'] = input('Please enter the ObjectID for that run') if initial_run_info == 'Y' else None
+    
     expt = input('Name of actual or hypothetical experiment? Eg: diiid, iter, sparc, etc. Press Enter to skip.\n')
     user_ip['expt'] = expt
 

@@ -148,7 +148,7 @@ def f_check_required_files(global_vars, fldr, suffix, sim_type):
 
 def f_set_metadata(user=None,out_dir=None,suffix=None,keywords=None,confidence=-1,comments='Uploaded with default settings.',time_upload=None,\
                    last_update=None, linked_ID=None, expt=None, scenario_runid=None, linear=None, quasiLinear=None, has_1dflux = None, sim_type=None,\
-                   git_hash=None, platform=None, ex_date=None, workflow_type=None, archive_loc=None):
+                   git_hash=None, platform=None, ex_date=None, workflow_type=None, archive_loc=None, restart=False, restart_timestep=0, initial_run_oid=None):
 
     metadata={
         'DBtag': { 
@@ -162,6 +162,7 @@ def f_set_metadata(user=None,out_dir=None,suffix=None,keywords=None,confidence=-
             'last_updated': last_update,
             'linkedObjectID': linked_ID, 
             'archiveLocation': archive_loc,
+            'IsRestart': {'restart': restart,'Timestep': restart_timestep,'InitObjectId': initial_run_oid}
         },
         'ScenarioTag': { 
                     'Name of actual of hypothetical experiment': expt,
@@ -826,7 +827,7 @@ def f_get_linked_oid(database, linked_id_file, linked_id_string):
         if id_exists:
             print("Linked OID %s"%(oid))
             return oid
-        else : 
+        else :
             return None
     else: return None
 

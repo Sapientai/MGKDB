@@ -16,8 +16,9 @@ import sys
 import os
 import argparse
 from sys import exit
+from bson.objectid import ObjectId
 
-from mgkdb.support.mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars, f_get_linked_oid, f_set_metadata
+from mgkdb.support.mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars, f_get_linked_oid, f_set_metadata, f_check_id_exists
 from mgkdb.support.mgk_login import mgk_login,f_login_dbase
 
 def f_parse_args():
@@ -44,7 +45,7 @@ def f_parse_args():
 
     return parser.parse_args()
 
-def f_user_input_metadata():
+def f_user_input_metadata(database):
     '''
     Create a dictonary of user inputs for metadata
     Used as keyword arguments to construct metadata dictionary
@@ -77,10 +78,15 @@ def f_user_input_metadata():
     user_ip['restart'] = (restart=='Y')
 
     if restart=='Y':
-        user_ip['restart_timestep'] = input('What was the timestep of the previous run used to start this run? \n')
+        user_ip['restart_timestep'] = int(input('What was the timestep of the previous run used to start this run?\n'))
         initial_run_info = input('Has the initial run been uploaded to this database. For yes -> Y .\n')
-        user_ip['initial_run_oid'] = input('Please enter the ObjectID for that run') if initial_run_info == 'Y' else None
-    
+        run_oid = ObjectId(input('Please enter the ObjectID for that run\n')) if initial_run_info == 'Y' else None
+        if f_check_id_exists(database, run_oid):
+            user_ip['initial_run_oid'] =  run_oid 
+        else:
+            print(f"Entered object id {run_oid} doesn't exist\n")
+            
+
     expt = input('Name of actual or hypothetical experiment? Eg: diiid, iter, sparc, etc. Press Enter to skip.\n')
     user_ip['expt'] = expt
 
@@ -176,7 +182,7 @@ def main_upload(target, keywords, exclude, default, sim_type, extra, authenticat
                         run_shared = None
                     
                     ### Metadata inputs
-                    user_ip_dict = f_user_input_metadata()
+                    user_ip_dict = f_user_input_metadata(database)
                 else:
                     suffixes = None
                     run_shared = None

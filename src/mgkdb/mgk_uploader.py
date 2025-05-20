@@ -18,7 +18,7 @@ import argparse
 from sys import exit
 from bson.objectid import ObjectId
 
-from mgkdb.support.mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars, f_get_linked_oid, f_set_metadata, f_check_id_exists
+from mgkdb.support.mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars, f_get_linked_oid, f_set_metadata, f_check_id_exists, f_load_config
 from mgkdb.support.mgk_login import mgk_login,f_login_dbase
 
 def f_parse_args():
@@ -32,11 +32,13 @@ def f_parse_args():
     parser.add_argument('-V', '--verbose', dest='verbose', default = False, action='store_true', help='output verbose')
     parser.add_argument('-Ex', '--extra', dest='extra', default = False, action='store_true', help='whether or not to include extra files')
     parser.add_argument('-L', '--large_files', dest='large_files', default = False, action='store_true', help='whether or not to include large files')
+    parser.add_argument('-X', '--exclude', default = None, help='folders to exclude')
                         
     parser.add_argument('-K', '--keywords', default = '-', help='relevant keywords for future references, separated by comma')
     parser.add_argument('-SIM', '--sim_type', choices=['GENE','CGYRO','TGLF','GS2','GX'], type=str, help='Type of simulation', required=True)
     parser.add_argument('-A', '--authenticate', default = None, help='locally saved login info, a .pkl file')
-    parser.add_argument('-X', '--exclude', default = None, help='folders to exclude')
+    parser.add_argument('-C', '--config_file', default = None, help='Configuration file (.yaml) to avoid terminal prompts.')
+    
     
     parser.add_argument('-lf', '--linked_id_file', default = None, help='File with Object ID to link')
     parser.add_argument('-ls', '--linked_id_string', default = None, help='String of Object ID to link')
@@ -110,9 +112,14 @@ def f_user_input_metadata(database):
     return user_ip
 
 ### Main 
-def main_upload(target, keywords, exclude, default, sim_type, extra, authenticate, verbose, large_files, linked_id_file, linked_id_string):
+def main_upload(target, keywords, exclude, default, sim_type, extra, authenticate, verbose, large_files, linked_id_file, linked_id_string,config_file):
     ### Initial setup 
     output_folder = os.path.abspath(target)
+
+    if config_file is not None: 
+        config_dict = f_load_config(config_file)
+        user_ip = config_dict['user_input']    
+        metadata_info = config_dict['metadata']
 
     if exclude is not None:
         exclude_folders = exclude.split(',')

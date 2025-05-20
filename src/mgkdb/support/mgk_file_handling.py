@@ -32,6 +32,7 @@ import os
 from pathlib import Path
 import gridfs
 import json
+import yaml
 from time import strftime
 import pickle
 from bson.binary import Binary
@@ -116,6 +117,17 @@ class Global_vars():
         ## Reset values 
         self.__init__(sim_type)
         print("File names and their key names are reset to default!")
+
+
+def f_load_config(config_file):
+    '''
+    Load config file instead of user prompts
+    '''
+    
+    with open(config_file) as f:
+        config_dict=yaml.load(f, Loader=yaml.SafeLoader)
+    
+    return config_dict 
 
 def f_check_required_files(global_vars, fldr, suffix, sim_type):
 

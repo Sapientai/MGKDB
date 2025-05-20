@@ -1,0 +1,39 @@
+### Template for metadata
+
+
+user_input:
+  suffixes: "_0001,_0002" ### For including all, use -1
+  extra_files:
+  common_files:
+  large_files:
+
+metadata:
+  DBtag:
+    user: ""
+    run_collection_name: ""  ## Added automatically
+    run_suffix: ""            ## Added automatically
+    keywords: ""
+    confidence: -1
+    comments: ""
+    time_uploaded: ""     ## Added automatically
+    last_updated: ""      ## Added automatically
+    linkedObjectID: ""
+    archiveLocation: ""
+    IsRestart:
+      restart: False
+      Timestep: 0
+      InitObjectId: ""
+  ScenarioTag:
+    Name of actual of hypothetical experiment: ""
+    scenario_runid: ""
+  CodeTag:
+    sim_type: ""
+    IsLinear: ""     ## Added automatically
+    quasi_linear: "" ## Added automatically
+    Has1DFluxes: ""  ## Added automatically
+    git_hash: ""
+    platform: ""
+    execution_date: ""
+    workflow_type: ""
+  Publications:
+    doi: []

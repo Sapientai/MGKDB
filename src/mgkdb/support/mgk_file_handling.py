@@ -391,6 +391,10 @@ def get_file_list(out_dir, begin):
     # print('{} files found in {} beginning with {}.'.format(len(files_list), out_dir, begin) )
     return files_list     
 
+
+# def get_file_list(out_dir,fname):
+
+
 def gridfs_put(db, filepath, sim_type):
 
     fs = gridfs.GridFS(db)
@@ -1159,7 +1163,149 @@ def remove_from_mongo(out_dir, db, runs_coll):
 #        delete the header file
         runs_coll.delete_one(run)
         
-def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=False, suffix = None, run_shared=None, global_vars=None):
+# def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=False, suffix = None, run_shared=None, global_vars=None):
+#     '''
+#     This function does the actual uploading of gridfs chunks and
+#     returns object_ids for the chunk.
+#     '''
+    
+#     MAX_FILE_SIZE = 10 * 1024 * 1024 # 10 MB limit 
+
+
+#     if sim_type=='GENE': 
+#         if suffix is not None:
+#             # par_list = get_file_list(out_dir, 'parameters' + suffix) # assuming parameter files start with 'parameters' 
+#             par_list = os.path.join(out_dir, 'parameters'+suffix)
+#         else:
+#             print("Suffix is not provided!")
+            
+#     #    print(par_list)
+#         if len(par_list) == 0:
+#             exit('Cannot locate parameter files in folder {}.'.format(out_dir))
+#         elif len(par_list) == 1:
+#             par_file = par_list[0]
+#         elif os.path.join(out_dir, 'parameters') in par_list:
+#             par_file = os.path.join(out_dir, 'parameters')
+#         else: 
+#             print('There seems to be multiple files detected starting with parameters{}:\n'.format(suffix))
+#             count=0
+#             for par in par_list:
+#                 print('{} : {}\n'.format(count, par.split('/')[-1]))
+#                 count+=1
+             
+#             par_list.sort()
+#             par_file = par_list[0]
+#             print('File {} selected for scanning [magn_geometry] and [mom] information.'.format(par_file))
+
+#         par = Parameters()
+#         par.Read_Pars(par_file)
+#         pars = par.pardict
+#         n_spec = pars['n_spec']
+        
+#         ## Get geometry from parameters file and add that to list of files to save
+#         if 'magn_geometry' in pars:
+#             global_vars.Docs.append(pars['magn_geometry'][1:-1])
+#             global_vars.Keys.append(pars['magn_geometry'][1:-1])
+#         if large_files:
+#             if 'name1' in pars and 'mom' in global_vars.Docs_L:
+#                 global_vars.Docs_L.pop(global_vars.Docs_L.index('mom'))
+#                 global_vars.Keys_L.pop(global_vars.Keys_L.index('mom'))
+#                 for i in range(n_spec): # adding all particle species
+#                     global_vars.Docs_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
+#                     global_vars.Keys_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
+    
+
+#     if sim_type=='GENE':
+#         output_files = [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
+#         ## For GENE runs, ensure omega file is not empty
+#         output_files = [file for file in output_files if file] ## Drop empty list elements
+#         for file in output_files:
+#             if 'omega' in file[0].split('/')[-1]:
+#                 if os.path.getsize(file[0]) == 0:
+#                     print("Omega file is empty for suffix {0}. Need it to compute Diagnostics. Skipping this run.".format(suffix))
+#                     raise SystemError
+#                     # return {}
+ 
+#         if large_files:
+#             output_files += [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs_L if Qname]
+#         if extra_files:
+#             output_files += [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs_ex if Qname]
+    
+#     elif sim_type in ['CGYRO','TGLF','GS2','GX']:
+#         output_files = [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
+        
+#         if large_files:
+#             output_files += [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs_L if Qname]
+#         if extra_files:
+#             output_files += [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs_ex if Qname]
+    
+#     ## Adding files not subject to suffixes, non_suffix should be a list 
+#     if isinstance(run_shared,list):
+#         output_files += [get_file_list(out_dir, ns) for ns in run_shared]
+ 
+#     output_files = set([item for sublist in output_files for item in sublist]) # flat the list and remove possible duplicates
+    
+#     object_ids = {}
+#     for file in output_files:
+#         if os.path.isfile(file):
+#             ## Ensure file is not too big
+#             file_size = os.path.getsize(file)
+
+#             if file_size > MAX_FILE_SIZE: ## Ensure file is not too big
+#                 raise ValueError("Size of the file %s is %s MB and it exceeds size limit of %s MB" %(file, file_size/(1024*1024), MAX_FILE_SIZE/(1024*1024)))
+
+#             _id = gridfs_put(db, file, sim_type)
+#             object_ids[_id] = file
+            
+#     return object_ids
+
+# def f_gene_update_global_vars():
+
+#     if sim_type=='GENE': 
+#         if suffix is not None:
+#             # par_list = get_file_list(out_dir, 'parameters' + suffix) # assuming parameter files start with 'parameters' 
+#             par_list = os.path.join(out_dir, 'parameters'+suffix)
+#         else:
+#             print("Suffix is not provided!")
+            
+#     #    print(par_list)
+#         if len(par_list) == 0:
+#             exit('Cannot locate parameter files in folder {}.'.format(out_dir))
+#         elif len(par_list) == 1:
+#             par_file = par_list[0]
+#         elif os.path.join(out_dir, 'parameters') in par_list:
+#             par_file = os.path.join(out_dir, 'parameters')
+#         else: 
+#             print('There seems to be multiple files detected starting with parameters{}:\n'.format(suffix))
+#             count=0
+#             for par in par_list:
+#                 print('{} : {}\n'.format(count, par.split('/')[-1]))
+#                 count+=1
+             
+#             par_list.sort()
+#             par_file = par_list[0]
+#             print('File {} selected for scanning [magn_geometry] and [mom] information.'.format(par_file))
+
+#         par = Parameters()
+#         par.Read_Pars(par_file)
+#         pars = par.pardict
+#         n_spec = pars['n_spec']
+        
+#         ## Get geometry from parameters file and add that to list of files to save
+#         if 'magn_geometry' in pars:
+#             global_vars.Docs.append(pars['magn_geometry'][1:-1])
+#             global_vars.Keys.append(pars['magn_geometry'][1:-1])
+#         if large_files:
+#             if 'name1' in pars and 'mom' in global_vars.Docs_L:
+#                 global_vars.Docs_L.pop(global_vars.Docs_L.index('mom'))
+#                 global_vars.Keys_L.pop(global_vars.Keys_L.index('mom'))
+#                 for i in range(n_spec): # adding all particle species
+#                     global_vars.Docs_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
+#                     global_vars.Keys_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
+#     return
+
+
+def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=False, suffix = None, run_shared=None, _docs=None, _keys=None):
     '''
     This function does the actual uploading of gridfs chunks and
     returns object_ids for the chunk.
@@ -1168,49 +1314,8 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
     MAX_FILE_SIZE = 10 * 1024 * 1024 # 10 MB limit 
 
 
-    if sim_type=='GENE': 
-        if suffix is not None:
-            par_list = get_file_list(out_dir, 'parameters' + suffix) # assuming parameter files start with 'parameters' 
-        else:
-            print("Suffix is not provided!")
-            
-    #    print(par_list)
-        if len(par_list) == 0:
-            exit('Cannot locate parameter files in folder {}.'.format(out_dir))
-        elif len(par_list) == 1:
-            par_file = par_list[0]
-        elif os.path.join(out_dir, 'parameters') in par_list:
-            par_file = os.path.join(out_dir, 'parameters')
-        else: 
-            print('There seems to be multiple files detected starting with parameters{}:\n'.format(suffix))
-            count=0
-            for par in par_list:
-                print('{} : {}\n'.format(count, par.split('/')[-1]))
-                count+=1
-             
-            par_list.sort()
-            par_file = par_list[0]
-            print('File {} selected for scanning [magn_geometry] and [mom] information.'.format(par_file))
-
-        par = Parameters()
-        par.Read_Pars(par_file)
-        pars = par.pardict
-        n_spec = pars['n_spec']
-        
-        ## Get geometry from parameters file and add that to list of files to save
-        if 'magn_geometry' in pars:
-            global_vars.Docs.append(pars['magn_geometry'][1:-1])
-            global_vars.Keys.append(pars['magn_geometry'][1:-1])
-        if large_files:
-            if 'name1' in pars and 'mom' in global_vars.Docs_L:
-                global_vars.Docs_L.pop(global_vars.Docs_L.index('mom'))
-                global_vars.Keys_L.pop(global_vars.Keys_L.index('mom'))
-                for i in range(n_spec): # adding all particle species
-                    global_vars.Docs_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
-                    global_vars.Keys_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
-    
-
     if sim_type=='GENE':
+        # f_gene_update_global_vars()
         output_files = [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
         ## For GENE runs, ensure omega file is not empty
         output_files = [file for file in output_files if file] ## Drop empty list elements
@@ -1227,13 +1332,48 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
             output_files += [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs_ex if Qname]
     
     elif sim_type in ['CGYRO','TGLF','GS2','GX']:
-        output_files = [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
-        
-        if large_files:
-            output_files += [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs_L if Qname]
-        if extra_files:
-            output_files += [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs_ex if Qname]
-    
+        file_upload_dict = {}
+        for doc,key in zip(_docs,_keys):
+            file =  os.path.join(out_dir,suffix,doc)
+            file_upload_dict[key] = {'full_fname':file,'oid':None}
+
+            if os.path.isfile(file):
+                ## Ensure file is not too big
+                file_size = os.path.getsize(file)
+
+                if file_size > MAX_FILE_SIZE: ## Ensure file is not too big
+                    raise ValueError("Size of the file %s is %s MB and it exceeds size limit of %s MB" %(file, file_size/(1024*1024), MAX_FILE_SIZE/(1024*1024)))
+
+                _id = gridfs_put(db, file, sim_type)
+                # object_ids[_id] = file
+                file_upload_dict[key]['oid']= _id
+            else: 
+                print(f'{file} not found in {out_dir}')
+
+
+        s_dict = {}
+        ### Add shared files 
+        if isinstance(run_shared,list):
+            for sh in run_shared:
+                key = sh.replace('.','_')
+                file =  os.path.join(out_dir,sh)
+                s_dict[key] = {'full_fname':file,'oid':None}
+
+                if os.path.isfile(file):
+                    ## Ensure file is not too big
+                    file_size = os.path.getsize(file)
+
+                    if file_size > MAX_FILE_SIZE: ## Ensure file is not too big
+                        raise ValueError("Size of the file %s is %s MB and it exceeds size limit of %s MB" %(file, file_size/(1024*1024), MAX_FILE_SIZE/(1024*1024)))
+
+                    _id = gridfs_put(db, file, sim_type)
+                    # object_ids[_id] = file
+                    s_dict[key]['oid']= _id
+                else: 
+                    print(f'{file} not found in {out_dir}')
+
+    return file_upload_dict, s_dict
+
     ## Adding files not subject to suffixes, non_suffix should be a list 
     if isinstance(run_shared,list):
         output_files += [get_file_list(out_dir, ns) for ns in run_shared]
@@ -1253,6 +1393,7 @@ def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=Fal
             object_ids[_id] = file
             
     return object_ids
+
 
 def f_get_input_fname(out_dir, suffix, sim_type):
     ''''
@@ -1450,7 +1591,7 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
     else:
         shared_not_uploaded = [False]
     shared_file_dict = {}
-#    manual_time_flag = True 
+
     for count, suffix in enumerate(suffixes):
         try:
             print('='*40)
@@ -1467,66 +1608,29 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
 
             ### Upload files to DB 
             print('Uploading files ....')
-            if count == 0:
-                object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, run_shared, global_vars)
-            else:
-                object_ids = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, None, global_vars)
-            id_copy = object_ids.copy() # make a copy to delete from database if following routine causes exceptions
-            '''
-            managing attributes
-            '''
+
             _docs = global_vars.Docs.copy()
             _keys = global_vars.Keys.copy()
-            
             if large_files:
                 _docs = _docs + global_vars.Docs_L
                 _keys = _keys + global_vars.Keys_L
             if extra:
                 _docs = _docs + global_vars.Docs_ex
                 _keys = _keys + global_vars.Keys_ex
-                
-            files_dict = dict.fromkeys(_keys, 'None')          
+
             
-            print('='*60)
-            print('Following files are uploaded.')
-            # print(object_ids)
-            for _id, line in list(object_ids.items()):  
-                for Q_name, Key in zip(_docs, _keys):
-                    if sim_type=='GENE' :  fname = os.path.join(out_dir,Q_name+suffix)
-                    elif sim_type in ['CGYRO','TGLF','GS2','GX'] :  fname = os.path.join(out_dir,suffix,Q_name)
-                    
-                    if fname == line:
-                        if '.' in Key:
-                            Key = '_'.join(Key.split('.'))
-    
-                        files_dict[Key] = _id
-                        print("{} file uploaded with id {}".format(Key, _id))
-                        try:
-                            object_ids.pop(_id)
-                        except KeyError:
-                            continue
-                        break
-                        
-                    if True in shared_not_uploaded and count==0:
-                        for S_ind, S_name in enumerate(run_shared):
-                            if os.path.join(out_dir,S_name) == line and shared_not_uploaded[S_ind]:
-                                print(S_name)
-                                if '.' in S_name:
-                                    S_name = '_'.join(S_name.split('.'))
-                                shared_file_dict[S_name] = _id
-                                shared_not_uploaded[S_ind] = False
-                            try:
-                                object_ids.pop(_id)
-                            except KeyError:
-                                continue
-                    elif count>0 and run_shared is not None:
-                        for S_ind, S_name in enumerate(run_shared):
-                            print(S_name)
-                                           
+            if count == 0:
+                f_dict,s_dict = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, run_shared, _docs, _keys)
+                shared_file_dict = {k:v['oid'] for k,v in s_dict.items()}
+            else:
+                f_dict,s_dict = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, None, _docs, _keys)
+            
+            files_dict = {k:v['oid'] for k,v in f_dict.items()}
             files_dict = {**files_dict, **shared_file_dict}
+            id_copy = files_dict.copy() # make a copy to delete from database if following routine causes exceptions
             print('='*60)
-    
-           #metadata dictonary
+
+            #metadata dictonary
             time_upload = strftime("%y%m%d-%H%M%S")
             
             metadata['DBtag']['run_collection_name'] = out_dir
@@ -1559,22 +1663,6 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
             if verbose:
                 print('A summary is generated as below:')
                 print(run_data)
-        
-    
-            '''
-            Get a dictionary of what's left in object_ids
-            '''
-            
-            ex_dict = dict()
-            for _id, line in object_ids.items():
-                if '.' in line:
-                    line = '_'.join(line.split('.'))
-                ex_dict[line] = _id
-                
-            if ex_dict:
-        #        print(ex_dict.values())
-                ex_dict['simulation_type']=sim_type
-                db.ex.Nonlin.insert_one(ex_dict) 
                 
         except Exception as e1:
             print(e1)

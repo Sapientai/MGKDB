@@ -53,8 +53,8 @@ class Global_vars():
 
             self.required_files =  ['field', 'nrg', 'omega','parameters']
             self.Docs = ['autopar', 'nrg', 'omega','parameters']
-            self.Keys = ['autopar', 'nrg', 'omega','parameters']
-
+            self.Keys = [fname.replace('.','_') for fname in self.Docs]
+            ## Geometry files added later in processing
 
             #Large files#
             self.Docs_L = ['field', 'mom', 'vsp']
@@ -65,8 +65,8 @@ class Global_vars():
             self.required_files =  ['input.cgyro', "out.cgyro.time","out.cgyro.grids","out.cgyro.equilibrium", "bin.cgyro.geo"]
             
             self.Docs = ['input.cgyro', 'input.cgyro.gen', 'input.gacode', 'out.cgyro.info']    
-            self.Keys = ['input_cgyro', 'input_cgyro_gen', 'input_gacode', 'out_cgyro_info']  
-
+            self.Keys = [fname.replace('.','_') for fname in self.Docs]
+            
             #Large files#
             self.Docs_L = []
             self.Keys_L = []
@@ -75,7 +75,7 @@ class Global_vars():
             self.required_files = ['input.tglf', 'out.tglf.run']    
 
             self.Docs = ['input.tglf', 'input.tglf.gen', 'out.tglf.run']    
-            self.Keys = ['input_tglf', 'input_tglf_gen', 'out_tglf_run']    
+            self.Keys = [fname.replace('.','_') for fname in self.Docs]
 
             #Large files#
             self.Docs_L = []
@@ -86,7 +86,7 @@ class Global_vars():
             self.required_files = ['gx.in','gx.out.nc']    
 
             self.Docs = ['gx.in']    
-            self.Keys = ['gx_in']    
+            self.Keys = [fname.replace('.','_') for fname in self.Docs]
 
             #Large files#
             self.Docs_L = []
@@ -96,7 +96,7 @@ class Global_vars():
             self.required_files = ['gs2.in','gs2.out.nc']    
 
             self.Docs = ['gs2.in']    
-            self.Keys = ['gs2_in']    
+            self.Keys = [fname.replace('.','_') for fname in self.Docs]
 
             #Large files#
             self.Docs_L = []
@@ -108,8 +108,9 @@ class Global_vars():
         self.Docs_ex = [] 
         self.Keys_ex = []
 
-        self.file_related_keys = self.Keys + self.Keys_L + self.Keys_ex
         self.file_related_docs = self.Docs + self.Docs_L + self.Docs_ex
+        self.file_related_keys = self.Keys + self.Keys_L + self.Keys_ex
+        
         self.troubled_runs = [] # a global list to collection runs where exception happens
 
     def reset_docs_keys(self,sim_type):

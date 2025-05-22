@@ -115,6 +115,10 @@ def f_user_input_metadata(database):
 def main_upload(target, keywords, exclude, default, sim_type, extra, authenticate, verbose, large_files, linked_id_file, linked_id_string,config_file):
     ### Initial setup 
     output_folder = os.path.abspath(target)
+    global_vars = Global_vars(sim_type)    
+
+    # manual_time_flag = not default
+    manual_time_flag = False
 
     if config_file is not None: 
         config_dict = f_load_config(config_file)
@@ -127,12 +131,6 @@ def main_upload(target, keywords, exclude, default, sim_type, extra, authenticat
         print('Scanning will skip specified folders:\n {}\n'.format(exclude_folders) )
     else:
         exclude_folders = []
-    
-    # manual_time_flag = not default
-    manual_time_flag = False
-    
-    ### Update global variables 
-    global_vars = Global_vars(sim_type)    
     
     if extra: # this will change the global variable
         exfiles = input('Please type FULL file names to update, separated by comma.\n').split(',')

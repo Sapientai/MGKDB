@@ -57,7 +57,6 @@ class Global_vars():
 
             #Large files#
             self.Docs_L = ['field', 'mom', 'vsp']
-            self.Keys_L = ['field', 'mom', 'vsp']
 
         elif sim_type=='CGYRO':
 
@@ -1305,12 +1304,8 @@ def f_update_global_var(global_vars, out_dir, suffix, sim_type, large_files, cou
     '''
 
     
-    
-    ### Add large files 
-    global_vars.update_docs_keys()
-
-    ### If count = 0 , add shared files too 
-
+    if large_files: 
+        global_vars.Docs +=global_vars.Docs_L
 
     ## For GENE, add geometry file to required and main files 
     ## Also modify large files when encountering many species 
@@ -1326,16 +1321,8 @@ def f_update_global_var(global_vars, out_dir, suffix, sim_type, large_files, cou
             global_vars.required_files.append(geom_file)
             global_vars.Docs.append(geom_file)
 
-        # par = Parameters()
-        # par.Read_Pars(par_file)
-        # pars = par.pardict
         n_spec = pars['n_spec']
         
-        ## Get geometry from parameters file and add that to list of files to save
-        # if 'magn_geometry' in pars:
-        #     global_vars.Docs.append(pars['magn_geometry'][1:-1])
-        #     global_vars.Keys.append(pars['magn_geometry'][1:-1])
-
         if large_files:
             if 'name1' in pars and 'mom' in global_vars.Docs_L:
                 global_vars.Docs_L.pop(global_vars.Docs_L.index('mom'))
@@ -1344,7 +1331,8 @@ def f_update_global_var(global_vars, out_dir, suffix, sim_type, large_files, cou
                     global_vars.Docs_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
                     global_vars.Keys_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
 
-        global_vars.update_docs_keys()
+    ### Finally update global vars
+    global_vars.update_docs_keys()
 
 def f_get_full_fname(sim_type, fldr, suffix, fname):
     '''
@@ -1357,7 +1345,7 @@ def f_get_full_fname(sim_type, fldr, suffix, fname):
 
     return full_fname
 
-def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=False, suffix = None, run_shared=None, global_vars=None):
+def upload_file_chunks(db, out_dir, sim_type, suffix = None, run_shared=None, global_vars=None):
     '''
     This function does the actual uploading of gridfs chunks and
     returns object_ids for the chunk.
@@ -1451,10 +1439,6 @@ def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
         try:
             print('='*40)
             print('Working on files with suffix: {} in folder {}.......'.format(suffix, out_dir))           
-            
-            if large_files: 
-                global_vars.Docs +=global_vars.Docs_L
-                global_vars.Keys +=global_vars.Keys_L
 
             f_update_global_var(global_vars, out_dir, suffix, sim_type, large_files, count)
 
@@ -1472,10 +1456,10 @@ def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
             print('Uploading files ....')
 
             if count == 0:
-                f_dict,s_dict = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, run_shared, global_vars)
+                f_dict,s_dict = upload_file_chunks(db, out_dir, sim_type, suffix, run_shared, global_vars)
                 shared_file_dict = {k:v['oid'] for k,v in s_dict.items()}
             else:
-                f_dict,s_dict = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, None, global_vars)
+                f_dict,s_dict = upload_file_chunks(db, out_dir, sim_type, suffix, None, global_vars)
             
             files_dict = {k:v['oid'] for k,v in f_dict.items()}
             files_dict = {**files_dict, **shared_file_dict}
@@ -1559,10 +1543,6 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
         try:
             print('='*40)
             print('Working on files with suffix: {} in folder {}.......'.format(suffix, out_dir))
-
-            if large_files: 
-                global_vars.Docs +=global_vars.Docs_L
-                global_vars.Keys +=global_vars.Keys_L
             
             f_update_global_var(global_vars, out_dir, suffix, sim_type, large_files, count)
 
@@ -1580,10 +1560,10 @@ def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
             print('Uploading files ....')
 
             if count == 0:
-                f_dict,s_dict = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, run_shared, global_vars)
+                f_dict,s_dict = upload_file_chunks(db, out_dir, sim_type, suffix, run_shared, global_vars)
                 shared_file_dict = {k:v['oid'] for k,v in s_dict.items()}
             else:
-                f_dict,s_dict = upload_file_chunks(db, out_dir, sim_type, large_files, extra, suffix, None, global_vars)
+                f_dict,s_dict = upload_file_chunks(db, out_dir, sim_type, suffix, None, global_vars)
             
             files_dict = {k:v['oid'] for k,v in f_dict.items()}
             files_dict = {**files_dict, **shared_file_dict}

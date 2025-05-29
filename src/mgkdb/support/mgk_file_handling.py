@@ -1253,60 +1253,55 @@ def remove_from_mongo(out_dir, db, runs_coll):
             
 #     return object_ids
 
-def f_gene_update_global_vars(sim_type):
+# def f_gene_update_global_vars(sim_type):
 
-    if sim_type=='GENE': 
-        if suffix is not None:
-            # par_list = get_file_list(out_dir, 'parameters' + suffix) # assuming parameter files start with 'parameters' 
-            par_list = os.path.join(out_dir, 'parameters'+suffix)
-        else:
-            print("Suffix is not provided!")
+#     if sim_type=='GENE': 
+#         if suffix is not None:
+#             # par_list = get_file_list(out_dir, 'parameters' + suffix) # assuming parameter files start with 'parameters' 
+#             par_list = os.path.join(out_dir, 'parameters'+suffix)
+#         else:
+#             print("Suffix is not provided!")
             
-    #    print(par_list)
-        if len(par_list) == 0:
-            exit('Cannot locate parameter files in folder {}.'.format(out_dir))
-        elif len(par_list) == 1:
-            par_file = par_list[0]
-        elif os.path.join(out_dir, 'parameters') in par_list:
-            par_file = os.path.join(out_dir, 'parameters')
-        else: 
-            print('There seems to be multiple files detected starting with parameters{}:\n'.format(suffix))
-            count=0
-            for par in par_list:
-                print('{} : {}\n'.format(count, par.split('/')[-1]))
-                count+=1
+#     #    print(par_list)
+#         if len(par_list) == 0:
+#             exit('Cannot locate parameter files in folder {}.'.format(out_dir))
+#         elif len(par_list) == 1:
+#             par_file = par_list[0]
+#         elif os.path.join(out_dir, 'parameters') in par_list:
+#             par_file = os.path.join(out_dir, 'parameters')
+#         else: 
+#             print('There seems to be multiple files detected starting with parameters{}:\n'.format(suffix))
+#             count=0
+#             for par in par_list:
+#                 print('{} : {}\n'.format(count, par.split('/')[-1]))
+#                 count+=1
              
-            par_list.sort()
-            par_file = par_list[0]
-            print('File {} selected for scanning [magn_geometry] and [mom] information.'.format(par_file))
+#             par_list.sort()
+#             par_file = par_list[0]
+#             print('File {} selected for scanning [magn_geometry] and [mom] information.'.format(par_file))
 
-        par = Parameters()
-        par.Read_Pars(par_file)
-        pars = par.pardict
-        n_spec = pars['n_spec']
+#         par = Parameters()
+#         par.Read_Pars(par_file)
+#         pars = par.pardict
+#         n_spec = pars['n_spec']
         
-        ## Get geometry from parameters file and add that to list of files to save
-        if 'magn_geometry' in pars:
-            global_vars.Docs.append(pars['magn_geometry'][1:-1])
-            global_vars.Keys.append(pars['magn_geometry'][1:-1])
-        if large_files:
-            if 'name1' in pars and 'mom' in global_vars.Docs_L:
-                global_vars.Docs_L.pop(global_vars.Docs_L.index('mom'))
-                global_vars.Keys_L.pop(global_vars.Keys_L.index('mom'))
-                for i in range(n_spec): # adding all particle species
-                    global_vars.Docs_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
-                    global_vars.Keys_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
-    return
+#         ## Get geometry from parameters file and add that to list of files to save
+#         if 'magn_geometry' in pars:
+#             global_vars.Docs.append(pars['magn_geometry'][1:-1])
+#             global_vars.Keys.append(pars['magn_geometry'][1:-1])
+#         if large_files:
+#             if 'name1' in pars and 'mom' in global_vars.Docs_L:
+#                 global_vars.Docs_L.pop(global_vars.Docs_L.index('mom'))
+#                 global_vars.Keys_L.pop(global_vars.Keys_L.index('mom'))
+#                 for i in range(n_spec): # adding all particle species
+#                     global_vars.Docs_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
+#                     global_vars.Keys_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
+#     return
 
 def f_update_global_var(global_vars, out_dir, suffix, sim_type, large_files, count):
     '''
     Update global variables for each suffix
     '''
-
-    
-    if large_files: 
-        global_vars.Docs +=global_vars.Docs_L
-
     ## For GENE, add geometry file to required and main files 
     ## Also modify large files when encountering many species 
 
@@ -1326,12 +1321,11 @@ def f_update_global_var(global_vars, out_dir, suffix, sim_type, large_files, cou
         if large_files:
             if 'name1' in pars and 'mom' in global_vars.Docs_L:
                 global_vars.Docs_L.pop(global_vars.Docs_L.index('mom'))
-                global_vars.Keys_L.pop(global_vars.Keys_L.index('mom'))
                 for i in range(n_spec): # adding all particle species
                     global_vars.Docs_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
-                    global_vars.Keys_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
 
-    ### Finally update global vars
+    if large_files: 
+        global_vars.Docs +=global_vars.Docs_L
     global_vars.update_docs_keys()
 
 def f_get_full_fname(sim_type, fldr, suffix, fname):

@@ -722,7 +722,6 @@ def isLinear(folder_name, sim_type):
     
     elif sim_type=='GS2': # Only support linear GS2 for now
         return True
-    
 
 def isUploaded(out_dir,runs_coll):
     '''
@@ -741,9 +740,6 @@ def isUploaded(out_dir,runs_coll):
     #         break
     
     return uploaded
-
-
-
 
 def not_uploaded_list(out_dir, runs_coll, write_to = None):
     '''
@@ -990,42 +986,12 @@ def download_runs_by_id(db, runs_coll, _id, destination):
         json.dump(record, f)
     print("Successfully downloaded files in the collection {} to directory {}".format( record['_id'],path) )   
     
-
-
-# def update_Meta(out_dir, runs_coll, suffix):
-
-#     meta_list = ['user', 'run_collection_name', 'run_suffix', 'keywords', 'confidence']
-#     print("Keys available for update are {}".format(meta_list.sort()))
-    
-#     keys = input('What entries do you like to update? separate your input by comma.\n').split(',')
-#     vals = input('type your values corresponding to those keys you typed. Separate each category by ; .\n').split(';')
-#     assert len(keys)==len(vals), 'Input number of keys and values does not match. Abort!'
-#     for key, val in zip(keys, vals):
-    
-#         runs_coll.update_one({ "Metadata.DBtag.run_collection_name": out_dir, "Metadata.DBtag.run_suffix": suffix}, 
-#                          {"$set":{'Metadata.DBtag.'+key: val, "Metadata.DBtag.last_updated": strftime("%y%m%d-%H%M%S")} }
-#                          )    
-#     print("Metadata{} in {} updated correctly".format(suffix, out_dir))
-
-    
-#def update_Parameter(out_dir, runs_coll, suffix):
-#    
-#    param_dict = get_parsed_params(os.path.join(out_dir, 'parameters' + suffix) )
-#    runs_coll.update_one({ "Metadata.DBtag.run_collection_name": out_dir, "Metadata.DBtag.run_suffix": suffix}, 
-#                     {"$set":{'Parameters': param_dict}}
-#                     )
-#    
-#    print("Parameters{} in {} updated correctly".format(suffix, out_dir))
-    
-
 def update_mongo(db, metadata, out_dir, runs_coll, linear, suffixes=None):
 
     '''
     only update file related entries, no comparison made before update
     '''
     
-    # user = metadata['DBtag']['user']
-    # linked_id = metadata['DBtag']['linkedObjectID']
     sim_type = metadata['CodeTag']['sim_type']
 
     fs = gridfs.GridFS(db)

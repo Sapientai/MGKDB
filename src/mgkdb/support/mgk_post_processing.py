@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from sys import path
 from sys import exit
 import os
+import glob
 import base64
 
 from .fieldlib import fieldfile
@@ -114,23 +115,14 @@ def get_parsed_params(filepath):
     pars = par.pardict 
     
     return pars
+
 def get_suffixes(out_dir, sim_type):
     suffixes = []
 
-    if sim_type=='GENE':
-        #scan files in output directory, find all run suffixes, return as list
-        files = next(os.walk(out_dir))[2]
-
-        for count, name in enumerate(files, start=0):
-            if name.startswith('parameters_'):
-                suffix = name.split('_',1)[1]
-                suffix = '_' + suffix
-                suffixes.append(suffix)
-            elif name.lower().startswith('parameters.dat'):
-                suffixes = ['.dat']    
-    elif sim_type in ['CGYRO','TGLF','GS2','GX']:
-        ## scan folders return as list 
-        suffixes = next(os.walk(out_dir))[1]
+    if sim_type=='GENE': ## scan all file with parameters 
+        suffixes = [ os.path.basename(file).split('parameters')[-1] for file in glob.glob(os.path.join(out_dir,'parameters*')) if os.path.isfile(file)]
+    elif sim_type in ['CGYRO','TGLF','GS2','GX']:  ## scan folders return as list 
+        suffixes = os.listdir(out_dir)
 
     suffixes.sort()
     return suffixes

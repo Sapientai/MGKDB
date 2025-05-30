@@ -51,8 +51,8 @@ class Global_vars():
 
         if sim_type=="GENE":
 
-            self.required_files =  ['field', 'nrg', 'omega','parameters']
-            self.Docs = ['autopar', 'nrg', 'omega','parameters']
+            self.required_files = ['field', 'nrg', 'omega','parameters']
+            self.Docs         = ['autopar', 'nrg', 'omega','parameters']
             ## Geometry files added later in processing
 
             #Large files#
@@ -552,14 +552,18 @@ def gridfs_put_npArray(db, value, filepath, filename, sim_type):
 
     fs = gridfs.GridFS(db)
     binary_data = _npArray2Binary(value)
-    
-    if len(binary_data) > MAX_FILE_SIZE: ## Ensure file is not too big
-        raise ValueError(f"Binary data for '{filename}' exceeds size limit of {MAX_FILE_SIZE / (1024 * 1024)} MB")
+    data_size = len(binary_data)
 
-    obj_id=fs.put(binary_data,encoding='UTF-8',
-                  filename = filename,
-                  simulation_type = sim_type,
-                  filepath = filepath)
+    if data_size > MAX_FILE_SIZE: ## Ensure file is not too big
+        print(f"Binary data for '{filename}' has size {data_size / (1024 * 1024)} exceeds size limit of {MAX_FILE_SIZE / (1024 * 1024)} MB")
+        print(f"Ignoring upload of this diagnostic: {filename}")
+        obj_id = None
+        # raise ValueError(f"Binary data for '{filename}' has size {data_size / (1024 * 1024)} exceeds size limit of {MAX_FILE_SIZE / (1024 * 1024)} MB")
+    else: 
+        obj_id=fs.put(binary_data,encoding='UTF-8',
+                    filename = filename,
+                    simulation_type = sim_type,
+                    filepath = filepath)
     
     return obj_id  
     
@@ -628,7 +632,6 @@ def isLinear(folder_name, sim_type):
     suffixes = get_suffixes(folder_name, sim_type)
     
     if len(suffixes):
-        suffixes.sort()
         suffix = suffixes[0] #assuming all parameters files are of the same linear/nonlinear type
         print('Scanning parameters{} for deciding linear/Nonlinar.')
     else:
@@ -717,7 +720,7 @@ def isLinear(folder_name, sim_type):
                     break
         return linear
     
-    elif sim_type=='GS2':
+    elif sim_type=='GS2': # Only support linear GS2 for now
         return True
     
 
@@ -1157,148 +1160,7 @@ def remove_from_mongo(out_dir, db, runs_coll):
 #        delete the header file
         runs_coll.delete_one(run)
         
-# def upload_file_chunks(db, out_dir, sim_type, large_files=False, extra_files=False, suffix = None, run_shared=None, global_vars=None):
-#     '''
-#     This function does the actual uploading of gridfs chunks and
-#     returns object_ids for the chunk.
-#     '''
-    
-#     MAX_FILE_SIZE = 10 * 1024 * 1024 # 10 MB limit 
-
-
-#     if sim_type=='GENE': 
-#         if suffix is not None:
-#             # par_list = get_file_list(out_dir, 'parameters' + suffix) # assuming parameter files start with 'parameters' 
-#             par_list = os.path.join(out_dir, 'parameters'+suffix)
-#         else:
-#             print("Suffix is not provided!")
-            
-#     #    print(par_list)
-#         if len(par_list) == 0:
-#             exit('Cannot locate parameter files in folder {}.'.format(out_dir))
-#         elif len(par_list) == 1:
-#             par_file = par_list[0]
-#         elif os.path.join(out_dir, 'parameters') in par_list:
-#             par_file = os.path.join(out_dir, 'parameters')
-#         else: 
-#             print('There seems to be multiple files detected starting with parameters{}:\n'.format(suffix))
-#             count=0
-#             for par in par_list:
-#                 print('{} : {}\n'.format(count, par.split('/')[-1]))
-#                 count+=1
-             
-#             par_list.sort()
-#             par_file = par_list[0]
-#             print('File {} selected for scanning [magn_geometry] and [mom] information.'.format(par_file))
-
-#         par = Parameters()
-#         par.Read_Pars(par_file)
-#         pars = par.pardict
-#         n_spec = pars['n_spec']
-        
-#         ## Get geometry from parameters file and add that to list of files to save
-#         if 'magn_geometry' in pars:
-#             global_vars.Docs.append(pars['magn_geometry'][1:-1])
-#             global_vars.Keys.append(pars['magn_geometry'][1:-1])
-#         if large_files:
-#             if 'name1' in pars and 'mom' in global_vars.Docs_L:
-#                 global_vars.Docs_L.pop(global_vars.Docs_L.index('mom'))
-#                 global_vars.Keys_L.pop(global_vars.Keys_L.index('mom'))
-#                 for i in range(n_spec): # adding all particle species
-#                     global_vars.Docs_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
-#                     global_vars.Keys_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
-    
-
-#     if sim_type=='GENE':
-#         output_files = [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
-#         ## For GENE runs, ensure omega file is not empty
-#         output_files = [file for file in output_files if file] ## Drop empty list elements
-#         for file in output_files:
-#             if 'omega' in file[0].split('/')[-1]:
-#                 if os.path.getsize(file[0]) == 0:
-#                     print("Omega file is empty for suffix {0}. Need it to compute Diagnostics. Skipping this run.".format(suffix))
-#                     raise SystemError
-#                     # return {}
- 
-#         if large_files:
-#             output_files += [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs_L if Qname]
-#         if extra_files:
-#             output_files += [get_file_list(out_dir, Qname+suffix) for Qname in global_vars.Docs_ex if Qname]
-    
-#     elif sim_type in ['CGYRO','TGLF','GS2','GX']:
-#         output_files = [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs if Qname] # get_file_list may get more files than expected if two files start with the same string specified in Doc list
-        
-#         if large_files:
-#             output_files += [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs_L if Qname]
-#         if extra_files:
-#             output_files += [get_file_list(out_dir+'/%s/'%(suffix),Qname) for Qname in global_vars.Docs_ex if Qname]
-    
-#     ## Adding files not subject to suffixes, non_suffix should be a list 
-#     if isinstance(run_shared,list):
-#         output_files += [get_file_list(out_dir, ns) for ns in run_shared]
- 
-#     output_files = set([item for sublist in output_files for item in sublist]) # flat the list and remove possible duplicates
-    
-#     object_ids = {}
-#     for file in output_files:
-#         if os.path.isfile(file):
-#             ## Ensure file is not too big
-#             file_size = os.path.getsize(file)
-
-#             if file_size > MAX_FILE_SIZE: ## Ensure file is not too big
-#                 raise ValueError("Size of the file %s is %s MB and it exceeds size limit of %s MB" %(file, file_size/(1024*1024), MAX_FILE_SIZE/(1024*1024)))
-
-#             _id = gridfs_put(db, file, sim_type)
-#             object_ids[_id] = file
-            
-#     return object_ids
-
-# def f_gene_update_global_vars(sim_type):
-
-#     if sim_type=='GENE': 
-#         if suffix is not None:
-#             # par_list = get_file_list(out_dir, 'parameters' + suffix) # assuming parameter files start with 'parameters' 
-#             par_list = os.path.join(out_dir, 'parameters'+suffix)
-#         else:
-#             print("Suffix is not provided!")
-            
-#     #    print(par_list)
-#         if len(par_list) == 0:
-#             exit('Cannot locate parameter files in folder {}.'.format(out_dir))
-#         elif len(par_list) == 1:
-#             par_file = par_list[0]
-#         elif os.path.join(out_dir, 'parameters') in par_list:
-#             par_file = os.path.join(out_dir, 'parameters')
-#         else: 
-#             print('There seems to be multiple files detected starting with parameters{}:\n'.format(suffix))
-#             count=0
-#             for par in par_list:
-#                 print('{} : {}\n'.format(count, par.split('/')[-1]))
-#                 count+=1
-             
-#             par_list.sort()
-#             par_file = par_list[0]
-#             print('File {} selected for scanning [magn_geometry] and [mom] information.'.format(par_file))
-
-#         par = Parameters()
-#         par.Read_Pars(par_file)
-#         pars = par.pardict
-#         n_spec = pars['n_spec']
-        
-#         ## Get geometry from parameters file and add that to list of files to save
-#         if 'magn_geometry' in pars:
-#             global_vars.Docs.append(pars['magn_geometry'][1:-1])
-#             global_vars.Keys.append(pars['magn_geometry'][1:-1])
-#         if large_files:
-#             if 'name1' in pars and 'mom' in global_vars.Docs_L:
-#                 global_vars.Docs_L.pop(global_vars.Docs_L.index('mom'))
-#                 global_vars.Keys_L.pop(global_vars.Keys_L.index('mom'))
-#                 for i in range(n_spec): # adding all particle species
-#                     global_vars.Docs_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
-#                     global_vars.Keys_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
-#     return
-
-def f_update_global_var(global_vars, out_dir, suffix, sim_type, large_files, count):
+def f_update_global_var(global_vars, out_dir, suffix, sim_type, is_linear, large_files, count):
     '''
     Update global variables for each suffix
     '''
@@ -1320,9 +1182,14 @@ def f_update_global_var(global_vars, out_dir, suffix, sim_type, large_files, cou
         
         if large_files:
             if 'name1' in pars and 'mom' in global_vars.Docs_L:
-                global_vars.Docs_L.pop(global_vars.Docs_L.index('mom'))
+                # global_vars.Docs_L.pop(global_vars.Docs_L.index('mom'))
+                global_vars.Docs_l.remove('mom')
                 for i in range(n_spec): # adding all particle species
                     global_vars.Docs_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
+
+        if not is_linear: ## No omega file needed for non-linear runs
+            global_vars.required_files.remove('omega')
+            # global_vars.Docs.remove('omega')
 
     if large_files: 
         global_vars.Docs +=global_vars.Docs_L
@@ -1404,258 +1271,6 @@ def f_get_input_fname(out_dir, suffix, sim_type):
 
     return fname_dict[sim_type]
 
-# def upload_linear(db, metadata, out_dir, suffixes = None, run_shared = None,
-#                   large_files=False, extra=False, verbose=True, manual_time_flag = True, global_vars=None):
-    
-#     sim_type = metadata['CodeTag']['sim_type']
-
-#     #connect to linear collection
-#     runs_coll = db.LinearRuns
-       
-#     #update files dictionary
-#     if suffixes is None:         
-#         suffixes = get_suffixes(out_dir, sim_type)
-
-#     if isinstance(run_shared, list):
-#         shared_not_uploaded = [True for _ in run_shared]
-#     else:
-#         shared_not_uploaded = [False]
-#     shared_file_dict = {}
-
-#     for count, suffix in enumerate(suffixes):
-#         try:
-#             print('='*40)
-#             print('Working on files with suffix: {} in folder {}.......'.format(suffix, out_dir))           
-
-#             f_update_global_var(global_vars, out_dir, suffix, sim_type, large_files, count)
-
-#             id_copy = {}
-
-#             files_exist = f_check_required_files(global_vars, out_dir, suffix, sim_type)
-#             assert files_exist,"Required files don't exist. Skipping folder"
-
-#             ### First compute gyrokinetics IMAS using pyrokinetics package
-#             print("Computing gyrokinetics IMAS using pyrokinetics")
-#             input_fname = f_get_input_fname(out_dir, suffix, sim_type)
-#             GK_dict, quasi_linear = create_gk_dict_with_pyro(input_fname, sim_type)
-            
-#             ### Upload files to DB 
-#             print('Uploading files ....')
-
-#             if count == 0:
-#                 f_dict,s_dict = upload_file_chunks(db, out_dir, sim_type, suffix, run_shared, global_vars)
-#                 shared_file_dict = {k:v['oid'] for k,v in s_dict.items()}
-#             else:
-#                 f_dict,s_dict = upload_file_chunks(db, out_dir, sim_type, suffix, None, global_vars)
-            
-#             files_dict = {k:v['oid'] for k,v in f_dict.items()}
-#             files_dict = {**files_dict, **shared_file_dict}
-#             id_copy = files_dict.copy() # make a copy to delete from database if following routine causes exceptions
-#             print('='*60)
-
-#             #metadata dictonary
-#             time_upload = strftime("%y%m%d-%H%M%S")
-            
-#             metadata['DBtag']['run_collection_name'] = out_dir
-#             metadata['DBtag']['run_suffix']=''+ suffix
-#             metadata['DBtag']['time_uploaded'] = time_upload
-#             metadata['DBtag']['last_updated']  = time_upload
-#             metadata['CodeTag']['IsLinear'] = True
-#             metadata['CodeTag']['quasi_linear'] = quasi_linear
-#             metadata['CodeTag']['Has1DFluxes'] = GK_dict['non_linear']['fluxes_1d']['particles_phi_potential']!=0
-
-#             meta_dict = metadata
-
-#             if sim_type in ['CGYRO','TGLF','GS2','GX']:
-#                 Diag_dict = {}
-#             elif sim_type=='GENE': 
-#                 print('='*60)
-#                 print('\n Working on diagnostics with user specified tspan .....\n')
-#                 Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
-#                 print('='*60)
-#                 for key, val in Diag_dict.items():
-#                     Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
-
-#                 ## Adding omega info to Diag_dict for linear runs
-#                 omega_val = get_omega(out_dir, suffix)
-#                 Diag_dict['omega'] = {}
-#                 Diag_dict['omega']['ky'] = omega_val[0]
-#                 Diag_dict['omega']['gamma'] = omega_val[1]
-#                 Diag_dict['omega']['omega'] = omega_val[2]
-
-#             run_data =  {'Metadata': meta_dict, 'Files': files_dict, 'gyrokineticsIMAS': GK_dict, 'Diagnostics': Diag_dict}
-#             runs_coll.insert_one(run_data).inserted_id  
-#             print('Files with suffix: {} in folder {} uploaded successfully'.format(suffix, out_dir))
-#             print('='*40)
-#             if verbose:
-#                 print('A summary is generated as below:\n')
-#                 print(run_data)
-        
-#         except Exception as e1:
-#             print(e1)
-#             print("Skip suffix {} in \n {} \n".format(suffix, out_dir))
-#             global_vars.troubled_runs.append(out_dir + '##' + suffix)
-#             print('cleaning ......')
-#             fs = gridfs.GridFS(db)
-#             try:
-#                 for _id, _ in id_copy.items():
-#                     fs.delete(_id)
-#                     print('{} deleted.'.format(_id))
-#             except Exception as e3:
-#                 print("Error deleting files from gridfs with exception:\t {0}".format(e3))
-#                 pass
-            
-#         global_vars.reset_docs_keys(sim_type)
-
-# def upload_nonlin(db, metadata, out_dir, suffixes = None, run_shared=None,
-#                   large_files=False, extra=False, verbose=True, manual_time_flag = True , global_vars=None):
-    
-#     # user = metadata['DBtag']['user']
-#     sim_type = metadata['CodeTag']['sim_type']
-
-#     #connect to nonlinear collection
-#     runs_coll = db.NonlinRuns
-        
-#     #update files dictionary
-#     if suffixes is None:
-#         suffixes = get_suffixes(out_dir, sim_type)
-#     if isinstance(run_shared, list):
-#         shared_not_uploaded = [True for _ in run_shared]
-#     else:
-#         shared_not_uploaded = [False]
-#     shared_file_dict = {}
-
-#     for count, suffix in enumerate(suffixes):
-#         try:
-#             print('='*40)
-#             print('Working on files with suffix: {} in folder {}.......'.format(suffix, out_dir))
-            
-#             f_update_global_var(global_vars, out_dir, suffix, sim_type, large_files, count)
-
-#             id_copy = {}
-
-#             files_exist = f_check_required_files(global_vars, out_dir, suffix, sim_type)
-#             assert files_exist,"Required files don't exist. Skipping folder"
-
-#             ### First compute gyrokinetics IMAS using pyrokinetics package
-#             print("Computing gyrokinetics IMAS using pyrokinetics")
-#             input_fname = f_get_input_fname(out_dir, suffix, sim_type)
-#             GK_dict, quasi_linear = create_gk_dict_with_pyro(input_fname, sim_type)
-
-#             ### Upload files to DB 
-#             print('Uploading files ....')
-
-#             if count == 0:
-#                 f_dict,s_dict = upload_file_chunks(db, out_dir, sim_type, suffix, run_shared, global_vars)
-#                 shared_file_dict = {k:v['oid'] for k,v in s_dict.items()}
-#             else:
-#                 f_dict,s_dict = upload_file_chunks(db, out_dir, sim_type, suffix, None, global_vars)
-            
-#             files_dict = {k:v['oid'] for k,v in f_dict.items()}
-#             files_dict = {**files_dict, **shared_file_dict}
-#             id_copy = files_dict.copy() # make a copy to delete from database if following routine causes exceptions
-#             print('='*60)
-
-#             #metadata dictonary
-#             time_upload = strftime("%y%m%d-%H%M%S")
-            
-#             metadata['DBtag']['run_collection_name'] = out_dir
-#             metadata['DBtag']['run_suffix']=''+ suffix
-#             metadata['DBtag']['time_uploaded'] = time_upload
-#             metadata['DBtag']['last_updated']  = time_upload
-#             metadata['CodeTag']['IsLinear'] = False
-#             metadata['CodeTag']['quasi_linear'] = quasi_linear
-#             metadata['CodeTag']['Has1DFluxes'] = GK_dict['non_linear']['fluxes_1d']['particles_phi_potential']!=0
-
-#             meta_dict = metadata
-
-#             #data dictionary format for nonlinear runs
-#             if sim_type in ['CGYRO','TGLF','GS2','GX']:
-#                 Diag_dict = {}
-#             elif sim_type=='GENE':
-#                 print('='*60)
-#                 print('\n Working on diagnostics with user specified tspan .....\n')
-#                 Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
-#                 print('='*60)
-#                 for key, val in Diag_dict.items():
-#                     Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
-
-#             #combine dictionaries and upload
-#             run_data =  {'Metadata': meta_dict, 'Files': files_dict, 'gyrokineticsIMAS': GK_dict, 'Diagnostics': Diag_dict}
-#             runs_coll.insert_one(run_data).inserted_id  
-    
-#             print('Files with suffix: {} in folder {} uploaded successfully.'.format(suffix, out_dir))
-#             print('='*40)
-#             if verbose:
-#                 print('A summary is generated as below:')
-#                 print(run_data)
-                
-#         except Exception as e1:
-#             print(e1)
-#             print("Skip suffix {} in \n {}. \n".format(suffix, out_dir))
-#             global_vars.troubled_runs.append(out_dir + '##' + suffix)
-#             print('cleaning ......')
-#             fs = gridfs.GridFS(db)
-#             try:
-#                 for _id, _ in id_copy.items():
-#                     fs.delete(_id)
-#                     print('{} deleted.'.format(_id))
-#             except Exception as e3:
-#                 print("Error deleting files from gridfs with exception:\t {0}".format(e3))
-#                 pass
-                
-#     global_vars.reset_docs_keys(sim_type)
-            
-# def upload_to_mongo(db, linear, metadata, out_dir, suffixes = None, run_shared=None,
-#                     large_files = False, extra=False, verbose=True, manual_time_flag = True, global_vars=None):
-#     #print(linear)
-#     #for linear runs
-#     if linear:
-#         #connect to linear collection
-#         runs_coll = db.LinearRuns
-#         #check if folder is already uploaded, prompt update?
-#         print('upload linear runs ******')
-#         if isUploaded(out_dir, runs_coll):
-#             update = input('Folder tag:\n {} \n exists in database.  You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to skip this folder.\n'.format(out_dir))
-#             if update == '0':
-#                 #for now, delete and reupload instead of update - function under construction
-#                 remove_from_mongo(out_dir, db, runs_coll)   
-#                 upload_linear(db, metadata, out_dir, suffixes, run_shared,
-#                               large_files, extra, verbose, manual_time_flag, global_vars)
-#             elif update == '1':
-#                 update_mongo(db, metadata, out_dir, runs_coll, linear)
-#             else:
-#                 print('Run collection \'' + out_dir + '\' skipped.')
-#         else:
-#             print('Folder tag:\n{}\n not detected, creating new.\n'.format(out_dir))
-#             upload_linear(db, metadata, out_dir, suffixes, run_shared,
-#                           large_files, extra, verbose, manual_time_flag, global_vars)
-                
-#     #for nonlinear runs
-#     elif not linear:
-#         #connect to nonlinear collection
-#         runs_coll = db.NonlinRuns
-#         #check if folder is already uploaded, prompt update?
-#         print('upload nonlinear runs ******')
-#         if isUploaded(out_dir, runs_coll):
-#             update = input('Folder tag:\n {} \n exists in database.  You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to skip this folder.\n'.format(out_dir))
-#             if update == '0':
-#                 remove_from_mongo(out_dir, db, runs_coll)   
-#                 upload_nonlin(db, metadata, out_dir, suffixes, run_shared,
-#                               large_files, extra, verbose,manual_time_flag, global_vars)
-#             elif update == '1':
-#                 update_mongo(db, metadata, out_dir, runs_coll, linear)
-
-#             else:
-#                 print('Run collection \'' + out_dir + '\' skipped.')
-#         else:
-#             print('Folder tag:\n{}\n not detected, creating new.\n'.format(out_dir))
-#             upload_nonlin(db, metadata, out_dir, suffixes, run_shared,
-#                           large_files, extra, verbose,manual_time_flag, global_vars)
-#     else:
-#         exit('Cannot decide if the folder is subject to linear or nonlinear runs.')
-
-
 def upload_runs(db, metadata, out_dir, is_linear=True, suffixes=None, run_shared=None,
                 large_files=False, extra=False, verbose=True, manual_time_flag=True, global_vars=None):
     """
@@ -1697,7 +1312,7 @@ def upload_runs(db, metadata, out_dir, is_linear=True, suffixes=None, run_shared
             print('='*40)
             print(f'Working on files with suffix: {suffix} in folder {out_dir}.......')
 
-            f_update_global_var(global_vars, out_dir, suffix, sim_type, large_files, count)
+            f_update_global_var(global_vars, out_dir, suffix, sim_type, is_linear, large_files, count)
 
             id_copy = {}
 
@@ -1741,11 +1356,20 @@ def upload_runs(db, metadata, out_dir, is_linear=True, suffixes=None, run_shared
                 Diag_dict = {}
             elif sim_type == 'GENE':
                 print('='*60)
-                print('\n Working on diagnostics with user specified tspan .....\n')
+                # print('\n Working on diagnostics with user specified tspan .....\n')
                 Diag_dict, manual_time_flag = get_diag_with_user_input(out_dir, suffix, manual_time_flag)
                 print('='*60)
+
+                drop_keys = [] # Diagnostics to drop if the file size is too large
                 for key, val in Diag_dict.items():
-                    Diag_dict[key] = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
+                    oid = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
+                    if oid is None:
+                        drop_keys.append(key)
+                    else: 
+                        Diag_dict[key] = oid ## Rewrite array with oid of stored file
+                        
+                for key in drop_keys: # Drop keys in diagnostics with very large file size
+                    Diag_dict.pop(key)
 
                 if is_linear:
                     # Add omega info to Diag_dict for linear runs
@@ -1789,7 +1413,7 @@ def upload_runs(db, metadata, out_dir, is_linear=True, suffixes=None, run_shared
 
 
 def upload_to_mongo(db, linear, metadata, out_dir, suffixes=None, run_shared=None,
-                    large_files=False, extra=False, verbose=True, manual_time_flag=True, global_vars=None):
+                    large_files=False, extra=False, verbose=True, manual_time_flag=False, global_vars=None):
     """
     Wrapper function to upload simulation runs to MongoDB, handling both linear and nonlinear runs.
 
@@ -1803,7 +1427,7 @@ def upload_to_mongo(db, linear, metadata, out_dir, suffixes=None, run_shared=Non
     - large_files: Boolean to handle large file uploads. Default: False.
     - extra: Boolean for additional processing (optional). Default: False.
     - verbose: Boolean to print detailed output. Default: True.
-    - manual_time_flag: Boolean to handle user-specified time spans for diagnostics. Default: True.
+    - manual_time_flag: Boolean to handle user-specified time spans for diagnostics. Default: False.
     - global_vars: Object containing global variables for the upload process.
 
     Returns:

@@ -1378,10 +1378,9 @@ def upload_runs(db, metadata, out_dir, is_linear=True, suffixes=None, run_shared
                 'gyrokineticsIMAS': GK_dict,
                 'Diagnostics': Diag_dict
             }
-            runs_coll.insert_one(run_data).inserted_id
-
-            raise ValueError()
-
+            
+            main_record_oid = runs_coll.insert_one(run_data).inserted_id
+            
             print(f'Files with suffix: {suffix} in folder {out_dir} uploaded successfully.')
             print('='*40)
             if verbose:
@@ -1397,7 +1396,7 @@ def upload_runs(db, metadata, out_dir, is_linear=True, suffixes=None, run_shared
             try:
                 for key, _id in uploaded_ids.items():
                     fs.delete(_id)
-                    print(f'{_id} deleted.')
+                    print(f'{key}: {_id} deleted.')
             except Exception as e3:
                 print(f"Error deleting files from gridfs with exception:\t {e3}")
                 pass

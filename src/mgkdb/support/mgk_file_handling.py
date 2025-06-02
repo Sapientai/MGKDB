@@ -1353,23 +1353,11 @@ def upload_runs(db, metadata, out_dir, is_linear=True, suffixes=None, run_shared
                         'omega': omega_val[2]
                     }
 
-                # drop_keys = [] # Diagnostics to drop if the file size is too large
-                # for key, val in Diag_dict.items():
-                #     oid = gridfs_put_npArray(db, val, out_dir, key, sim_type)
-                #     if oid is not None: 
-                #         Diag_dict[key] = oid ## Rewrite array with oid of stored file
-                #     else: 
-                #         drop_keys.append(key)
-                        
-                # for key in drop_keys: # Drop keys in diagnostics with very large file size
-                #     Diag_dict.pop(key)
-
                 for key, val in Diag_dict.items():
                     oid = gridfs_put_npArray(db, val, out_dir, key, sim_type)
                     Diag_dict[key] = oid ## Rewrite array with oid of stored file
                     if oid is not None: 
                         uploaded_ids[key] = oid
-
 
             # Combine dictionaries and upload
             run_data = {
@@ -1380,7 +1368,7 @@ def upload_runs(db, metadata, out_dir, is_linear=True, suffixes=None, run_shared
             }
             
             main_record_oid = runs_coll.insert_one(run_data).inserted_id
-            
+
             print(f'Files with suffix: {suffix} in folder {out_dir} uploaded successfully.')
             print('='*40)
             if verbose:

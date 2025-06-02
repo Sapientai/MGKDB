@@ -1346,7 +1346,7 @@ def upload_runs(db, metadata, out_dir, is_linear=True, suffixes=None, run_shared
 
                 drop_keys = [] # Diagnostics to drop if the file size is too large
                 for key, val in Diag_dict.items():
-                    oid = gridfs_put_npArray(db, Diag_dict[key], out_dir, key, sim_type)
+                    oid = gridfs_put_npArray(db, val, out_dir, key, sim_type)
                     if oid is None:
                         drop_keys.append(key)
                     else: 

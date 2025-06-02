@@ -1149,7 +1149,7 @@ def f_update_global_var(global_vars, out_dir, suffix, sim_type, is_linear, large
         if large_files:
             if 'name1' in pars and 'mom' in global_vars.Docs_L:
                 # global_vars.Docs_L.pop(global_vars.Docs_L.index('mom'))
-                global_vars.Docs_l.remove('mom')
+                global_vars.Docs_L.remove('mom')
                 for i in range(n_spec): # adding all particle species
                     global_vars.Docs_L.append('mom_'+pars['name{}'.format(i+1)][1:-1])
 
@@ -1172,56 +1172,71 @@ def f_get_full_fname(sim_type, fldr, suffix, fname):
 
     return full_fname
 
-def upload_file_chunks(db, out_dir, sim_type, suffix = None, run_shared=None, global_vars=None):
+def upload_file_chunks(db, out_dir, sim_type, suffix=None, run_shared=None, global_vars=None):
     '''
     This function does the actual uploading of gridfs chunks and
-    returns object_ids for the chunk.
+    returns object_ids for the chunk. If a ValueError is raised due to file size,
+    it returns the current state of the dictionaries along with an error flag.
     '''
     
-    MAX_FILE_SIZE = 10 * 1024 * 1024 # 10 MB limit 
+    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB limit 
 
     _docs, _keys = global_vars.all_file_docs, global_vars.all_file_keys
 
     file_upload_dict = {}
-    for doc,key in zip(_docs,_keys):
-        file = f_get_full_fname(sim_type, out_dir, suffix, doc)
-        file_upload_dict[key] = {'full_fname':file,'oid':None}
-
-        if os.path.isfile(file):
-            ## Ensure file is not too big
-            file_size = os.path.getsize(file)
-
-            if file_size > MAX_FILE_SIZE: ## Ensure file is not too big
-                raise ValueError("Size of the file %s is %s MB and it exceeds size limit of %s MB" %(file, file_size/(1024*1024), MAX_FILE_SIZE/(1024*1024)))
-
-            _id = gridfs_put(db, file, sim_type)
-            file_upload_dict[key]['oid']= _id
-        else: 
-            print(f'{file} not found in {out_dir}')
-
-
     s_dict = {}
-    ### Add shared files 
-    if isinstance(run_shared,list):
-        for sh in run_shared:
-            key = sh.replace('.','_')
-            file =  os.path.join(out_dir,sh)
-            s_dict[key] = {'full_fname':file,'oid':None}
+    error_occurred = False
+    error_message = None
+
+    try:
+        for doc, key in zip(_docs, _keys):
+            file = f_get_full_fname(sim_type, out_dir, suffix, doc)
+            file_upload_dict[key] = {'full_fname': file, 'oid': None}
 
             if os.path.isfile(file):
                 ## Ensure file is not too big
                 file_size = os.path.getsize(file)
 
-                if file_size > MAX_FILE_SIZE: ## Ensure file is not too big
-                    raise ValueError("Size of the file %s is %s MB and it exceeds size limit of %s MB" %(file, file_size/(1024*1024), MAX_FILE_SIZE/(1024*1024)))
+                if file_size > MAX_FILE_SIZE:
+                    raise ValueError(
+                        "Size of the file %s is %s MB and it exceeds size limit of %s MB" %
+                        (file, file_size / (1024 * 1024), MAX_FILE_SIZE / (1024 * 1024))
+                    )
 
                 _id = gridfs_put(db, file, sim_type)
-                s_dict[key]['oid']= _id
-            else: 
+                file_upload_dict[key]['oid'] = _id
+            else:
                 print(f'{file} not found in {out_dir}')
 
-    return file_upload_dict, s_dict
+        
+        ### Add shared files 
+        if isinstance(run_shared, list):
+            for sh in run_shared:
+                key = sh.replace('.', '_')
+                file = os.path.join(out_dir, sh)
+                s_dict[key] = {'full_fname': file, 'oid': None}
 
+                if os.path.isfile(file):
+                    ## Ensure file is not too big
+                    file_size = os.path.getsize(file)
+
+                    if file_size > MAX_FILE_SIZE:
+                        raise ValueError(
+                            "Size of the file %s is %s MB and it exceeds size limit of %s MB" %
+                            (file, file_size / (1024 * 1024), MAX_FILE_SIZE / (1024 * 1024))
+                        )
+
+                    _id = gridfs_put(db, file, sim_type)
+                    s_dict[key]['oid'] = _id
+                else:
+                    print(f'{file} not found in {out_dir}')
+
+        return file_upload_dict, s_dict, error_occurred, error_message
+
+    except ValueError as e:
+        error_occurred = True
+        error_message = str(e)
+        return file_upload_dict, s_dict, error_occurred, error_message
 
 def f_get_input_fname(out_dir, suffix, sim_type):
     ''''
@@ -1294,16 +1309,19 @@ def upload_runs(db, metadata, out_dir, is_linear=True, suffixes=None, run_shared
             print('Uploading files ....')
 
             if count == 0:
-                f_dict, s_dict = upload_file_chunks(db, out_dir, sim_type, suffix, run_shared, global_vars)
+                f_dict, s_dict,err_occured, err_msg = upload_file_chunks(db, out_dir, sim_type, suffix, run_shared, global_vars)
                 shared_file_dict = {k: v['oid'] for k, v in s_dict.items()}
             else:
-                f_dict, s_dict = upload_file_chunks(db, out_dir, sim_type, suffix, None, global_vars)
+                f_dict, s_dict, err_occured, err_msg = upload_file_chunks(db, out_dir, sim_type, suffix, None, global_vars)
 
             files_dict = {k: v['oid'] for k, v in f_dict.items()}
             files_dict = {**files_dict, **shared_file_dict}
-            id_copy = files_dict.copy()  # Make a copy to delete from database if errors occur
-            print('='*60)
+            if err_occured: 
+                print('Error occured')
+                id_copy = {k:v for k,v in files_dict.items() if v is not None}
+                raise ValueError(err_msg)
 
+            print('='*60)
             # Metadata dictionary
             time_upload = strftime("%y%m%d-%H%M%S")
 
@@ -1368,7 +1386,7 @@ def upload_runs(db, metadata, out_dir, is_linear=True, suffixes=None, run_shared
             print('cleaning ......')
             fs = gridfs.GridFS(db)
             try:
-                for _id, _ in id_copy.items():
+                for key, _id in id_copy.items():
                     fs.delete(_id)
                     print(f'{_id} deleted.')
             except Exception as e3:

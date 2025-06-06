@@ -14,16 +14,8 @@ reading and writing to database containing:
     gridfs_read(db_file):               input database filename, return contents of file
     upload_to_mongo   
     isLinear
-@author: Austin Blackmon, Dongyang Kuang
+@author: Austin Blackmon, Dongyang Kuang, Venkitesh Ayyar
 """
-
-'''
-ToDO:
-    
-    1: files with extention
-    2: mom files with different type (linear run will only need the last frame)
-    
-'''
 
 import sys
 import numpy as np
@@ -67,7 +59,6 @@ class Global_vars():
             
             #Large files#
             self.Docs_L = []
-            self.Keys_L = []
 
         elif sim_type=='TGLF':
             self.required_files = ['input.tglf', 'out.tglf.run']    
@@ -76,7 +67,6 @@ class Global_vars():
 
             #Large files#
             self.Docs_L = []
-            self.Keys_L = []
 
         elif sim_type=='GX':
 
@@ -86,17 +76,14 @@ class Global_vars():
 
             #Large files#
             self.Docs_L = []
-            self.Keys_L = []
 
         elif sim_type=='GS2':
             self.required_files = ['gs2.in','gs2.out.nc']    
 
             self.Docs = ['gs2.in']    
-            
 
             #Large files#
             self.Docs_L = []
-            self.Keys_L = []
         
         else : 
             print("Invalid simulation type",sim_type)
@@ -107,7 +94,7 @@ class Global_vars():
         
         #User specified files#
         self.Docs_ex = [] 
-        self.Keys_ex = []
+        # self.Keys_ex = []
 
         self.update_docs_keys()
         
@@ -122,8 +109,6 @@ class Global_vars():
         ## Reset values 
         self.__init__(sim_type)
         print("File names and their key names are reset to default!")
-
-
 
 def f_load_config(config_file):
     '''

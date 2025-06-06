@@ -1,22 +1,24 @@
 ### Template for metadata
 
-
+## multiple entries must be separated by commas
 user_input:
-  suffixes: "_0001,_0002" ### For including all, use -1
+  suffixes: "_0001" ### For including all, use -1
   extra_files:
   common_files:
   large_files:
+  exclude_folders: 
+  shared_files:
 
 metadata:
   DBtag:
     user: ""
-    run_collection_name: ""  ## Added automatically
-    run_suffix: ""            ## Added automatically
+    run_collection_name:   ## Added automatically
+    run_suffix:            ## Added automatically
     keywords: ""
     confidence: -1
     comments: ""
-    time_uploaded: ""     ## Added automatically
-    last_updated: ""      ## Added automatically
+    time_uploaded:      ## Added automatically
+    last_updated:       ## Added automatically
     linkedObjectID: ""
     archiveLocation: ""
     IsRestart:
@@ -28,9 +30,9 @@ metadata:
     scenario_runid: ""
   CodeTag:
     sim_type: ""
-    IsLinear: ""     ## Added automatically
-    quasi_linear: "" ## Added automatically
-    Has1DFluxes: ""  ## Added automatically
+    IsLinear:      ## Added automatically
+    quasi_linear:  ## Added automatically
+    Has1DFluxes:   ## Added automatically
     git_hash: ""
     platform: ""
     execution_date: ""

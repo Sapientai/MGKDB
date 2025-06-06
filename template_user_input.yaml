@@ -8,6 +8,7 @@ user_input:
   large_files:
   exclude_folders: 
   shared_files:
+  reupload_if_exists: False ## If run exists, delete and re-upload
 
 metadata:
   DBtag:

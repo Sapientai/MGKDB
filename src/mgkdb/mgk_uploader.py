@@ -21,6 +21,8 @@ from bson.objectid import ObjectId
 from mgkdb.support.mgk_file_handling import get_suffixes, upload_to_mongo, isLinear, Global_vars, f_get_linked_oid, f_set_metadata, f_check_id_exists, f_load_config
 from mgkdb.support.mgk_login import mgk_login,f_login_dbase
 
+import yaml 
+
 def f_parse_args():
     #==========================================================
     # argument parser
@@ -41,7 +43,6 @@ def f_parse_args():
     parser.add_argument('-L', '--large_files', dest='large_files', default = False, action='store_true', help='whether or not to include large files')
     parser.add_argument('-X', '--exclude', default = None, help='folders to exclude')
     
-
     return parser.parse_args()
 
 def f_user_input_metadata(database):
@@ -120,6 +121,10 @@ def main_upload(target, keywords, exclude, default, sim_type, extra, authenticat
 
     if config_file is not None: 
         config_dict = f_load_config(config_file)
+
+        ## to do : Add check for format of config file
+
+
         user_ip = config_dict['user_input']    
         metadata_info = config_dict['metadata']
         shared_files = user_ip['shared_files']

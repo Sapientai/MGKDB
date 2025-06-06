@@ -2,7 +2,7 @@
 
 ## multiple entries must be separated by commas
 user_input:
-  suffixes: "_0001" ### For including all, use -1
+  suffixes: ### For including all, use -1
   extra_files:
   common_files:
   large_files:

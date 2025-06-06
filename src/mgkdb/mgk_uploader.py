@@ -178,18 +178,21 @@ def main_upload(target, keywords, exclude, default, sim_type, extra, authenticat
                         exit('Invalid input encountered!')                         
                 
                 if not default:
-                    suffixes = get_suffixes(dirpath, sim_type)
+                    all_suffixes = get_suffixes(dirpath, sim_type)
 
                     if config_file is not None: 
                         ## Add suffixes
-                        ip_suffixes = user_ip['suffixes'].rstrip(',').split(',')
-                        ## Check if input suffixes exist in the folder
-                        incorrect_suffixes = [s1 for s1 in ip_suffixes if s1 not in suffixes]
-                        if incorrect_suffixes: 
-                            print("The following suffixes provided don't exist in this folder")
-                            print(f"Found in {dirpath} these suffixes:\n {suffixes}")
-                            print('Skipping this folder')
-                            continue
+                        ip_suffixes = user_ip['suffixes']
+                        if ip_suffixes: 
+                            suffixes=ip_suffixes.split(',')
+                            ## Check if input suffixes exist in the folder
+                            incorrect_suffixes = [s1 for s1 in suffixes if s1 not in all_suffixes]
+                            if incorrect_suffixes: 
+                                print("The following suffixes provided don't exist in this folder")
+                                print(f"Found in {dirpath} these suffixes:\n {all_suffixes}")
+                                print('Skipping this folder')
+                                continue
+                        else:    suffixes = None
 
                         ## Adding shared files info
                         run_shared = shared_files.split(',') if shared_files else None
@@ -200,7 +203,7 @@ def main_upload(target, keywords, exclude, default, sim_type, extra, authenticat
 
                     else: ## Get data through user input 
                         
-                        print("Found in {} these suffixes:\n {}".format(dirpath, suffixes))
+                        print("Found in {} these suffixes:\n {}".format(dirpath, all_suffixes))
                         
                         suffixes = input('Which run do you want to upload? Separate them by comma. \n Press q to skip. Press ENTER to upload ALL.\n')
                         if suffixes == 'q':

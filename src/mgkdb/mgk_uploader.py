@@ -118,10 +118,10 @@ def main_upload(target, exclude, default, sim_type, extra, authenticate, verbose
         manual_time_flag = False
         exclude_folders = []
 
-        print('Scanning in {upload_folder} *******************\n')
+        print(f'Scanning in {upload_folder} *******************\n')
         linear = isLinear(upload_folder, sim_type)                      
         all_suffixes = get_suffixes(upload_folder, sim_type)
-        
+
         if not all_suffixes:
             print("Did not find any suffixes in the folder",upload_folder)
             return

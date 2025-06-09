@@ -1362,11 +1362,12 @@ def upload_to_mongo(db, linear, metadata, out_dir, suffixes=None, run_shared=Non
 
     # Check if folder is already uploaded
     if isUploaded(out_dir, runs_coll):
+        print(f'Folder tag:\n {out_dir} \n exists in database')
         
         if no_prompts: 
             update='0' if reupload_if_exists else '1'
         else: 
-            update = input(f'Folder tag:\n {out_dir} \n exists in database. You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to skip this folder.\n')
+            update = input(f'You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to skip this folder.\n')
         
         if update == '0':
             # Delete and reupload

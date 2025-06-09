@@ -20,8 +20,8 @@ metadata:
     comments: ""
     time_uploaded:      ## Added automatically
     last_updated:       ## Added automatically
-    linkedObjectID: ""
-    archiveLocation: ""
+    linkedObjectID:   ## Sting converted to a ObjectID if exists
+    archiveLocation: 
     IsRestart:
       restart: False
       Timestep: 0

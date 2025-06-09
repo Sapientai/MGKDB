@@ -122,8 +122,8 @@ def get_suffixes(out_dir, sim_type):
     if sim_type=='GENE': ## scan all file with parameters 
         suffixes = [ os.path.basename(file).split('parameters')[-1] for file in glob.glob(os.path.join(out_dir,'parameters*')) if os.path.isfile(file)]
     elif sim_type in ['CGYRO','TGLF','GS2','GX']:  ## scan folders return as list 
-        suffixes = os.listdir(out_dir)
-
+        # suffixes = [os.path.basename(fldr) for fldr in os.listdir(out_dir) os.path.isdir(os.path.join(out_dir,fldr))]
+        suffixes = [fldr for fldr in os.listdir(out_dir) if os.path.isdir(os.path.join(out_dir,fldr))]
     suffixes.sort()
     return suffixes
 

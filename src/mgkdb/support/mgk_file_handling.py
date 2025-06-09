@@ -483,7 +483,6 @@ def get_oid_from_query(db, collection, query):
     for record in records_found:
         oid_list.append(record['_id'])
         
-    
     return oid_list
 
 def _npArray2Binary(npArray):
@@ -736,10 +735,6 @@ def get_record(out_dir, runs_coll):
         record.append(run)
     return record
    
-
-
-    ## Extract linked_ID
-
 def f_check_id_exists(db, _id):
     ''' Given an object ID, check if it exists in linear or nonlinear collections
     '''
@@ -759,32 +754,48 @@ def f_check_id_exists(db, _id):
     print("Entry %s not found in database, please double check the id"%(_id))
     return False
 
-def f_get_linked_oid(database, linked_id_file, linked_id_string):
+# def f_get_linked_oid(database, linked_id_file, linked_id_string):
+#     '''
+#     Get linked ObjectID
+#     '''
+
+#     if ((linked_id_file is not None) and (linked_id_string is not None)): 
+#         print("Both linked_id_file and linked_id_string specified. Please choose any one and re-upload")
+#         raise SystemError
+
+#     elif linked_id_file is not None:
+#         fname = linked_id_file
+#         assert os.path.exists(fname), "File %s does not exist"%(fname)
+#         print("Input file for OID is %s",fname)
+
+#         ## Get OID from file 
+#         with open(fname, 'r') as f:
+#             data_dict = json.load(f)
+
+#         oid = ObjectId(data_dict['_id'])
+
+#     elif linked_id_string is not None: 
+#         oid = ObjectId(linked_id_string)
+
+#     else:  oid = None
+
+#     if oid is not None: 
+#         id_exists = f_check_id_exists(database, oid)
+
+#         if id_exists:
+#             print("Linked OID %s"%(oid))
+#             return oid
+#         else :
+#             return None
+#     else: return None
+
+def f_get_linked_oid(database, linked_id_string):
     '''
     Get linked ObjectID
     '''
 
-    if ((linked_id_file is not None) and (linked_id_string is not None)): 
-        print("Both linked_id_file and linked_id_string specified. Please choose any one and re-upload")
-        raise SystemError
-
-    elif linked_id_file is not None:
-        fname = linked_id_file
-        assert os.path.exists(fname), "File %s does not exist"%(fname)
-        print("Input file for OID is %s",fname)
-
-        ## Get OID from file 
-        with open(fname, 'r') as f:
-            data_dict = json.load(f)
-
-        oid = ObjectId(data_dict['_id'])
-
-    elif linked_id_string is not None: 
+    if linked_id_string is not None: 
         oid = ObjectId(linked_id_string)
-
-    else:  oid = None
-
-    if oid is not None: 
         id_exists = f_check_id_exists(database, oid)
 
         if id_exists:
@@ -792,8 +803,6 @@ def f_get_linked_oid(database, linked_id_file, linked_id_string):
             return oid
         else :
             return None
-    else: return None
-
 
 def download_file_by_path(db, filepath, destination, revision=-1, session=None):
     '''

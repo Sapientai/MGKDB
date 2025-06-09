@@ -1,13 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Main script to handle uploading GENE runs to the MGK database
-Required fields:    user
-                    output_folder
-                    multiple_runs (True or False)
-                    
-Optional fields:    confidence
-                    input_heat
-                    keywords
+Main script to handle uploading a set of runs with same metadata to the MGK database
                     
 @author: Austin Blackmon, Dongyang Kuang, Venkitesh Ayyar
 """
@@ -36,9 +29,6 @@ def f_parse_args():
     parser.add_argument('-D', '--default', default = False, action='store_true', help='Using default inputs for all.')
     parser.add_argument('-V', '--verbose', dest='verbose', default = False, action='store_true', help='output verbose')
     
-    # parser.add_argument('-lf', '--linked_id_file', default = None, help='File with Object ID to link')
-    # parser.add_argument('-ls', '--linked_id_string', default = None, help='String of Object ID to link')
-    # parser.add_argument('-K', '--keywords', default = '-', help='relevant keywords for future references, separated by comma')
     parser.add_argument('-Ex', '--extra', dest='extra', default = False, action='store_true', help='whether or not to include extra files')
     parser.add_argument('-L', '--large_files', dest='large_files', default = False, action='store_true', help='whether or not to include large files')
     parser.add_argument('-X', '--exclude', default = None, help='folders to exclude')
@@ -115,39 +105,8 @@ def main_upload(target, exclude, default, sim_type, extra, authenticate, verbose
     Upload a set of suffixes with common Metadata
     '''
     ### Initial setup 
-    output_folder = os.path.abspath(target)
+    upload_folder = os.path.abspath(target)
     global_vars = Global_vars(sim_type)    
-
-    # manual_time_flag = not default
-    manual_time_flag = False
-    exclude_folders = []
-
-    if config_file is not None: 
-        config_dict = f_load_config(config_file)
-
-        ## to do : Add check for format of config file
-
-        user_ip = config_dict['user_input']    
-        metadata_info = config_dict['metadata']
-        shared_files = user_ip['shared_files']
-
-        if user_ip['extra_files']:
-            ex_files = user_ip['extra_files'].split(',')
-            global_vars.Docs_ex +=ex_files
-
-        if user_ip['exclude_folders'] is not None:
-            ex_files = user_ip['exclude'].split(',')
-            exclude_folders = [os.path.join(output_folder, fname) for fname in exclude_folders]
-
-    else : 
-        if exclude is not None:
-            exclude_folders = exclude.split(',')
-            exclude_folders = [os.path.join(output_folder, fname) for fname in exclude_folders]
-            print('Scanning will skip specified folders:\n {}\n'.format(exclude_folders) )
-        
-        if extra: # this will change the global variable
-            ex_files = input('Please type FULL file names to update, separated by comma.\n').split(',')
-            global_vars.Docs_ex +=ex_files
 
     ### Connect to database 
     login = f_login_dbase(authenticate)
@@ -155,36 +114,46 @@ def main_upload(target, exclude, default, sim_type, extra, authenticate, verbose
     with client:
         user = login.login['user']
 
-        ### Run uploader 
-        #######################################################################
-        print("Processing files for uploading ........")
-        # #scan through a directory for more than one run
-        # for count, (dirpath, dirnames, files) in enumerate(os.walk(output_folder)):
-        #     condition = ( sim_type in ['CGYRO','TGLF','GS2','GX'] and count==0)  \
-        #         or (sim_type=='GENE' and str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1 and str(dirpath) not in exclude_folders)
-        #     if ( condition ):    
-        dirpath = output_folder
+        # manual_time_flag = not default
+        manual_time_flag = False
+        exclude_folders = []
 
-        print('Scanning in {} *******************\n'.format( str(dirpath)) )
-        linear = isLinear(dirpath, sim_type)                      
-        all_suffixes = get_suffixes(dirpath, sim_type)
+        print('Scanning in {upload_folder} *******************\n')
+        linear = isLinear(upload_folder, sim_type)                      
+        all_suffixes = get_suffixes(upload_folder, sim_type)
+        
         if not all_suffixes:
-            print("Did not find any suffixes in the folder",dirpath)
+            print("Did not find any suffixes in the folder",upload_folder)
             return
 
         if not default:
-            if config_file is not None: 
+            if config_file is not None:
+                config_dict = f_load_config(config_file)
+
+                ## to do : Add check for format of config file
+
+                user_input = config_dict['user_input']    
+                metadata_info = config_dict['metadata']
+                shared_files = user_input['shared_files']
+
+                if user_input['extra_files']:
+                    ex_files = user_input['extra_files'].split(',')
+                    global_vars.Docs_ex +=ex_files
+
+                if user_input['exclude_folders'] is not None:
+                    ex_files = user_input['exclude'].split(',')
+                    exclude_folders = [os.path.join(upload_folder, fname) for fname in exclude_folders]
+
                 ## Add suffixes
-                ip_suffixes = user_ip['suffixes']
+                ip_suffixes = user_input['suffixes']
                 if ip_suffixes: 
                     suffixes=ip_suffixes.split(',')
                     ## Check if input suffixes exist in the folder
                     incorrect_suffixes = [s1 for s1 in suffixes if s1 not in all_suffixes]
                     if incorrect_suffixes: 
                         print("The following suffixes provided don't exist in this folder")
-                        print(f"Found in {dirpath} these suffixes:\n {all_suffixes}")
+                        print(f"Found in {upload_folder} these suffixes:\n {all_suffixes}")
                         print('Skipping this folder')
-                        # continue
                 else:    suffixes = None
 
                 ## Adding shared files info
@@ -197,14 +166,24 @@ def main_upload(target, exclude, default, sim_type, extra, authenticate, verbose
                 if linked_id_strg is not None:
                     metadata['DBTag']['linkedObjectID'] = f_get_linked_oid(database, linked_id_strg)
 
+                no_prompts         = user_input['no_prompts']
+                reupload_if_exists = user_input['reupload_if_exists']
+
             else: ## Get data through user input 
+                if exclude is not None:
+                    exclude_folders = exclude.split(',')
+                    exclude_folders = [os.path.join(upload_folder, fname) for fname in exclude_folders]
+                    print('Scanning will skip specified folders:\n {}\n'.format(exclude_folders) )
                 
-                print("Found in {} these suffixes:\n {}".format(dirpath, all_suffixes))
+                if extra: # this will change the global variable
+                    ex_files = input('Please type FULL file names to update, separated by comma.\n').split(',')
+                    global_vars.Docs_ex +=ex_files
+
+                print("Found in {} these suffixes:\n {}".format(upload_folder, all_suffixes))
                 
                 suffixes = input('Which run do you want to upload? Separate them by comma. \n Press q to skip. Press ENTER to upload ALL.\n')
                 if suffixes == 'q':
-                    print("Skipping the folder {}.".format(dirpath))
-                    # continue
+                    print("Skipping the folder {}.".format(upload_folder))
                 elif len(suffixes):
                     suffixes = suffixes.split(',')
                 else:
@@ -224,22 +203,21 @@ def main_upload(target, exclude, default, sim_type, extra, authenticate, verbose
                 ### Metadata inputs
                 user_ip_dict = f_user_input_metadata(database)
                 metadata = f_set_metadata(**user_ip_dict,user=user, keywords = keywords, sim_type=sim_type, linked_ID=linked_id)
+
+                no_prompts = False
+                reupload_if_exists = False
         else:
             suffixes = None
             run_shared = None
             metadata = f_set_metadata(user=user, sim_type=sim_type)
-        
-        upload_to_mongo(database, linear, metadata, dirpath, suffixes, run_shared,
-                        large_files, extra, verbose, manual_time_flag,global_vars)
-
-    # if len(global_vars.troubled_runs):
-    #     print("The following runs are skipped due to exceptions.")
-    #     for r in global_vars.troubled_runs:
-    #         print(r)
-
+            no_prompts = True
+            reupload_if_exists = False
+            
+        upload_to_mongo(database, linear, metadata, upload_folder, suffixes, run_shared,
+                        large_files, extra, verbose, manual_time_flag, global_vars, no_prompts=no_prompts, reupload_if_exists=reupload_if_exists)
 
 def main():
-    
+
     ### Parse arguments 
     args = f_parse_args()
     print(args)

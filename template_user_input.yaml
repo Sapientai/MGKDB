@@ -8,6 +8,7 @@ user_input:
   large_files:
   exclude_folders: 
   shared_files:
+  no_prompts: True ## Skip all prompts. Useful in workflows
   reupload_if_exists: False ## If run exists, delete and re-upload
 
 metadata:
@@ -25,7 +26,7 @@ metadata:
     IsRestart:
       restart: False
       Timestep: 0
-      InitObjectId: ""
+      InitObjectId: 
   ScenarioTag:
     Name of actual of hypothetical experiment: ""
     scenario_runid: ""

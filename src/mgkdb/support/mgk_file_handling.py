@@ -754,41 +754,6 @@ def f_check_id_exists(db, _id):
     print("Entry %s not found in database, please double check the id"%(_id))
     return False
 
-# def f_get_linked_oid(database, linked_id_file, linked_id_string):
-#     '''
-#     Get linked ObjectID
-#     '''
-
-#     if ((linked_id_file is not None) and (linked_id_string is not None)): 
-#         print("Both linked_id_file and linked_id_string specified. Please choose any one and re-upload")
-#         raise SystemError
-
-#     elif linked_id_file is not None:
-#         fname = linked_id_file
-#         assert os.path.exists(fname), "File %s does not exist"%(fname)
-#         print("Input file for OID is %s",fname)
-
-#         ## Get OID from file 
-#         with open(fname, 'r') as f:
-#             data_dict = json.load(f)
-
-#         oid = ObjectId(data_dict['_id'])
-
-#     elif linked_id_string is not None: 
-#         oid = ObjectId(linked_id_string)
-
-#     else:  oid = None
-
-#     if oid is not None: 
-#         id_exists = f_check_id_exists(database, oid)
-
-#         if id_exists:
-#             print("Linked OID %s"%(oid))
-#             return oid
-#         else :
-#             return None
-#     else: return None
-
 def f_get_linked_oid(database, linked_id_string):
     '''
     Get linked ObjectID
@@ -1367,7 +1332,7 @@ def upload_runs(db, metadata, out_dir, is_linear=True, suffixes=None, run_shared
 
 
 def upload_to_mongo(db, linear, metadata, out_dir, suffixes=None, run_shared=None,
-                    large_files=False, extra=False, verbose=True, manual_time_flag=False, global_vars=None):
+                    large_files=False, extra=False, verbose=True, manual_time_flag=False, global_vars=None, no_prompts=False, reupload_if_exists=False):
     """
     Wrapper function to upload simulation runs to MongoDB, handling both linear and nonlinear runs.
 
@@ -1383,7 +1348,8 @@ def upload_to_mongo(db, linear, metadata, out_dir, suffixes=None, run_shared=Non
     - verbose: Boolean to print detailed output. Default: True.
     - manual_time_flag: Boolean to handle user-specified time spans for diagnostics. Default: False.
     - global_vars: Object containing global variables for the upload process.
-
+    - no_prompts: Autoupload with no prompts. Default = False
+    - reupload_if_exists: Delete and reupload if existing folder name is present in DB. Default: False
     Returns:
     None
     """
@@ -1396,14 +1362,19 @@ def upload_to_mongo(db, linear, metadata, out_dir, suffixes=None, run_shared=Non
 
     # Check if folder is already uploaded
     if isUploaded(out_dir, runs_coll):
-        update = input(f'Folder tag:\n {out_dir} \n exists in database. You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to skip this folder.\n')
+        
+        if no_prompts: 
+            update='0' if reupload_if_exists else '1'
+        else: 
+            update = input(f'Folder tag:\n {out_dir} \n exists in database. You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to skip this folder.\n')
+        
         if update == '0':
             # Delete and reupload
+            print("Deleting {out_dir} and reuploading")
             remove_from_mongo(out_dir, db, runs_coll)
             upload_runs(db, metadata, out_dir, is_linear=linear, suffixes=suffixes, run_shared=run_shared,
                         large_files=large_files, extra=extra, verbose=verbose, manual_time_flag=manual_time_flag, global_vars=global_vars)
         elif update == '1':
-            # Run update
             update_mongo(db, metadata, out_dir, runs_coll, linear)
         else:
             print(f'Run collection \'{out_dir}\' skipped.')

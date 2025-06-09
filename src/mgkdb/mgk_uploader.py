@@ -164,18 +164,7 @@ def main_upload(target, keywords, exclude, default, sim_type, extra, authenticat
                 or (sim_type=='GENE' and str(dirpath).find('in_par') == -1 and str(files).find('parameters') != -1 and str(dirpath) not in exclude_folders)
             if ( condition ):    
                 print('Scanning in {} *******************\n'.format( str(dirpath)) )
-                linear = isLinear(dirpath, sim_type)
-                if linear == None:
-                    linear_input = input('Cannot decide if this folder is a linear run or not. Please make the selection manually by typing:\n 1: Linear\n 2: Nonlinear \n 3: Skip this folder \n')
-                    if linear_input.strip() == '1':
-                        linear = True
-                    elif linear_input.strip() == '2':
-                        linear = False
-                    elif linear_input.strip() == '3':
-                        print('Folder skipped.')
-                        continue
-                    else:
-                        exit('Invalid input encountered!')                         
+                linear = isLinear(dirpath, sim_type)                      
                 
                 if not default:
                     all_suffixes = get_suffixes(dirpath, sim_type)

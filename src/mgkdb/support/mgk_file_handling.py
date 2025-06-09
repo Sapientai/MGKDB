@@ -486,38 +486,6 @@ def get_oid_from_query(db, collection, query):
     
     return oid_list
 
-def clear_ex_lin(db):
-    fs = gridfs.GridFS(db)
-    for record in db.ex.Lin.find():
-        for key, val in record.items():
-            if key != '_id':
-                print((key, val))
-                fs.delete(val)
-                print('deleted!')
-        
-        db.ex.Lin.remove(record['_id'])
-        
-    print("Documents in ex.Lin cleared !")
-
-        
-def clear_ex_Nonlin(db):
-    fs = gridfs.GridFS(db)
-    for record in db.ex.Nonlin.find():
-        for key, val in record.items():
-            if key != '_id':
-                print((key, val))
-                fs.delete(val)
-                print('deleted!') 
-                
-        db.ex.Nonlin.remove(record['_id'])
-    
-    print("Documents in ex.Lin cleared !")
-           
-def clear_ex(db):
-    clear_ex_lin(db)
-    clear_ex_Nonlin(db)
-    
-
 def _npArray2Binary(npArray):
     """Utility method to turn an numpy array into a BSON Binary string.
     utilizes pickle protocol 2 (see http://www.python.org/dev/peps/pep-0307/

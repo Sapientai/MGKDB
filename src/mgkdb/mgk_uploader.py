@@ -42,7 +42,7 @@ def f_user_input_metadata(database):
 
     user_ip = {} 
     print("Filling metadata.")
-    skip_metadata = input("To skip entering Metadata, please enter 0\n")
+    skip_metadata = input("To skip entering Metadata, please enter 0. press any other key to continue\n")
     if skip_metadata=='0': 
         return user_ip
 
@@ -56,13 +56,16 @@ def f_user_input_metadata(database):
 
     user_ip['confidence']= confidence 
 
+    keywords = input('Any keywords to categorize this run. Press Enter to skip\n')
+    user_ip['keywords'] = keywords
+    
     comments = input('Any comments for data in this folder?Press Enter to skip.\n')
     user_ip['comments'] = comments
 
     archive = input('Is there a location where the data is archived? Press Enter to skip.\n')
     user_ip['archive_loc'] = archive
 
-    restart = input('Is this run a restart starting from a different run? For yes -> Y .\n')
+    restart = input('Is this run a restart starting from a different run? For yes -> Y . no -> any other key \n')
 
     user_ip['restart'] = (restart=='Y')
 
@@ -74,8 +77,7 @@ def f_user_input_metadata(database):
             user_ip['initial_run_oid'] =  run_oid 
         else:
             print(f"Entered object id {run_oid} doesn't exist\n")
-            
-
+    
     expt = input('Name of actual or hypothetical experiment? Eg: diiid, iter, sparc, etc. Press Enter to skip.\n')
     user_ip['expt'] = expt
 
@@ -156,9 +158,9 @@ def main_upload(target, default, sim_type, extra, authenticate, verbose, large_f
                 ## Add metadata info
                 metadata = metadata_info
                 metadata['CodeTag']['sim_type']=sim_type
-                linked_id_strg = metadata['DBTag']['linkedObjectID']
+                linked_id_strg = metadata['DBtag']['linkedObjectID']
                 if linked_id_strg is not None:
-                    metadata['DBTag']['linkedObjectID'] = f_get_linked_oid(database, linked_id_strg)
+                    metadata['DBtag']['linkedObjectID'] = f_get_linked_oid(database, linked_id_strg)
 
                 no_prompts         = user_input['no_prompts']
                 reupload_if_exists = user_input['reupload_if_exists']
@@ -187,11 +189,9 @@ def main_upload(target, default, sim_type, extra, authenticate, verbose, large_f
                 linked_id_strg = input('Do you want to link this run to another existing run in MGKDB. Press Enter to skip\n')
                 linked_id = f_get_linked_oid(database, linked_id_strg) if linked_id_strg else None
 
-                keywords  = input('Any keywords to categorize this run. Press Enter to skip\n')
-
                 ### Metadata inputs
                 user_ip_dict = f_user_input_metadata(database)
-                metadata = f_set_metadata(**user_ip_dict,user=user, keywords = keywords, sim_type=sim_type, linked_ID=linked_id)
+                metadata = f_set_metadata(**user_ip_dict,user=user, sim_type=sim_type, linked_ID=linked_id)
 
                 no_prompts = False
                 reupload_if_exists = False

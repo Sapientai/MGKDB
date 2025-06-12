@@ -519,10 +519,9 @@ def gridfs_put_npArray(db, value, filepath, filename, sim_type):
     data_size = len(binary_data)
 
     if data_size > MAX_FILE_SIZE: ## Ensure file is not too big
-        print(f"Binary data for '{filename}' has size {data_size / (1024 * 1024)} exceeds size limit of {MAX_FILE_SIZE / (1024 * 1024)} MB")
+        print(f"Binary data for '{filename}' has size {data_size / (1024 * 1024)} MB. This exceeds the size limit of {MAX_FILE_SIZE / (1024 * 1024)} MB")
         print(f"Ignoring upload of this diagnostic: {filename}")
         obj_id = None
-        # raise ValueError(f"Binary data for '{filename}' has size {data_size / (1024 * 1024)} exceeds size limit of {MAX_FILE_SIZE / (1024 * 1024)} MB")
     else: 
         obj_id=fs.put(binary_data,encoding='UTF-8',
                     filename = filename,
@@ -597,7 +596,7 @@ def isLinear(folder_name, sim_type):
     
     if len(suffixes):
         suffix = suffixes[0] #assuming all parameters files are of the same linear/nonlinear type
-        print('Scanning parameters{} for deciding linear/Nonlinar.')
+        print('Scanning parameters for deciding linear/Nonlinar.')
     else:
         suffix = ''
 

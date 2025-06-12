@@ -468,10 +468,6 @@ def gridfs_put(db, filepath, sim_type):
     return dbfile
     
 def gridfs_read(db, query):
-    #connect to 'ETG' database
-#    db = mgkdb_client.mgk_fusion
-#    db = database
-    #open 'filepath'
     fs = gridfs.GridFS(db)
     file = fs.find_one(query)
     contents = file.read()

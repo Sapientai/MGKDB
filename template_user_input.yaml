@@ -6,7 +6,7 @@ user_input:
   extra_files:   ## Extra files for each suffix
   shared_files:  ## Common file for each suffix
   no_prompts: True ## Skip all prompts. Useful in workflows
-  reupload_if_exists: False ## If run exists, delete and re-upload
+  reupload_if_exists: True ## If run exists, delete and re-upload
 
 metadata:
   DBtag:
@@ -18,7 +18,7 @@ metadata:
     comments: ""
     time_uploaded:      ## Added automatically
     last_updated:       ## Added automatically
-    linkedObjectID:   ## Sting converted to a ObjectID if exists
+    linkedObjectID:   ## String converted to a ObjectID if exists
     archiveLocation: 
     IsRestart:
       restart: False

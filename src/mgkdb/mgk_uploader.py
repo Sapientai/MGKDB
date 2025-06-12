@@ -62,6 +62,9 @@ def f_user_input_metadata(database):
     comments = input('Any comments for data in this folder?Press Enter to skip.\n')
     user_ip['comments'] = comments
 
+    linked_id_strg = input('Do you want to link this run to another existing run in MGKDB. Press Enter to skip\n')
+    user_ip['linked_ID'] = f_get_linked_oid(database, linked_id_strg) if linked_id_strg else None
+
     archive = input('Is there a location where the data is archived? Press Enter to skip.\n')
     user_ip['archive_loc'] = archive
 
@@ -186,12 +189,9 @@ def main_upload(target, default, sim_type, extra, authenticate, verbose, large_f
                 else:
                     run_shared = None
 
-                linked_id_strg = input('Do you want to link this run to another existing run in MGKDB. Press Enter to skip\n')
-                linked_id = f_get_linked_oid(database, linked_id_strg) if linked_id_strg else None
-
                 ### Metadata inputs
                 user_ip_dict = f_user_input_metadata(database)
-                metadata = f_set_metadata(**user_ip_dict,user=user, sim_type=sim_type, linked_ID=linked_id)
+                metadata = f_set_metadata(**user_ip_dict,user=user, sim_type=sim_type)
 
                 no_prompts = False
                 reupload_if_exists = False

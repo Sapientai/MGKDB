@@ -14,16 +14,8 @@ reading and writing to database containing:
     gridfs_read(db_file):               input database filename, return contents of file
     upload_to_mongo   
     isLinear
-@author: Austin Blackmon, Dongyang Kuang
+@author: Austin Blackmon, Dongyang Kuang, Venkitesh Ayyar
 """
-
-'''
-ToDO:
-    
-    1: files with extention
-    2: mom files with different type (linear run will only need the last frame)
-    
-'''
 
 import sys
 import numpy as np
@@ -32,6 +24,7 @@ import os
 from pathlib import Path
 import gridfs
 import json
+import yaml
 from time import strftime
 import pickle
 from bson.binary import Binary
@@ -66,7 +59,6 @@ class Global_vars():
             
             #Large files#
             self.Docs_L = []
-            self.Keys_L = []
 
         elif sim_type=='TGLF':
             self.required_files = ['input.tglf', 'out.tglf.run']    
@@ -75,7 +67,6 @@ class Global_vars():
 
             #Large files#
             self.Docs_L = []
-            self.Keys_L = []
 
         elif sim_type=='GX':
 
@@ -85,17 +76,14 @@ class Global_vars():
 
             #Large files#
             self.Docs_L = []
-            self.Keys_L = []
 
         elif sim_type=='GS2':
             self.required_files = ['gs2.in','gs2.out.nc']    
 
             self.Docs = ['gs2.in']    
-            
 
             #Large files#
             self.Docs_L = []
-            self.Keys_L = []
         
         else : 
             print("Invalid simulation type",sim_type)
@@ -106,7 +94,7 @@ class Global_vars():
         
         #User specified files#
         self.Docs_ex = [] 
-        self.Keys_ex = []
+        # self.Keys_ex = []
 
         self.update_docs_keys()
         
@@ -122,6 +110,15 @@ class Global_vars():
         self.__init__(sim_type)
         print("File names and their key names are reset to default!")
 
+def f_load_config(config_file):
+    '''
+    Load config file instead of user prompts
+    '''
+    
+    with open(config_file) as f:
+        config_dict=yaml.load(f, Loader=yaml.SafeLoader)
+    
+    return config_dict 
 
 def f_check_required_files(global_vars, fldr, suffix, sim_type):
 
@@ -486,40 +483,7 @@ def get_oid_from_query(db, collection, query):
     for record in records_found:
         oid_list.append(record['_id'])
         
-    
     return oid_list
-
-def clear_ex_lin(db):
-    fs = gridfs.GridFS(db)
-    for record in db.ex.Lin.find():
-        for key, val in record.items():
-            if key != '_id':
-                print((key, val))
-                fs.delete(val)
-                print('deleted!')
-        
-        db.ex.Lin.remove(record['_id'])
-        
-    print("Documents in ex.Lin cleared !")
-
-        
-def clear_ex_Nonlin(db):
-    fs = gridfs.GridFS(db)
-    for record in db.ex.Nonlin.find():
-        for key, val in record.items():
-            if key != '_id':
-                print((key, val))
-                fs.delete(val)
-                print('deleted!') 
-                
-        db.ex.Nonlin.remove(record['_id'])
-    
-    print("Documents in ex.Lin cleared !")
-           
-def clear_ex(db):
-    clear_ex_lin(db)
-    clear_ex_Nonlin(db)
-    
 
 def _npArray2Binary(npArray):
     """Utility method to turn an numpy array into a BSON Binary string.
@@ -555,10 +519,9 @@ def gridfs_put_npArray(db, value, filepath, filename, sim_type):
     data_size = len(binary_data)
 
     if data_size > MAX_FILE_SIZE: ## Ensure file is not too big
-        print(f"Binary data for '{filename}' has size {data_size / (1024 * 1024)} exceeds size limit of {MAX_FILE_SIZE / (1024 * 1024)} MB")
+        print(f"Binary data for '{filename}' has size {data_size / (1024 * 1024)} MB. This exceeds the size limit of {MAX_FILE_SIZE / (1024 * 1024)} MB")
         print(f"Ignoring upload of this diagnostic: {filename}")
         obj_id = None
-        # raise ValueError(f"Binary data for '{filename}' has size {data_size / (1024 * 1024)} exceeds size limit of {MAX_FILE_SIZE / (1024 * 1024)} MB")
     else: 
         obj_id=fs.put(binary_data,encoding='UTF-8',
                     filename = filename,
@@ -633,7 +596,7 @@ def isLinear(folder_name, sim_type):
     
     if len(suffixes):
         suffix = suffixes[0] #assuming all parameters files are of the same linear/nonlinear type
-        print('Scanning parameters{} for deciding linear/Nonlinar.')
+        print('Scanning parameters for deciding linear/Nonlinar.')
     else:
         suffix = ''
 
@@ -771,10 +734,6 @@ def get_record(out_dir, runs_coll):
         record.append(run)
     return record
    
-
-
-    ## Extract linked_ID
-
 def f_check_id_exists(db, _id):
     ''' Given an object ID, check if it exists in linear or nonlinear collections
     '''
@@ -794,32 +753,13 @@ def f_check_id_exists(db, _id):
     print("Entry %s not found in database, please double check the id"%(_id))
     return False
 
-def f_get_linked_oid(database, linked_id_file, linked_id_string):
+def f_get_linked_oid(database, linked_id_string):
     '''
     Get linked ObjectID
     '''
 
-    if ((linked_id_file is not None) and (linked_id_string is not None)): 
-        print("Both linked_id_file and linked_id_string specified. Please choose any one and re-upload")
-        raise SystemError
-
-    elif linked_id_file is not None:
-        fname = linked_id_file
-        assert os.path.exists(fname), "File %s does not exist"%(fname)
-        print("Input file for OID is %s",fname)
-
-        ## Get OID from file 
-        with open(fname, 'r') as f:
-            data_dict = json.load(f)
-
-        oid = ObjectId(data_dict['_id'])
-
-    elif linked_id_string is not None: 
+    if linked_id_string is not None: 
         oid = ObjectId(linked_id_string)
-
-    else:  oid = None
-
-    if oid is not None: 
         id_exists = f_check_id_exists(database, oid)
 
         if id_exists:
@@ -827,8 +767,6 @@ def f_get_linked_oid(database, linked_id_file, linked_id_string):
             return oid
         else :
             return None
-    else: return None
-
 
 def download_file_by_path(db, filepath, destination, revision=-1, session=None):
     '''
@@ -1393,7 +1331,7 @@ def upload_runs(db, metadata, out_dir, is_linear=True, suffixes=None, run_shared
 
 
 def upload_to_mongo(db, linear, metadata, out_dir, suffixes=None, run_shared=None,
-                    large_files=False, extra=False, verbose=True, manual_time_flag=False, global_vars=None):
+                    large_files=False, extra=False, verbose=True, manual_time_flag=False, global_vars=None, no_prompts=False, reupload_if_exists=False):
     """
     Wrapper function to upload simulation runs to MongoDB, handling both linear and nonlinear runs.
 
@@ -1409,7 +1347,8 @@ def upload_to_mongo(db, linear, metadata, out_dir, suffixes=None, run_shared=Non
     - verbose: Boolean to print detailed output. Default: True.
     - manual_time_flag: Boolean to handle user-specified time spans for diagnostics. Default: False.
     - global_vars: Object containing global variables for the upload process.
-
+    - no_prompts: Autoupload with no prompts. Default = False
+    - reupload_if_exists: Delete and reupload if existing folder name is present in DB. Default: False
     Returns:
     None
     """
@@ -1422,14 +1361,20 @@ def upload_to_mongo(db, linear, metadata, out_dir, suffixes=None, run_shared=Non
 
     # Check if folder is already uploaded
     if isUploaded(out_dir, runs_coll):
-        update = input(f'Folder tag:\n {out_dir} \n exists in database. You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to skip this folder.\n')
+        print(f'Folder tag:\n {out_dir} \n exists in database')
+        
+        if no_prompts: 
+            update='0' if reupload_if_exists else '1'
+        else: 
+            update = input(f'You can:\n 0: Delete and reupload folder? \n 1: Run an update (if you have updated files to add) \n Press any other keys to skip this folder.\n')
+        
         if update == '0':
             # Delete and reupload
+            print("Deleting {out_dir} and reuploading")
             remove_from_mongo(out_dir, db, runs_coll)
             upload_runs(db, metadata, out_dir, is_linear=linear, suffixes=suffixes, run_shared=run_shared,
                         large_files=large_files, extra=extra, verbose=verbose, manual_time_flag=manual_time_flag, global_vars=global_vars)
         elif update == '1':
-            # Run update
             update_mongo(db, metadata, out_dir, runs_coll, linear)
         else:
             print(f'Run collection \'{out_dir}\' skipped.')

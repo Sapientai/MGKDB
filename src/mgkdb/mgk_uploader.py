@@ -29,9 +29,8 @@ def f_parse_args():
     parser.add_argument('-D', '--default', default = False, action='store_true', help='Using default inputs for all.')
     parser.add_argument('-V', '--verbose', dest='verbose', default = False, action='store_true', help='output verbose')
     
-    parser.add_argument('-Ex', '--extra', dest='extra', default = False, action='store_true', help='whether or not to include extra files')
+    parser.add_argument('-Ex', '--extra', dest='extra', default = False, action='store_true', help='whether or not to include any extra files for each suffix')
     parser.add_argument('-L', '--large_files', dest='large_files', default = False, action='store_true', help='whether or not to include large files')
-    parser.add_argument('-X', '--exclude', default = None, help='folders to exclude')
     
     return parser.parse_args()
 
@@ -100,7 +99,7 @@ def f_user_input_metadata(database):
     return user_ip
 
 ### Main 
-def main_upload(target, exclude, default, sim_type, extra, authenticate, verbose, large_files, config_file):
+def main_upload(target, default, sim_type, extra, authenticate, verbose, large_files, config_file):
     '''
     Upload a set of suffixes with common Metadata
     '''
@@ -116,7 +115,6 @@ def main_upload(target, exclude, default, sim_type, extra, authenticate, verbose
 
         # manual_time_flag = not default
         manual_time_flag = False
-        exclude_folders = []
 
         print(f'Scanning in {upload_folder} *******************\n')
         linear = isLinear(upload_folder, sim_type)                      
@@ -139,10 +137,6 @@ def main_upload(target, exclude, default, sim_type, extra, authenticate, verbose
                 if user_input['extra_files']:
                     ex_files = user_input['extra_files'].split(',')
                     global_vars.Docs_ex +=ex_files
-
-                if user_input['exclude_folders'] is not None:
-                    ex_files = user_input['exclude'].split(',')
-                    exclude_folders = [os.path.join(upload_folder, fname) for fname in exclude_folders]
 
                 ## Add suffixes
                 ip_suffixes = user_input['suffixes']
@@ -170,11 +164,6 @@ def main_upload(target, exclude, default, sim_type, extra, authenticate, verbose
                 reupload_if_exists = user_input['reupload_if_exists']
 
             else: ## Get data through user input 
-                if exclude is not None:
-                    exclude_folders = exclude.split(',')
-                    exclude_folders = [os.path.join(upload_folder, fname) for fname in exclude_folders]
-                    print('Scanning will skip specified folders:\n {}\n'.format(exclude_folders) )
-                
                 if extra: # this will change the global variable
                     ex_files = input('Please type FULL file names to update, separated by comma.\n').split(',')
                     global_vars.Docs_ex +=ex_files

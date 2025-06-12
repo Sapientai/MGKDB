@@ -20,7 +20,8 @@ classifiers = [
 ]
 dependencies = [
     'numpy>=1.24.3', 
-    'h5py', 'pymongo'
+    'h5py', 'pymongo',
+'pyrokinetics @ git+ssh://git@github.com/pyro-kinetics/pyrokinetics.git'
 ]
 
 [project.urls]

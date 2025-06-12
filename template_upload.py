@@ -7,7 +7,7 @@ from mgkdb import mgk_uploader
 
 
 # Example command : 
-## python template_upload -A /Users/venkitesh_work/Documents/work/Sapient_AI/Data/mgkdb_data/db_credentials/ayyarv.pkl -T test_data/test_cgyro_multi_runs/ -SIM CGYRO -D 
+## python template_upload -A <fname.pkl> -T test_data/test_cgyro_multi_runs/ -SIM CGYRO 
 if __name__=="__main__":
 
     ## Loop over a set of runs to upload 

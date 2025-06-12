@@ -139,10 +139,10 @@ def main():
 
     ### Parse arguments 
     args = f_parse_args()
-    print(args)
+    input_args = vars(args)
+    print(input_args)
 
-    main_upload(**vars(args))
-
+    main_upload(**input_args)
 
 ## Runner 
 if __name__=="__main__":

@@ -1,14 +1,16 @@
 name: mgkdb
-channels: 
+channels:
   - conda-forge
   - defaults
 dependencies:
-- python=3.9
-- pip
-- pip:
-    - numpy==1.24.3
-    - matplotlib==3.7.4
-    - scipy==1.10.1
-    - h5py==3.9.0
-    - pymongo==3.9.0
-
+  - python=3.12
+  - pip
+  - numpy>=1.26.4
+  - matplotlib>=3.9.2
+  - pandas
+  - scipy>=1.13.1
+  - h5py>=3.11.0
+  - pymongo=4.8.0
+  - openblas  # Explicitly include a BLAS library
+  - pip:
+      - git+ssh://git@github.com/pyro-kinetics/pyrokinetics.git
